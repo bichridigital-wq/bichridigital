@@ -24,7 +24,7 @@ export default function Home() {
     "/portfolio2.png",
     "/portfolio3.png",
     "/portfolio4.png",
-    "/portfolio5.png",
+  
   ];
 
   return (
