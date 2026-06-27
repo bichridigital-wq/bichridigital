@@ -5,6 +5,7 @@ import ContactForm from "../components/contact/ContactForm";
 import ContactMap from "../components/contact/ContactMap";
 import ContactCTA from "../components/contact/ContactCTA";
 import ContactFooter from "../components/contact/ContactFooter";
+import Footer from "../components/Footer";
 
 export default function ContactPage() {
   return (

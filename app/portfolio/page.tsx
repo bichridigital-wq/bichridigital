@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import ContactFooter from "../components/contact/ContactFooter";
 const projects = [
   {
@@ -134,7 +135,7 @@ export default function PortfolioPage() {
 </section>
       </main>
 
-      <ContactFooter />
+      <Footer />
     </>
   );
 }
