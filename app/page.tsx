@@ -76,18 +76,18 @@ export default function Home() {
       </a>
 
       <a
-        href="#contact"
-        className="hover:text-[#FCCD12] transition"
-      >
-        Contact
-      </a>
+  href="/contact"
+  className="hover:text-[#FCCD12] transition"
+>
+  Contact
+</a>
 
-      <a
-        href="#contact"
-        className="bg-[#0057FF] hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold transition"
-      >
-        Demander un devis →
-      </a>
+     <a
+  href="/contact"
+  className="bg-[#0057FF] hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold"
+>
+  Demander un devis →
+</a>
     </div>
 
     {/* Bouton Hamburger Mobile */}

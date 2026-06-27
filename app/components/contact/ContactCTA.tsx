@@ -5,96 +5,107 @@ import { motion } from "framer-motion";
 
 export default function ContactCTA() {
   return (
-    <section className="max-w-7xl mx-auto px-6 pb-24">
+    <section className="py-24 bg-[#020B2E]">
 
-      <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="relative overflow-hidden rounded-[40px] border border-[#1E40AF] shadow-[0_20px_80px_rgba(0,0,0,.45)]"
-      >
+      <div className="max-w-7xl mx-auto px-6">
 
-        {/* VIDEO */}
-
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover scale-110"
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="
+            relative
+            overflow-hidden
+            rounded-[45px]
+            min-h-[450px]
+            flex
+            items-center
+            justify-center
+          "
         >
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
+          {/* Vidéo */}
 
-        {/* Overlay */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
 
-        <div className="absolute inset-0 bg-[#020B2E]/88"></div>
+          {/* Overlay */}
 
-        {/* Dégradé */}
+          <div className="absolute inset-0 bg-[#020B2E]/85"></div>
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#020B2E] via-[#020B2E]/75 to-[#020B2E]"></div>
+          {/* Contenu */}
 
-        {/* Lumière */}
+          <div className="relative z-10 text-center px-6">
 
-        <div className="absolute -top-32 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#FCCD12]/20 blur-[120px]"></div>
+            <h2 className="text-5xl md:text-7xl font-black leading-tight">
 
-        {/* Contenu */}
+              Donnons vie
 
-        <div className="relative z-20 px-8 py-28 text-center">
+              <br />
 
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#FCCD12]/40 bg-[#FCCD12]/10 px-6 py-2 text-sm font-semibold text-[#FCCD12]">
+              <span className="text-[#FCCD12]">
 
-            🚀 Construisons ensemble votre projet
+                à vos idées.
 
-          </span>
+              </span>
 
-          <h2 className="mt-8 text-5xl md:text-7xl font-black leading-tight text-white">
+            </h2>
 
-            Une idée.
+            <p className="text-gray-200 text-xl mt-8 max-w-3xl mx-auto">
 
-            <br />
+              Communication digitale • Audiovisuel •
+              Développement Web • Streaming Live
 
-            <span className="text-[#FCCD12]">
+            </p>
 
-              Un projet.
+            <div className="flex flex-wrap justify-center gap-5 mt-12">
 
-            </span>
+              <Link
+                href="tel:+221771433900"
+                className="
+                  bg-[#FCCD12]
+                  text-[#020B2E]
+                  font-bold
+                  px-10
+                  py-5
+                  rounded-full
+                  hover:scale-105
+                  transition-all
+                  duration-300
+                "
+              >
+                📞 Nous appeler
+              </Link>
 
-            <br />
+              <Link
+                href="/portfolio"
+                className="
+                  border
+                  border-white/20
+                  px-10
+                  py-5
+                  rounded-full
+                  backdrop-blur-md
+                  hover:border-[#FCCD12]
+                  transition-all
+                "
+              >
+                Voir nos réalisations
+              </Link>
 
-            Une réussite.
-
-          </h2>
-
-          <p className="mx-auto mt-8 max-w-3xl text-lg leading-9 text-gray-200">
-
-            Communication digitale • Production audiovisuelle •
-            Développement web • Streaming Live • Photographie
-
-          </p>
-
-          <div className="mt-12 flex flex-wrap justify-center gap-5">
-
-            <Link
-              href="#formulaire"
-              className="rounded-full bg-[#FCCD12] px-10 py-5 text-lg font-bold text-[#020B2E] transition-all duration-300 hover:scale-105 hover:bg-yellow-400 shadow-[0_0_35px_rgba(252,205,18,.45)]"
-            >
-              Demander un devis →
-            </Link>
-
-            <Link
-              href="tel:+221771433900"
-              className="rounded-full border border-white/20 bg-white/5 px-10 py-5 text-lg font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-[#FCCD12] hover:text-[#FCCD12]"
-            >
-              📞 Nous appeler
-            </Link>
+            </div>
 
           </div>
 
-        </div>
+        </motion.div>
 
-      </motion.div>
+      </div>
 
     </section>
   );
