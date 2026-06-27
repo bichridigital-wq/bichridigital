@@ -6,44 +6,6 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const projects = [
-  {
-    id: 1,
-    title: "Affiche Mariage",
-    category: "Graphisme",
-    image: "/mariage-1.jpg",
-  },
-  {
-    id: 2,
-    title: "Affiche Mariage 2",
-    category: "Graphisme",
-    image: "/mariage-2.jpg",
-  },
-  {
-    id: 3,
-    title: "Site Web Bichridigital",
-    category: "Sites Web",
-    image: "/portfolio1.png",
-  },
-  {
-    id: 4,
-    title: "Projet Web",
-    category: "Sites Web",
-    image: "/portfolio2.png",
-  },
-  {
-    id: 5,
-    title: "Studio Photo",
-    category: "Photographie",
-    image: "/studio.jpg",
-  },
-  {
-    id: 6,
-    title: "Streaming Live",
-    category: "Vidéo",
-    image: "/streaming.jpg",
-  },
-];
 const categories = [
   "Tous",
   "Graphisme",
@@ -51,9 +13,45 @@ const categories = [
   "Photographie",
   "Vidéo",
 ];
+
+const projects = [
+  {
+    id: 1,
+    title: "Projet Graphique",
+    category: "Graphisme",
+    image: "/portfolio/portfolio1.png",
+  },
+  {
+    id: 2,
+    title: "Site Web",
+    category: "Sites Web",
+    image: "/portfolio/portfolio2.png",
+  },
+  {
+    id: 3,
+    title: "Photographie",
+    category: "Photographie",
+    image: "/portfolio/portfolio3.png",
+  },
+  {
+    id: 4,
+    title: "Production Vidéo",
+    category: "Vidéo",
+    image: "/portfolio/portfolio4.png",
+  },
+  {
+    id: 5,
+    title: "Projet Bichridigital",
+    category: "Graphisme",
+    image: "/portfolio/portfolio5.png",
+  },
+];
 export default function PortfolioPage() {
   const [activeCategory, setActiveCategory] =
     useState("Tous");
+
+  const [selectedImage, setSelectedImage] =
+    useState<string | null>(null);
 
   const filteredProjects =
     activeCategory === "Tous"
@@ -62,23 +60,36 @@ export default function PortfolioPage() {
           (project) =>
             project.category === activeCategory
         );
-
-  return (
+          return (
     <>
       <Navbar />
 
-      <main className="bg-[#020B2E] text-white pt-28">
-        <div className="flex flex-wrap justify-center gap-4 mb-16 px-6">
+      <main className="bg-[#020B2E] text-white pt-24 min-h-screen">
+      <section className="text-center py-24 px-6">
+  <h1 className="text-5xl md:text-7xl font-black">
+    Nos
+    <span className="text-[#FCCD12]">
+      {" "}Réalisations
+    </span>
+  </h1>
+
+  <p className="text-gray-300 mt-8 max-w-3xl mx-auto text-lg">
+    Découvrez quelques projets réalisés par
+    Bichridigital Agency dans le domaine du
+    graphisme, du web et de l'audiovisuel.
+  </p>
+</section>
+<div className="flex flex-wrap justify-center gap-4 px-6 mb-16">
   {categories.map((category) => (
     <button
       key={category}
       onClick={() =>
         setActiveCategory(category)
       }
-      className={`px-6 py-3 rounded-full transition-all duration-300 ${
+      className={`px-6 py-3 rounded-full transition ${
         activeCategory === category
           ? "bg-[#FCCD12] text-[#020B2E]"
-          : "bg-white/10 text-white"
+          : "bg-white/10"
       }`}
     >
       {category}
@@ -86,52 +97,119 @@ export default function PortfolioPage() {
   ))}
 </div>
 <section className="max-w-7xl mx-auto px-6 pb-24">
-  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
     {filteredProjects.map((project) => (
       <div
         key={project.id}
-        className="bg-white/5 rounded-3xl overflow-hidden border border-white/10 hover:border-[#FCCD12] transition-all group"
+        onClick={() =>
+          setSelectedImage(project.image)
+        }
+        className="
+          group
+          cursor-pointer
+          overflow-hidden
+          rounded-3xl
+          bg-white/5
+          border
+          border-white/10
+        "
       >
-        <div className="relative h-72 overflow-hidden">
+        <div className="relative h-80 overflow-hidden">
+
           <Image
             src={project.image}
             alt={project.title}
             fill
-            className="object-cover group-hover:scale-110 transition duration-500"
+            className="
+              object-cover
+              group-hover:scale-110
+              transition
+              duration-700
+            "
           />
-        </div>
 
-        <div className="p-6">
-          <p className="text-[#FCCD12] text-sm mb-2">
-            {project.category}
-          </p>
+          <div className="
+            absolute
+            inset-0
+            bg-black/50
+            opacity-0
+            group-hover:opacity-100
+            transition
+            flex
+            items-end
+            p-6
+          ">
+            <div>
+              <p className="text-[#FCCD12]">
+                {project.category}
+              </p>
 
-          <h3 className="text-2xl font-bold">
-            {project.title}
-          </h3>
+              <h3 className="text-2xl font-bold">
+                {project.title}
+              </h3>
+            </div>
+          </div>
+
         </div>
       </div>
     ))}
+
   </div>
+
 </section>
-<section className="bg-gradient-to-r from-[#001B5E] to-[#0057FF] py-20">
-  <div className="max-w-4xl mx-auto text-center px-6">
-    <h2 className="text-4xl font-bold">
-      Vous avez un projet ?
-    </h2>
-
-    <p className="text-gray-200 mt-4">
-      Confiez votre communication
-      digitale à Bichridigital Agency.
-    </p>
-
-    <Link
-      href="/contact"
-      className="inline-block mt-8 bg-[#FCCD12] text-[#020B2E] font-bold px-8 py-4 rounded-full"
-    >
-      Demander un devis →
-    </Link>
+{selectedImage && (
+  <div
+    onClick={() => setSelectedImage(null)}
+    className="
+      fixed
+      inset-0
+      bg-black/90
+      z-[999]
+      flex
+      items-center
+      justify-center
+      p-6
+    "
+  >
+    <div className="relative w-full max-w-5xl h-[80vh]">
+      <Image
+        src={selectedImage}
+        alt=""
+        fill
+        className="object-contain"
+      />
+    </div>
   </div>
+)}
+<section className="py-24 text-center px-6">
+  <h2 className="text-4xl md:text-6xl font-black">
+    Votre projet mérite
+    <span className="text-[#FCCD12]">
+      {" "}l'excellence.
+    </span>
+  </h2>
+
+  <p className="text-gray-300 mt-8">
+    Parlons ensemble de votre prochain projet.
+  </p>
+
+  <Link
+    href="/contact"
+    className="
+      inline-block
+      mt-10
+      bg-[#FCCD12]
+      text-[#020B2E]
+      font-bold
+      px-8
+      py-4
+      rounded-full
+    "
+  >
+    Demander un devis →
+  </Link>
 </section>
       </main>
 
