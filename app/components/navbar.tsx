@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="stickytop-0 left-0 w-full z-50 bg-[#020B2E]/95 backdrop-blur-md border-b border-blue-900">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-[#020B2E]/95 backdrop-blur-md border-b border-blue-900">
 
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
@@ -25,47 +26,43 @@ export default function Navbar() {
         {/* Menu Desktop */}
         <div className="hidden md:flex items-center gap-8 text-white font-medium">
 
-          <a
-            href="/"
-            className="hover:text-[#FCCD12] transition"
-          >
-            Accueil
-          </a>
+          <Link
+  href="/"
+  className="hover:text-[#FCCD12] transition"
+>
+  Accueil
+</Link>
 
-          <a
-            href="/services"
-            className="hover:text-[#FCCD12] transition"
-          >
-            Services
-          </a>
+          <Link
+  href="/services"
+  className="hover:text-[#FCCD12] transition"
+>
+  Services
+</Link>
 
-          <a
-            href="/portfolio"
-            className="hover:text-[#FCCD12] transition"
-          >
-            Portfolio
-          </a>
+          <Link
+  href="/apropos"
+  className="hover:text-[#FCCD12] transition"
+>
+  À propos
+</Link>
 
-          <a
-            href="/apropos"
-            className="hover:text-[#FCCD12] transition"
-          >
-            À propos
-          </a>
+          
+<Link
+  href="/contact"
+  className="hover:text-[#FCCD12] transition"
+>
+  Contact
+</Link>
 
-          <a
-            href="/contact"
-            className="hover:text-[#FCCD12] transition"
-          >
-            Contact
-          </a>
+          
 
-          <a
-            href="/contact"
-            className="bg-[#0057FF] hover:bg-blue-700 px-6 py-3 rounded-full font-semibold transition"
-          >
-            Demander un devis →
-          </a>
+          <Link
+  href="/contact"
+  className="bg-[#0057FF] hover:bg-blue-700 px-6 py-3 rounded-full font-semibold transition"
+>
+  Demander un devis →
+</Link>
 
         </div>
 
