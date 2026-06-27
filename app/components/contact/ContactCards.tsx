@@ -8,13 +8,13 @@ export default function ContactCards() {
     {
       icon: <FaPhoneAlt />,
       title: "Téléphone",
-      value: "+221 77 143 39 00",
+      value: "+221 77 321 10 96",
       color: "text-[#FCCD12]",
     },
     {
       icon: <FaEnvelope />,
       title: "Email",
-      value: "contact@bichridigital.com",
+      value: "bichridigital@gmail.com",
       color: "text-[#FCCD12]",
     },
     {
