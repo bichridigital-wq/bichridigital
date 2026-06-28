@@ -1,64 +1,63 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import {
-  FaRocket,
+  FaBullhorn,
   FaVideo,
   FaCode,
   FaCamera,
   FaBroadcastTower,
   FaPaintBrush,
+  FaHeadphones,
   FaBullseye,
-  FaClipboardCheck,
+  FaRocket,
   FaPaperPlane,
+  FaGem,
+  FaBolt,
+  FaShieldAlt,
 } from "react-icons/fa";
+
 const services = [
   {
     number: "01",
     title: "Communication Digitale",
-    description:
-      "Stratégie digitale, community management et campagnes publicitaires.",
-    icon: <FaRocket />,
+    desc: "Gestion des réseaux sociaux, publicité et stratégie digitale.",
+    icon: <FaBullhorn />,
   },
   {
     number: "02",
     title: "Production Audiovisuelle",
-    description:
-      "Captation vidéo, montage et films institutionnels.",
+    desc: "Captation vidéo, montage et films institutionnels.",
     icon: <FaVideo />,
   },
   {
     number: "03",
     title: "Développement Web",
-    description:
-      "Sites vitrines, e-commerce et applications web.",
+    desc: "Sites vitrines, e-commerce et applications web.",
     icon: <FaCode />,
   },
   {
     number: "04",
     title: "Photographie",
-    description:
-      "Photos professionnelles et couverture d'événements.",
+    desc: "Photos professionnelles et couverture d'événements.",
     icon: <FaCamera />,
   },
   {
     number: "05",
     title: "Streaming & Live",
-    description:
-      "Diffusions en direct sur toutes les plateformes.",
+    desc: "Diffusion en direct sur toutes les plateformes.",
     icon: <FaBroadcastTower />,
   },
   {
     number: "06",
     title: "Design Graphique",
-    description:
-      "Création de logos, affiches et chartes graphiques.",
+    desc: "Logos, affiches et identités visuelles.",
     icon: <FaPaintBrush />,
   },
 ];
+
 export default function ServicesPage() {
   return (
     <>
@@ -67,7 +66,7 @@ export default function ServicesPage() {
       <main className="bg-[#020B2E] text-white overflow-hidden">
 
         {/* HERO */}
-        <section className="pt-32 pb-24 bg-[radial-gradient(circle_at_top_right,#0B3B9E40,transparent_45%)]">
+        <section className="pt-32 pb-24">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
 
             <div>
@@ -91,27 +90,37 @@ export default function ServicesPage() {
               <div className="flex flex-wrap gap-5 mt-10">
                 <Link
                   href="#services"
-                  className="bg-[#FCCD12] text-[#020B2E] px-8 py-4 rounded-full font-bold"
+                  className="bg-[#FCCD12] text-[#020B2E] px-8 py-4 rounded-full font-bold hover:scale-105 transition"
                 >
                   Découvrir nos services →
                 </Link>
 
                 <Link
                   href="/contact"
-                  className="border border-white/20 px-8 py-4 rounded-full"
+                  className="border border-white/20 px-8 py-4 rounded-full hover:border-[#FCCD12] transition"
                 >
                   Demander un devis
                 </Link>
               </div>
+
+              <p className="text-gray-400 mt-10">
+                Plus de{" "}
+                <span className="font-bold text-white">
+                  200+
+                </span>{" "}
+                clients nous font confiance.
+              </p>
             </div>
 
-            <div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-blue-500/20 blur-[120px] rounded-full"></div>
+
               <video
                 autoPlay
                 muted
                 loop
                 playsInline
-                className="w-full rounded-[35px] border border-blue-800 shadow-[0_0_80px_rgba(0,87,255,0.4)]"
+                className="relative w-full rounded-[35px] border border-blue-800 shadow-[0_0_80px_rgba(0,87,255,0.4)]"
               >
                 <source
                   src="/hero-video2.mp4"
@@ -154,7 +163,7 @@ export default function ServicesPage() {
                 </h3>
 
                 <p className="text-gray-400 mt-5 leading-8">
-                  {service.description}
+                  {service.desc}
                 </p>
 
                 <Link
@@ -169,26 +178,27 @@ export default function ServicesPage() {
         </section>
 
         {/* PROCESSUS */}
-        <section className="py-24">
+        <section className="py-24 bg-white/[0.02]">
           <h2 className="text-center text-5xl font-bold">
-            Une méthode{" "}
+            Comment nous{" "}
             <span className="text-[#FCCD12]">
-              simple et efficace
+              travaillons
             </span>
+            ?
           </h2>
 
-          <div className="grid md:grid-cols-4 gap-8 max-w-7xl mx-auto px-6 mt-20">
+          <div className="grid md:grid-cols-4 gap-10 max-w-7xl mx-auto px-6 mt-20">
             {[
               {
-                icon: <FaBullseye />,
+                icon: <FaHeadphones />,
                 title: "Écoute",
               },
               {
-                icon: <FaRocket />,
+                icon: <FaBullseye />,
                 title: "Stratégie",
               },
               {
-                icon: <FaClipboardCheck />,
+                icon: <FaRocket />,
                 title: "Réalisation",
               },
               {
@@ -206,6 +216,46 @@ export default function ServicesPage() {
 
                 <h3 className="text-2xl font-bold mt-8">
                   {step.title}
+                </h3>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* POURQUOI NOUS */}
+        <section className="max-w-7xl mx-auto px-6 py-24">
+          <h2 className="text-center text-5xl font-bold">
+            Pourquoi choisir{" "}
+            <span className="text-[#FCCD12]">
+              Bichridigital ?
+            </span>
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8 mt-20">
+            {[
+              {
+                icon: <FaGem />,
+                title: "Qualité Premium",
+              },
+              {
+                icon: <FaBolt />,
+                title: "Réactivité",
+              },
+              {
+                icon: <FaShieldAlt />,
+                title: "Résultats Concrets",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="bg-white/5 border border-white/10 rounded-[30px] p-10 text-center"
+              >
+                <div className="text-[#FCCD12] text-5xl">
+                  {item.icon}
+                </div>
+
+                <h3 className="text-2xl font-bold mt-8">
+                  {item.title}
                 </h3>
               </div>
             ))}
