@@ -48,21 +48,21 @@ export default function Home() {
     {/* Menu Desktop */}
     <div className="hidden md:flex items-center gap-8 text-white font-medium">
       <a
-        href="#accueil"
+        href="/accueil"
         className="hover:text-[#FCCD12] transition"
       >
         Accueil
       </a>
 
       <a
-        href="#services"
+        href="/services"
         className="hover:text-[#FCCD12] transition"
       >
         Services
       </a>
 
       <a
-        href="#portfolio"
+        href="/portfolio"
         className="hover:text-[#FCCD12] transition"
       >
         Portfolio
@@ -106,7 +106,7 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center gap-8 py-10 text-white text-lg font-medium">
 
         <a
-          href="#accueil"
+          href="/accueil"
           onClick={() => setMenuOpen(false)}
           className="hover:text-[#FCCD12]"
         >
@@ -138,7 +138,7 @@ export default function Home() {
         </a>
 
         <a
-          href="#contact"
+          href="/contact"
           onClick={() => setMenuOpen(false)}
           className="hover:text-[#FCCD12]"
         >
@@ -146,7 +146,7 @@ export default function Home() {
         </a>
 
         <a
-          href="#contact"
+          href="/contact"
           onClick={() => setMenuOpen(false)}
           className="bg-[#0057FF] text-white px-6 py-3 rounded-full font-semibold"
         >
@@ -205,7 +205,7 @@ export default function Home() {
     <div className="flex flex-wrap justify-center gap-4 mt-10">
 
       <a
-        href="#portfolio"
+        href="/portfolio"
         className="
         bg-[#ffcd12]
         text-black
