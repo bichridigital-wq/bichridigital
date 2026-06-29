@@ -40,7 +40,13 @@ export default function Navbar() {
 >
   Services
 </Link>
-<Link href="/portfolio">Portfolio</Link>
+
+          <Link
+  href="/portfolio"
+  className="hover:text-[#FCCD12] transition"
+>
+  Portfolio
+</Link>
           <Link
   href="/apropos"
   className="hover:text-[#FCCD12] transition"
@@ -98,7 +104,13 @@ export default function Navbar() {
             >
               Services
             </a>
-
+<a
+  href="/boutique"
+  onClick={() => setMenuOpen(false)}
+  className="hover:text-[#FCCD12]"
+>
+  Boutique
+</a>
             <a
               href="/portfolio"
               onClick={() => setMenuOpen(false)}
