@@ -40,7 +40,7 @@ export default function Navbar() {
 >
   Services
 </Link>
-
+<Link href="/portfolio">Portfolio</Link>
           <Link
   href="/apropos"
   className="hover:text-[#FCCD12] transition"
