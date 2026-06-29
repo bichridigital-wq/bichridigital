@@ -3,6 +3,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import { useState } from "react";
@@ -51,6 +52,33 @@ const teamMembers = [
     name: "Mbaye Loum",
     role: "Production,designer Montage & Streaming",
     image: "/team/mbaye-loum.jpg",
+  },
+  
+];
+const storeItems = [
+  {
+    title: "Ordinateurs",
+    desc: "PC portables, ordinateurs de bureau et accessoires informatiques.",
+    tag: "Informatique",
+    icon: "PC",
+  },
+  {
+    title: "T-shirts",
+    desc: "T-shirts personnalisés, modernes et adaptés à votre style.",
+    tag: "Textile",
+    icon: "TS",
+  },
+  {
+    title: "Casquettes",
+    desc: "Casquettes stylées pour entreprises, événements et particuliers.",
+    tag: "Mode",
+    icon: "CAP",
+  },
+  {
+    title: "Pulls",
+    desc: "Pulls personnalisés, confortables et professionnels.",
+    tag: "Textile",
+    icon: "PL",
   },
 ];
 export default function Home() {
@@ -824,6 +852,84 @@ export default function Home() {
           </div>
         </div>
       ))}
+    </div>
+  </div>
+</section>
+{/* BICHRISTORE */}
+<section className="py-24 bg-[#020B2E]">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="grid lg:grid-cols-2 gap-14 items-center">
+      
+      {/* Texte */}
+      <div>
+        <div className="flex items-center gap-4 mb-5">
+          <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+          <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+            BichriStore
+          </span>
+        </div>
+
+        <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">
+          Votre boutique pour vos besoins{" "}
+          <span className="text-[#FCCD12]">
+            tech & lifestyle.
+          </span>
+        </h2>
+
+        <p className="mt-6 text-gray-300 text-lg leading-8">
+          BichriStore vous propose la vente d’ordinateurs, de t-shirts,
+          casquettes, pulls et divers articles adaptés aux entreprises,
+          événements, associations et particuliers.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
+            Ordinateurs
+          </span>
+          <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
+            T-shirts
+          </span>
+          <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
+            Casquettes
+          </span>
+          <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
+            Pulls
+          </span>
+        </div>
+
+        <Link
+          href="/boutique"
+          className="inline-block mt-10 bg-[#FCCD12] text-[#020B2E] px-9 py-4 rounded-full font-black hover:scale-105 transition"
+        >
+          Découvrir la boutique →
+        </Link>
+      </div>
+
+      {/* Cartes produits */}
+      <div className="grid sm:grid-cols-2 gap-6">
+        {storeItems.map((item) => (
+          <div
+            key={item.title}
+            className="rounded-[26px] bg-[#071542] border border-blue-500/30 p-7 hover:border-[#FCCD12] hover:-translate-y-2 transition-all duration-300 shadow-[0_0_40px_rgba(0,87,255,0.12)]"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-[#1738C8] text-[#FCCD12] flex items-center justify-center font-black text-xl mb-6">
+              {item.icon}
+            </div>
+
+            <span className="text-[#FCCD12] text-sm font-bold">
+              {item.tag}
+            </span>
+
+            <h3 className="mt-3 text-2xl font-black text-white">
+              {item.title}
+            </h3>
+
+            <p className="mt-4 text-gray-400 leading-7">
+              {item.desc}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>
