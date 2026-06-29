@@ -67,8 +67,8 @@ export default function Footer() {
 
             <div className="space-y-3 text-gray-400">
               <p>📍 Ndiagne, Louga, Sénégal</p>
-              <p>📞 +221 77 143 39 00</p>
-              <p>✉️ contact@bichridigital.com</p>
+              <p>📞 +221 77 321 10 96</p>
+              <p>✉️ bichridigital@gmail.com</p>
             </div>
 
             <div className="flex gap-4 mt-6 text-2xl text-[#FCCD12]">
