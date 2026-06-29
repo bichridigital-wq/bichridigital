@@ -12,24 +12,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
-    </html>
-  );
-}
-export const metadata = {
+export const metadata: Metadata = {
   title: "Bichridigital Agency",
   description:
     "Agence de communication digitale, audiovisuelle et développement web au Sénégal.",
 };
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="fr" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[#020B2E] text-white antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
