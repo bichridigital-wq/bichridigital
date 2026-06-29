@@ -16,6 +16,43 @@ import {
 } from "react-icons/fa";
 
 import { FaXTwitter } from "react-icons/fa6";
+const teamMembers = [
+  {
+    name: "Bounama Niang",
+    role: "CEO & Fondateur",
+    image: "/team/bounama.jpg",
+  },
+  {
+    name: "Djibril Sy",
+    role: "Présentateur & directeur des programmes",
+    image: "/team/djibril.jpg",
+  },
+  {
+    name: "Baye Dame Thioune",
+    role: "Présentateur &collaborateur",
+    image: "/team/baye-dame.jpg",
+  },
+  {
+    name: "Baye Cheikh Thiam",
+    role: "Animateur & Collaborateur",
+    image: "/team/baye-cheikh.jpg",
+  },
+  {
+    name: "Abdou Wade",
+    role: "Présentateur & Collaborateur",
+    image: "/team/abdou-wade.jpg",
+  },
+  {
+    name: "Ameth Diao",
+    role: "chroniqueur",
+    image: "/team/ameth-diao.jpg",
+  },
+  {
+    name: "Mbaye Loum",
+    role: "Production,designer Montage & Streaming",
+    image: "/team/mbaye-loum.jpg",
+  },
+];
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -734,7 +771,62 @@ export default function Home() {
   </div>
 
 </section>
+{/* TEAM */}
+<section className="py-24 bg-[#020B2E]">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="text-center mb-16">
+      <div className="flex items-center justify-center gap-4 mb-4">
+        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+        <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+          Notre Équipe
+        </span>
+        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+      </div>
 
+      <h2 className="text-4xl md:text-5xl font-black text-white">
+        Les visages derrière{" "}
+        <span className="text-[#FCCD12]">
+          Bichridigital
+        </span>
+      </h2>
+
+      <p className="mt-5 text-gray-400 max-w-3xl mx-auto leading-8">
+        Une équipe passionnée par la communication digitale,
+        l’audiovisuel, la photographie, le streaming live et la création
+        de contenus professionnels.
+      </p>
+    </div>
+
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {teamMembers.map((member, index) => (
+        <div
+          key={index}
+          className="group rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] hover:-translate-y-2 transition-all duration-300 shadow-[0_0_40px_rgba(0,87,255,0.12)]"
+        >
+          <div className="relative h-[280px] overflow-hidden bg-[#0B1C54]">
+            <img
+              src={member.image}
+              alt={member.name}
+              className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#020B2E] via-[#020B2E]/20 to-transparent"></div>
+          </div>
+
+          <div className="p-6 text-center">
+            <h3 className="text-xl font-black text-white group-hover:text-[#FCCD12] transition">
+              {member.name}
+            </h3>
+
+            <p className="mt-2 text-gray-400 text-sm">
+              {member.role}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 {/* ================= CONTACT ================= */}
 
 <section
