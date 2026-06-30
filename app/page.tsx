@@ -170,45 +170,29 @@ export default function Home() {
     <div className="md:hidden bg-gradient-to-b from-[#020B2E] to-[#00154A] border-t border-blue-900 shadow-2xl">
       <div className="flex flex-col items-center justify-center gap-8 py-10 text-white text-lg font-medium">
 
-        <a
-          href="/accueil"
-          onClick={() => setMenuOpen(false)}
-          className="hover:text-[#FCCD12]"
-        >
-          Accueil
-        </a>
+       <a href="/" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
+  Accueil
+</a>
 
-        <a
-         href="/services"
-          onClick={() => setMenuOpen(false)}
-          className="hover:text-[#FCCD12]"
-        >
-          Services
-        </a>
+<a href="/services" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
+  Services
+</a>
 
-        <a
-          href="/portfolio"
-          onClick={() => setMenuOpen(false)}
-          className="hover:text-[#FCCD12]"
-        >
-          Portfolio
-        </a>
+<a href="/portfolio" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
+  Portfolio
+</a>
 
-        <a
-          href="/apropos"
-          onClick={() => setMenuOpen(false)}
-          className="hover:text-[#FCCD12]"
-        >
-          À propos
-        </a>
+<a href="/boutique" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
+  Boutique
+</a>
 
-        <a
-          href="/contact"
-          onClick={() => setMenuOpen(false)}
-          className="hover:text-[#FCCD12]"
-        >
-          Contact
-        </a>
+<a href="/apropos" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
+  À propos
+</a>
+
+<a href="/contact" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
+  Contact
+</a>
 
         <a
           href="/contact"
