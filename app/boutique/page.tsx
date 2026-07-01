@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { useEffect, useRef } from "react";
 
 const categories = [
   "Tous",
@@ -129,7 +130,89 @@ const latestComputers = [
 ];
 
 export default function BoutiquePage() {
+    const computerScrollRef = useRef<HTMLDivElement | null>(null);
+  const pauseAutoScrollRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const resumeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const pauseAutoScroll = () => {
+    pauseAutoScrollRef.current = true;
+
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+    }
+  };
+
+  const resumeAutoScrollLater = () => {
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+    }
+
+    resumeTimerRef.current = setTimeout(() => {
+      pauseAutoScrollRef.current = false;
+    }, 2500);
+  };
+
+  useEffect(() => {
+    const slider = computerScrollRef.current;
+
+    if (!slider) return;
+
+    const oneSetWidth = slider.scrollWidth / 3;
+
+    slider.scrollLeft = oneSetWidth;
+
+    const interval = setInterval(() => {
+      if (!slider || pauseAutoScrollRef.current) return;
+
+      slider.scrollLeft += 1;
+
+      if (slider.scrollLeft >= oneSetWidth * 2) {
+        slider.scrollLeft -= oneSetWidth;
+      }
+
+      if (slider.scrollLeft <= 0) {
+        slider.scrollLeft += oneSetWidth;
+      }
+    }, 20);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const slider = computerScrollRef.current;
+    if (!slider) return;
+
+    pauseAutoScroll();
+    isDraggingRef.current = true;
+    startXRef.current = e.clientX;
+    startScrollLeftRef.current = slider.scrollLeft;
+
+    slider.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const slider = computerScrollRef.current;
+    if (!slider || !isDraggingRef.current) return;
+
+    const distance = e.clientX - startXRef.current;
+    slider.scrollLeft = startScrollLeftRef.current - distance;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const slider = computerScrollRef.current;
+
+    isDraggingRef.current = false;
+    resumeAutoScrollLater();
+
+    if (slider) {
+      slider.releasePointerCapture(e.pointerId);
+    }
+  };
   return (
+    
     <>
       <Navbar />
 
@@ -224,13 +307,31 @@ export default function BoutiquePage() {
     </div>
   </div>
 
-  <div className="relative w-full overflow-hidden">
-    <div className="computer-marquee flex gap-8 w-max">
-      {[...latestComputers, ...latestComputers].map((pc, index) => (
+<div className="relative w-full">
+  <div className="max-w-7xl mx-auto px-6">
+    <p className="text-center text-gray-400 mb-6 text-sm">
+      Faites glisser les ordinateurs vers la gauche ou vers la droite.
+    </p>
+
+    <div className="relative w-full">
+  <div
+    ref={computerScrollRef}
+    onMouseEnter={pauseAutoScroll}
+    onMouseLeave={resumeAutoScrollLater}
+    onPointerDown={handlePointerDown}
+    onPointerMove={handlePointerMove}
+    onPointerUp={handlePointerUp}
+    onPointerCancel={handlePointerUp}
+    className="flex gap-8 overflow-x-auto px-6 pb-8 cursor-grab active:cursor-grabbing select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+  >
+    {[...latestComputers, ...latestComputers, ...latestComputers].map((pc, index) => (
         <div
           key={index}
-          className="w-[330px] md:w-[380px] shrink-0 rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
+        className="w-[310px] sm:w-[350px] md:w-[380px] shrink-0 rounded-[28px] 
+        bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] 
+        transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
         >
+          
           <div className="relative h-[230px] bg-[#0B1C54] overflow-hidden">
             <img
               src={pc.image}
@@ -279,25 +380,10 @@ export default function BoutiquePage() {
       ))}
     </div>
   </div>
+</div>
+</div>
 
-  <style>{`
-    @keyframes computerMarquee {
-      0% {
-        transform: translateX(-50%);
-      }
-      100% {
-        transform: translateX(0);
-      }
-    }
-
-    .computer-marquee {
-      animation: computerMarquee 35s linear infinite;
-    }
-
-    .computer-marquee:hover {
-      animation-play-state: paused;
-    }
-  `}</style>
+  
 </section>
         {/* PRODUCTS */}
         <section id="produits" className="py-16">
