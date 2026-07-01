@@ -88,7 +88,7 @@ const latestComputers = [
   },
   {
     name: "HP EliteBook Core i5",
-    image: "/boutique/pc1.jpg",
+    image: "/boutique/pc02.jpg",
     desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
     oldPrice: "200 000 FCFA",
     price: "180 000 FCFA",
@@ -96,7 +96,7 @@ const latestComputers = [
   },
   {
     name: "Dell Latitude 7410  Core i7",
-    image: "/boutique/pc2.jpg",
+    image: "/boutique/pc3.jpg",
     desc: "PC puissant pour travail intensif, montage léger, gestion et multitâche.",
     oldPrice: "300 000 FCFA",
     price: "230 000 FCFA",
@@ -104,7 +104,7 @@ const latestComputers = [
   },
   {
     name: "Lenovo ThinkPad",
-    image: "/boutique/pc3.jpg",
+    image: "/boutique/pc03.jpg",
     desc: "Machine solide, fiable et parfaite pour les professionnels et étudiants.",
     oldPrice: "240 000 FCFA",
     price: "225 000 FCFA",
