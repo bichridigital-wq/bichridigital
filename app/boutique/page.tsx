@@ -77,6 +77,56 @@ const advantages = [
     desc: "Vous choisissez le produit, puis vous nous contactez directement par WhatsApp.",
   },
 ];
+const latestComputers = [
+  {
+    name: "HP EliteBook Core i5",
+    image: "/boutique/pc1.jpg",
+    desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
+    oldPrice: "180 000 FCFA",
+    price: "150 000 FCFA",
+    specs: "Core i5 • 8GB RAM • 256GB SSD",
+  },
+  {
+    name: "HP EliteBook Core i5",
+    image: "/boutique/pc1.jpg",
+    desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
+    oldPrice: "200 000 FCFA",
+    price: "180 000 FCFA",
+    specs: "Core i5 • 8GB RAM • 256GB SSD",
+  },
+  {
+    name: "Dell Latitude 7410  Core i7",
+    image: "/boutique/pc2.jpg",
+    desc: "PC puissant pour travail intensif, montage léger, gestion et multitâche.",
+    oldPrice: "300 000 FCFA",
+    price: "230 000 FCFA",
+    specs: "Core i7 • 16GB RAM • 512GB SSD",
+  },
+  {
+    name: "Lenovo ThinkPad",
+    image: "/boutique/pc3.jpg",
+    desc: "Machine solide, fiable et parfaite pour les professionnels et étudiants.",
+    oldPrice: "240 000 FCFA",
+    price: "225 000 FCFA",
+    specs: "Core i5 • 16GB RAM • 256GB SSD",
+  },
+  {
+    name: "HP ProBook 650 G8",
+    image: "/boutique/pc4.jpg",
+    desc: "Ordinateur élégant, performant et adapté aux besoins quotidiens.",
+    oldPrice: "300 000 FCFA",
+    price: "275 000 FCFA",
+    specs: "Core i5 • 16GB RAM • 256GB SSD",
+  },
+  {
+    name: "Dell LATITUDE 7480",
+    image: "/boutique/pc5.jpg",
+    desc: "PC polyvalent pour navigation, bureautique, formation et travail à distance.",
+    oldPrice: "190 000 FCFA",
+    price: "160 000 FCFA",
+    specs: "Core i5 • 8GB RAM • 256GB SSD",
+  },
+];
 
 export default function BoutiquePage() {
   return (
@@ -151,7 +201,104 @@ export default function BoutiquePage() {
             </div>
           </div>
         </section>
+{/* DERNIERS ORDINATEURS */}
+<section className="py-20 bg-[#020B2E] overflow-hidden">
+  <div className="max-w-7xl mx-auto px-6 mb-12">
+    <div className="text-center">
+      <div className="flex items-center justify-center gap-4 mb-4">
+        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+        <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+          Derniers arrivages
+        </span>
+        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+      </div>
 
+      <h2 className="text-4xl md:text-5xl font-black text-white">
+        Nos derniers ordinateurs disponibles
+      </h2>
+
+      <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
+        Découvrez nos dernières machines avec des prix cassés.
+        Les stocks sont limités, contactez-nous rapidement pour réserver.
+      </p>
+    </div>
+  </div>
+
+  <div className="relative w-full overflow-hidden">
+    <div className="computer-marquee flex gap-8 w-max">
+      {[...latestComputers, ...latestComputers].map((pc, index) => (
+        <div
+          key={index}
+          className="w-[330px] md:w-[380px] shrink-0 rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
+        >
+          <div className="relative h-[230px] bg-[#0B1C54] overflow-hidden">
+            <img
+              src={pc.image}
+              alt={pc.name}
+              className="w-full h-full object-cover"
+            />
+
+            <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
+              Prix cassé
+            </div>
+          </div>
+
+          <div className="p-7">
+            <span className="text-[#FCCD12] text-sm font-bold">
+              {pc.specs}
+            </span>
+
+            <h3 className="mt-3 text-2xl font-black text-white">
+              {pc.name}
+            </h3>
+
+            <p className="mt-4 text-gray-400 leading-7">
+              {pc.desc}
+            </p>
+
+            <div className="mt-6 flex items-end gap-4">
+              <span className="text-gray-500 line-through font-bold">
+                {pc.oldPrice}
+              </span>
+
+              <span className="text-[#FCCD12] text-2xl font-black">
+                {pc.price}
+              </span>
+            </div>
+
+            <a
+              href="https://wa.me/221773211096"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-7 py-3 rounded-full font-black hover:scale-105 transition"
+            >
+              Commander →
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <style>{`
+    @keyframes computerMarquee {
+      0% {
+        transform: translateX(-50%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    .computer-marquee {
+      animation: computerMarquee 35s linear infinite;
+    }
+
+    .computer-marquee:hover {
+      animation-play-state: paused;
+    }
+  `}</style>
+</section>
         {/* PRODUCTS */}
         <section id="produits" className="py-16">
           <div className="max-w-7xl mx-auto px-6">
