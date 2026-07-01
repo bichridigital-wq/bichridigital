@@ -27,42 +27,29 @@ export default function Navbar() {
         {/* Menu Desktop */}
         <div className="hidden md:flex items-center gap-8 text-white font-medium">
 
-          <Link
-  href="/"
-  className="hover:text-[#FCCD12] transition"
->
+          <Link href="/" className="hover:text-[#FCCD12] transition">
   Accueil
 </Link>
 
-          <Link
-  href="/services"
-  className="hover:text-[#FCCD12] transition"
->
+<Link href="/services" className="hover:text-[#FCCD12] transition">
   Services
 </Link>
 
-          <Link
-  href="/portfolio"
-  className="hover:text-[#FCCD12] transition"
->
+<Link href="/portfolio" className="hover:text-[#FCCD12] transition">
   Portfolio
 </Link>
-          <Link
-  href="/apropos"
-  className="hover:text-[#FCCD12] transition"
->
+
+<Link href="/boutique" className="hover:text-[#FCCD12] transition">
+  Boutique
+</Link>
+
+<Link href="/apropos" className="hover:text-[#FCCD12] transition">
   À propos
 </Link>
 
-          
-<Link
-  href="/contact"
-  className="hover:text-[#FCCD12] transition"
->
+<Link href="/contact" className="hover:text-[#FCCD12] transition">
   Contact
 </Link>
-
-          
 
           <Link
   href="/contact"
