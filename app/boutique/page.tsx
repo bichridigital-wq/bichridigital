@@ -410,7 +410,7 @@ export default function BoutiquePage() {
             />
 
             <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
-              Prix cassé
+              PROMO
             </div>
           </div>
 
