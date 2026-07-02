@@ -127,6 +127,38 @@ const latestComputers = [
     price: "160 000 FCFA",
     specs: "Core i5 • 8GB RAM • 256GB SSD",
   },
+  {
+  name: "HP EliteBook 840 G8",
+  image: "/boutique/pc7.jpg",
+  desc: "Ordinateur professionnel puissant, léger et adapté au travail quotidien.",
+  oldPrice: "290 000 FCFA",
+  price: "260 000 FCFA",
+  specs: "Core i5 • 08GB RAM • 512GB SSD",
+},
+{
+  name: "MacBook Pro 2020",
+  image: "/boutique/pc8.jpg",
+  desc: "PC solide et performant pour bureautique, études, business et multitâche.",
+  oldPrice: "400 000 FCFA",
+  price: "380 000 FCFA",
+  specs: "Core i5 • 16GB RAM • 256GB SSD",
+},
+{
+  name: "Dell Precision 5540 Gamer",
+  image: "/boutique/pc9.jpg",
+  desc: "Machine fiable, résistante et idéale pour les professionnels.",
+  oldPrice: "390 000 FCFA",
+  price: "350 000 FCFA",
+  specs: "Core i7 • 32GB RAM • 512GB SSD",
+},
+{
+  name: " Dell Latitude 3190",
+  image: "/boutique/pc10.jpg",
+  desc: "Ordinateur élégant, rapide et pratique pour le bureau et les études.",
+  oldPrice: "125 000 FCFA",
+  price: "99 000 FCFA",
+  specs: "8GB RAM • 128GB SSD",
+},
 ];
 
 export default function BoutiquePage() {
