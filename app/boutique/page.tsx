@@ -211,6 +211,21 @@ export default function BoutiquePage() {
       slider.releasePointerCapture(e.pointerId);
     }
   };
+
+  const scrollComputers = (direction: "left" | "right") => {
+    const slider = computerScrollRef.current;
+    if (!slider) return;
+
+    pauseAutoScroll();
+
+    slider.scrollBy({
+      left: direction === "right" ? 420 : -420,
+      behavior: "smooth",
+    });
+
+    resumeAutoScrollLater();
+  };
+
   return (
     
     <>
@@ -304,16 +319,39 @@ export default function BoutiquePage() {
         Découvrez nos dernières machines avec des prix cassés.
         Les stocks sont limités, contactez-nous rapidement pour réserver.
       </p>
+
     </div>
   </div>
 
 <div className="relative w-full">
   <div className="max-w-7xl mx-auto px-6">
     <p className="text-center text-gray-400 mb-6 text-sm">
-      Faites glisser les ordinateurs vers la gauche ou vers la droite.
+      Faites glisser pour faire votre choix.
     </p>
 
-    <div className="relative w-full">
+  
+
+  {/* Flèche gauche */}
+  <button
+    onClick={() => scrollComputers("left")}
+    className="hidden md:flex absolute left-2 top-1/2 z-30 -translate-y-1/2 w-14 h-14 items-center justify-center rounded-full bg-[#020B2E]/90 border border-[#FCCD12]/60 text-[#FCCD12] text-2xl font-black backdrop-blur hover:bg-[#FCCD12] hover:text-[#020B2E] transition"
+    aria-label="Défiler vers la gauche"
+  >
+    ←
+  </button>
+
+  {/* Flèche droite */}
+  <button
+    onClick={() => scrollComputers("right")}
+    className="hidden md:flex absolute right-2 top-1/2 z-30 -translate-y-1/2 w-14 h-14 items-center justify-center rounded-full bg-[#020B2E]/90 border border-[#FCCD12]/60 text-[#FCCD12] text-2xl font-black backdrop-blur hover:bg-[#FCCD12] hover:text-[#020B2E] transition"
+    aria-label="Défiler vers la droite"
+  >
+    →
+  </button>
+
+  <div className="hidden md:block pointer-events-none absolute left-0 top-12 h-[calc(100%-48px)] w-24 bg-gradient-to-r from-[#020B2E] to-transparent z-20"></div>
+  <div className="hidden md:block pointer-events-none absolute right-0 top-12 h-[calc(100%-48px)] w-24 bg-gradient-to-l from-[#020B2E] to-transparent z-20"></div>
+
   <div
     ref={computerScrollRef}
     onMouseEnter={pauseAutoScroll}
@@ -380,7 +418,6 @@ export default function BoutiquePage() {
       ))}
     </div>
   </div>
-</div>
 </div>
 
   
