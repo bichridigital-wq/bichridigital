@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const categories = [
   "Tous",
@@ -160,7 +160,50 @@ const latestComputers = [
   specs: "8GB RAM • 128GB SSD",
 },
 ];
+const boutiqueProducts = [
+  {
+    name: "HP EliteBook Core i5",
+    category: "Ordinateurs",
+    image: "/boutique/pc1.jpg",
+    desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
+    oldPrice: "180 000 FCFA",
+    price: "150 000 FCFA",
+  },
+  {
+    name: "Dell Latitude 7410 Core i7",
+    category: "Ordinateurs",
+    image: "/boutique/pc3.jpg",
+    desc: "PC puissant pour travail intensif, gestion, multitâche et montage léger.",
+    oldPrice: "300 000 FCFA",
+    price: "230 000 FCFA",
+  },
+  {
+    name: "T-shirt Bichridigital",
+    category: "T-shirts",
+    image: "/boutique/tshirt1.jpg",
+    desc: "T-shirt personnalisé Bichridigital, confortable et disponible en plusieurs tailles.",
+    oldPrice: "8 000 FCFA",
+    price: "6 000 FCFA",
+  },
+  {
+    name: "Casquette Bichridigital",
+    category: "Casquettes",
+    image: "/boutique/casquette1.jpg",
+    desc: "Casquette personnalisée avec design moderne pour vos sorties et événements.",
+    oldPrice: "7 000 FCFA",
+    price: "5 000 FCFA",
+  },
+  {
+    name: "Pull Bichridigital",
+    category: "Pulls",
+    image: "/boutique/pull1.jpg",
+    desc: "Pull personnalisé de qualité, idéal pour vos tenues sobres et professionnelles.",
+    oldPrice: "18 000 FCFA",
+    price: "15 000 FCFA",
+  },
+];
 
+const productCategories = ["Tous", "Ordinateurs", "T-shirts", "Casquettes", "Pulls"];
 export default function BoutiquePage() {
     const computerScrollRef = useRef<HTMLDivElement | null>(null);
   const pauseAutoScrollRef = useRef(false);
@@ -212,6 +255,18 @@ export default function BoutiquePage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const [selectedCategory, setSelectedCategory] = useState("Tous");
+
+  const filteredProducts =
+    selectedCategory === "Tous"
+      ? boutiqueProducts
+      : boutiqueProducts.filter((product) => product.category === selectedCategory);
+
+  const getWhatsappLink = (productName: string) => {
+    const message = `Bonjour Bichridigital, je veux commander : ${productName}`;
+    return `https://wa.me/221773211096?text=${encodeURIComponent(message)}`;
+  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const slider = computerScrollRef.current;
@@ -451,8 +506,92 @@ export default function BoutiquePage() {
     </div>
   </div>
 </div>
+</section>
 
-  
+  {/* TOUS LES PRODUITS */}
+<section className="py-20 bg-[#071542]">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="text-center mb-12">
+      <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+        Boutique
+      </span>
+
+      <h2 className="mt-4 text-4xl md:text-5xl font-black text-white">
+        Tous nos produits disponibles
+      </h2>
+
+      <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
+        Choisissez une catégorie et commandez directement via WhatsApp.
+      </p>
+    </div>
+
+    <div className="flex flex-wrap justify-center gap-4 mb-12">
+      {productCategories.map((category) => (
+        <button
+          key={category}
+          onClick={() => setSelectedCategory(category)}
+          className={`px-6 py-3 rounded-full font-black transition ${
+            selectedCategory === category
+              ? "bg-[#FCCD12] text-[#020B2E]"
+              : "bg-white/10 text-white hover:bg-white/20"
+          }`}
+        >
+          {category}
+        </button>
+      ))}
+    </div>
+
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {filteredProducts.map((product, index) => (
+        <div
+          key={index}
+          className="rounded-[28px] bg-[#020B2E] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
+        >
+          <div className="relative h-[240px] bg-[#0B1C54] overflow-hidden">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+
+            <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
+              {product.category}
+            </div>
+          </div>
+
+          <div className="p-7">
+            <h3 className="text-2xl font-black text-white">
+              {product.name}
+            </h3>
+
+            <p className="mt-4 text-gray-400 leading-7">
+              {product.desc}
+            </p>
+
+            <div className="mt-6 flex items-end gap-4">
+              <span className="text-gray-500 line-through font-bold">
+                {product.oldPrice}
+              </span>
+
+              <span className="text-[#FCCD12] text-2xl font-black">
+                {product.price}
+              </span>
+            </div>
+
+            <a
+              href={getWhatsappLink(product.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-7 py-3 rounded-full font-black hover:scale-105 transition"
+            >
+              Commander →
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
 </section>
         {/* PRODUCTS */}
         <section id="produits" className="py-16">
