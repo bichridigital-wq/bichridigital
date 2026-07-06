@@ -123,9 +123,37 @@ const latestComputers: Product[] = [
 
 const tshirtProducts: Product[] = [
   {
-    name: "T-shirt Mbégtémi",
+    name: "T-shirt Mbégtémi - Modèle principal",
     image: "/boutique/tshirt1.jpg",
     desc: "T-shirt confortable avec un style simple qui inspire le sourire.",
+    oldPrice: "10 000 FCFA",
+    price: "8 000 FCFA",
+  },
+  {
+    name: "T-shirt Mbégtémi - Blanc",
+    image: "/boutique/tshirt2.jpg",
+    desc: "Version blanche du T-shirt Mbégtémi, sobre et facile à porter.",
+    oldPrice: "10 000 FCFA",
+    price: "8 000 FCFA",
+  },
+  {
+    name: "T-shirt Mbégtémi - Noir",
+    image: "/boutique/tshirt3.jpg",
+    desc: "Version noire du T-shirt Mbégtémi, élégante et moderne.",
+    oldPrice: "10 000 FCFA",
+    price: "8 000 FCFA",
+  },
+  {
+    name: "T-shirt Mbégtémi - Bleu",
+    image: "/boutique/tshirt4.jpg",
+    desc: "Version bleue du T-shirt Mbégtémi, dynamique et originale.",
+    oldPrice: "10 000 FCFA",
+    price: "8 000 FCFA",
+  },
+  {
+    name: "T-shirt Mbégtémi - Jaune",
+    image: "/boutique/tshirt5.jpg",
+    desc: "Version jaune du T-shirt Mbégtémi, lumineuse et expressive.",
     oldPrice: "10 000 FCFA",
     price: "8 000 FCFA",
   },
@@ -133,9 +161,37 @@ const tshirtProducts: Product[] = [
 
 const pullProducts: Product[] = [
   {
-    name: "Pull Mbégtémi",
+    name: "Pull Mbégtémi - Modèle principal",
     image: "/boutique/pull1.jpg",
     desc: "Pull Mbégtémi sobre, élégant et confortable.",
+    oldPrice: "18 000 FCFA",
+    price: "15 000 FCFA",
+  },
+  {
+    name: "Pull Mbégtémi - Blanc",
+    image: "/boutique/pull2.jpg",
+    desc: "Version blanche du pull Mbégtémi, propre et élégante.",
+    oldPrice: "18 000 FCFA",
+    price: "15 000 FCFA",
+  },
+  {
+    name: "Pull Mbégtémi - Noir",
+    image: "/boutique/pull3.jpg",
+    desc: "Version noire du pull Mbégtémi, sobre et professionnelle.",
+    oldPrice: "18 000 FCFA",
+    price: "15 000 FCFA",
+  },
+  {
+    name: "Pull Mbégtémi - Bleu",
+    image: "/boutique/pull4.jpg",
+    desc: "Version bleue du pull Mbégtémi, moderne et distinctive.",
+    oldPrice: "18 000 FCFA",
+    price: "15 000 FCFA",
+  },
+  {
+    name: "Pull Mbégtémi - Jaune",
+    image: "/boutique/pull5.jpg",
+    desc: "Version jaune du pull Mbégtémi, joyeuse et remarquable.",
     oldPrice: "18 000 FCFA",
     price: "15 000 FCFA",
   },
@@ -143,9 +199,37 @@ const pullProducts: Product[] = [
 
 const casquetteProducts: Product[] = [
   {
-    name: "Casquette Mbégtémi",
+    name: "Casquette Mbégtémi - Modèle principal",
     image: "/boutique/casquette1.jpg",
     desc: "Casquette personnalisée Mbégtémi pour un style moderne.",
+    oldPrice: "7 000 FCFA",
+    price: "5 000 FCFA",
+  },
+  {
+    name: "Casquette Mbégtémi - Blanche",
+    image: "/boutique/casquette2.jpg",
+    desc: "Version blanche de la casquette Mbégtémi, simple et élégante.",
+    oldPrice: "7 000 FCFA",
+    price: "5 000 FCFA",
+  },
+  {
+    name: "Casquette Mbégtémi - Noire",
+    image: "/boutique/casquette3.jpg",
+    desc: "Version noire de la casquette Mbégtémi, moderne et passe-partout.",
+    oldPrice: "7 000 FCFA",
+    price: "5 000 FCFA",
+  },
+  {
+    name: "Casquette Mbégtémi - Bleue",
+    image: "/boutique/casquette4.jpg",
+    desc: "Version bleue de la casquette Mbégtémi, fraîche et stylée.",
+    oldPrice: "7 000 FCFA",
+    price: "5 000 FCFA",
+  },
+  {
+    name: "Casquette Mbégtémi - Jaune",
+    image: "/boutique/casquette5.jpg",
+    desc: "Version jaune de la casquette Mbégtémi, joyeuse et visible.",
     oldPrice: "7 000 FCFA",
     price: "5 000 FCFA",
   },
