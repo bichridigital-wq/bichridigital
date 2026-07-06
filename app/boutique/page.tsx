@@ -1,67 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, type PointerEvent } from "react";
 
-const categories = [
-  "Tous",
-  "Ordinateurs",
-  "Textile",
-  "Accessoires",
-  "Personnalisation",
-];
+type Product = {
+  name: string;
+  image: string;
+  desc: string;
+  oldPrice: string;
+  price: string;
+  specs?: string;
+};
 
-const products = [
-  {
-    title: "Ordinateurs portables",
-    category: "Ordinateurs",
-    desc: "PC portables performants pour étudiants, professionnels et créateurs de contenu.",
-    price: "À partir de 150 000 FCFA",
-    tag: "Informatique",
-    icon: "PC",
-  },
-  {
-    title: "Ordinateurs de bureau",
-    category: "Ordinateurs",
-    desc: "Postes fixes pour bureaux, studios, entreprises et espaces de travail.",
-    price: "Sur commande",
-    tag: "Informatique",
-    icon: "DESK",
-  },
-  {
-    title: "T-shirts personnalisés",
-    category: "Textile",
-    desc: "T-shirts modernes pour marques, événements, associations et entreprises.",
-    price: "À partir de 5 000 FCFA",
-    tag: "Textile",
-    icon: "TS",
-  },
-  {
-    title: "Casquettes",
-    category: "Accessoires",
-    desc: "Casquettes stylées et personnalisables pour votre image ou votre événement.",
-    price: "À partir de 4 000 FCFA",
-    tag: "Mode",
-    icon: "CAP",
-  },
-  {
-    title: "Pulls personnalisés",
-    category: "Textile",
-    desc: "Pulls confortables, professionnels et personnalisés selon votre besoin.",
-    price: "À partir de 12 000 FCFA",
-    tag: "Textile",
-    icon: "PL",
-  },
-  {
-    title: "Accessoires & divers",
-    category: "Accessoires",
-    desc: "Articles divers, goodies, supports de marque et produits sur demande.",
-    price: "Sur devis",
-    tag: "Divers",
-    icon: "B+",
-  },
+type CarouselDirection = "right-to-left" | "left-to-right";
+
+const navigationCategories = [
+  { label: "Tous", href: "#produits" },
+  { label: "Ordinateurs", href: "#ordinateurs" },
+  { label: "T-shirts", href: "#tshirts" },
+  { label: "Pulls", href: "#pulls" },
+  { label: "Casquettes", href: "#casquettes" },
 ];
 
 const advantages = [
@@ -78,14 +37,15 @@ const advantages = [
     desc: "Vous choisissez le produit, puis vous nous contactez directement par WhatsApp.",
   },
 ];
-const latestComputers = [
+
+const latestComputers: Product[] = [
   {
     name: "HP EliteBook Core i5",
     image: "/boutique/pc1.jpg",
     desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
     oldPrice: "180 000 FCFA",
     price: "150 000 FCFA",
-    specs: "Core i5 • 8GB RAM • 256GB SSD",
+    specs: "Core i5 - 8GB RAM - 256GB SSD",
   },
   {
     name: "HP EliteBook Core i5",
@@ -93,7 +53,7 @@ const latestComputers = [
     desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
     oldPrice: "200 000 FCFA",
     price: "180 000 FCFA",
-    specs: "Core i5 • 8GB RAM • 256GB SSD",
+    specs: "Core i5 - 8GB RAM - 256GB SSD",
   },
   {
     name: "Dell Latitude 7410 Core i7",
@@ -101,7 +61,7 @@ const latestComputers = [
     desc: "PC puissant pour travail intensif, montage léger, gestion et multitâche.",
     oldPrice: "300 000 FCFA",
     price: "230 000 FCFA",
-    specs: "Core i7 • 16GB RAM • 512GB SSD",
+    specs: "Core i7 - 16GB RAM - 512GB SSD",
   },
   {
     name: "Lenovo ThinkPad",
@@ -109,7 +69,7 @@ const latestComputers = [
     desc: "Machine solide, fiable et parfaite pour les professionnels et étudiants.",
     oldPrice: "240 000 FCFA",
     price: "225 000 FCFA",
-    specs: "Core i5 • 16GB RAM • 256GB SSD",
+    specs: "Core i5 - 16GB RAM - 256GB SSD",
   },
   {
     name: "HP ProBook 650 G8",
@@ -117,7 +77,7 @@ const latestComputers = [
     desc: "Ordinateur élégant, performant et adapté aux besoins quotidiens.",
     oldPrice: "300 000 FCFA",
     price: "275 000 FCFA",
-    specs: "Core i5 • 16GB RAM • 256GB SSD",
+    specs: "Core i5 - 16GB RAM - 256GB SSD",
   },
   {
     name: "Dell Latitude 7480",
@@ -125,92 +85,100 @@ const latestComputers = [
     desc: "PC polyvalent pour navigation, bureautique, formation et travail à distance.",
     oldPrice: "190 000 FCFA",
     price: "160 000 FCFA",
-    specs: "Core i5 • 8GB RAM • 256GB SSD",
+    specs: "Core i5 - 8GB RAM - 256GB SSD",
   },
   {
-  name: "HP EliteBook 840 G8",
-  image: "/boutique/pc7.jpg",
-  desc: "Ordinateur professionnel puissant, léger et adapté au travail quotidien.",
-  oldPrice: "290 000 FCFA",
-  price: "260 000 FCFA",
-  specs: "Core i5 • 08GB RAM • 512GB SSD",
-},
-{
-  name: "MacBook Pro 2020",
-  image: "/boutique/pc8.jpg",
-  desc: "PC solide et performant pour bureautique, études, business et multitâche.",
-  oldPrice: "400 000 FCFA",
-  price: "380 000 FCFA",
-  specs: "Core i5 • 16GB RAM • 256GB SSD",
-},
-{
-  name: "Dell Precision 5540 Gamer",
-  image: "/boutique/pc9.jpg",
-  desc: "Machine fiable, résistante et idéale pour les professionnels.",
-  oldPrice: "390 000 FCFA",
-  price: "350 000 FCFA",
-  specs: "Core i7 • 32GB RAM • 512GB SSD",
-},
-{
-  name: " Dell Latitude 3190",
-  image: "/boutique/pc10.jpg",
-  desc: "Ordinateur élégant, rapide et pratique pour le bureau et les études.",
-  oldPrice: "125 000 FCFA",
-  price: "99 000 FCFA",
-  specs: "8GB RAM • 128GB SSD",
-},
+    name: "HP EliteBook 840 G8",
+    image: "/boutique/pc7.jpg",
+    desc: "Ordinateur professionnel puissant, léger et adapté au travail quotidien.",
+    oldPrice: "290 000 FCFA",
+    price: "260 000 FCFA",
+    specs: "Core i5 - 8GB RAM - 512GB SSD",
+  },
+  {
+    name: "MacBook Pro 2020",
+    image: "/boutique/pc8.jpg",
+    desc: "PC solide et performant pour bureautique, études, business et multitâche.",
+    oldPrice: "400 000 FCFA",
+    price: "380 000 FCFA",
+    specs: "Core i5 - 16GB RAM - 256GB SSD",
+  },
+  {
+    name: "Dell Precision 5540 Gamer",
+    image: "/boutique/pc9.jpg",
+    desc: "Machine fiable, résistante et idéale pour les professionnels.",
+    oldPrice: "390 000 FCFA",
+    price: "350 000 FCFA",
+    specs: "Core i7 - 32GB RAM - 512GB SSD",
+  },
+  {
+    name: "Dell Latitude 3190",
+    image: "/boutique/pc10.jpg",
+    desc: "Ordinateur élégant, rapide et pratique pour le bureau et les études.",
+    oldPrice: "125 000 FCFA",
+    price: "99 000 FCFA",
+    specs: "8GB RAM - 128GB SSD",
+  },
 ];
-const boutiqueProducts = [
+
+const tshirtProducts: Product[] = [
   {
-    name: "HP EliteBook Core i5",
-    category: "Ordinateurs",
-    image: "/boutique/pc1.jpg",
-    desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
-    oldPrice: "180 000 FCFA",
-    price: "150 000 FCFA",
-  },
-  {
-    name: "Dell Latitude 7410 Core i7",
-    category: "Ordinateurs",
-    image: "/boutique/pc3.jpg",
-    desc: "PC puissant pour travail intensif, gestion, multitâche et montage léger.",
-    oldPrice: "300 000 FCFA",
-    price: "230 000 FCFA",
-  },
-  {
-    name: "T-shirt Bichridigital",
-    category: "T-shirts",
+    name: "T-shirt Mbégtémi",
     image: "/boutique/tshirt1.jpg",
-    desc: "T-shirt personnalisé Bichridigital, confortable et disponible en plusieurs tailles.",
-    oldPrice: "8 000 FCFA",
-    price: "6 000 FCFA",
+    desc: "T-shirt confortable avec un style simple qui inspire le sourire.",
+    oldPrice: "10 000 FCFA",
+    price: "8 000 FCFA",
   },
+];
+
+const pullProducts: Product[] = [
   {
-    name: "Casquette Bichridigital",
-    category: "Casquettes",
-    image: "/boutique/casquette1.jpg",
-    desc: "Casquette personnalisée avec design moderne pour vos sorties et événements.",
-    oldPrice: "7 000 FCFA",
-    price: "5 000 FCFA",
-  },
-  {
-    name: "Pull Bichridigital",
-    category: "Pulls",
+    name: "Pull Mbégtémi",
     image: "/boutique/pull1.jpg",
-    desc: "Pull personnalisé de qualité, idéal pour vos tenues sobres et professionnelles.",
+    desc: "Pull Mbégtémi sobre, élégant et confortable.",
     oldPrice: "18 000 FCFA",
     price: "15 000 FCFA",
   },
 ];
 
-const productCategories = ["Tous", "Ordinateurs", "T-shirts", "Casquettes", "Pulls"];
-export default function BoutiquePage() {
-    const computerScrollRef = useRef<HTMLDivElement | null>(null);
+const casquetteProducts: Product[] = [
+  {
+    name: "Casquette Mbégtémi",
+    image: "/boutique/casquette1.jpg",
+    desc: "Casquette personnalisée Mbégtémi pour un style moderne.",
+    oldPrice: "7 000 FCFA",
+    price: "5 000 FCFA",
+  },
+];
+
+function getWhatsappLink(productName: string) {
+  const message = `Bonjour Bichridigital, je veux commander : ${productName}`;
+  return `https://wa.me/221773211096?text=${encodeURIComponent(message)}`;
+}
+
+function ProductCarousel({
+  id,
+  eyebrow,
+  title,
+  description,
+  products,
+  direction,
+  sectionClassName = "bg-[#020B2E]",
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  products: Product[];
+  direction: CarouselDirection;
+  sectionClassName?: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const pauseAutoScrollRef = useRef(false);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const startScrollLeftRef = useRef(0);
-  const resumeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pauseAutoScroll = () => {
     pauseAutoScrollRef.current = true;
@@ -231,18 +199,20 @@ export default function BoutiquePage() {
   };
 
   useEffect(() => {
-    const slider = computerScrollRef.current;
-
+    const slider = scrollRef.current;
     if (!slider) return;
 
     const oneSetWidth = slider.scrollWidth / 3;
-
     slider.scrollLeft = oneSetWidth;
 
     const interval = setInterval(() => {
-      if (!slider || pauseAutoScrollRef.current) return;
+      if (pauseAutoScrollRef.current) return;
 
-      slider.scrollLeft += 1;
+      if (direction === "right-to-left") {
+        slider.scrollLeft += 1;
+      } else {
+        slider.scrollLeft -= 1;
+      }
 
       if (slider.scrollLeft >= oneSetWidth * 2) {
         slider.scrollLeft -= oneSetWidth;
@@ -253,60 +223,52 @@ export default function BoutiquePage() {
       }
     }, 20);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      clearInterval(interval);
 
-  const [selectedCategory, setSelectedCategory] = useState("Tous");
+      if (resumeTimerRef.current) {
+        clearTimeout(resumeTimerRef.current);
+      }
+    };
+  }, [direction]);
 
-  const filteredProducts =
-    selectedCategory === "Tous"
-      ? boutiqueProducts
-      : boutiqueProducts.filter((product) => product.category === selectedCategory);
-
-  const getWhatsappLink = (productName: string) => {
-    const message = `Bonjour Bichridigital, je veux commander : ${productName}`;
-    return `https://wa.me/221773211096?text=${encodeURIComponent(message)}`;
-  };
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    const slider = computerScrollRef.current;
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    const slider = scrollRef.current;
     if (!slider) return;
 
     pauseAutoScroll();
     isDraggingRef.current = true;
     startXRef.current = e.clientX;
     startScrollLeftRef.current = slider.scrollLeft;
-
     slider.setPointerCapture(e.pointerId);
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const slider = computerScrollRef.current;
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const slider = scrollRef.current;
     if (!slider || !isDraggingRef.current) return;
 
     const distance = e.clientX - startXRef.current;
     slider.scrollLeft = startScrollLeftRef.current - distance;
   };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    const slider = computerScrollRef.current;
-
+  const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
+    const slider = scrollRef.current;
     isDraggingRef.current = false;
     resumeAutoScrollLater();
 
-    if (slider) {
+    if (slider && slider.hasPointerCapture(e.pointerId)) {
       slider.releasePointerCapture(e.pointerId);
     }
   };
 
-  const scrollComputers = (direction: "left" | "right") => {
-    const slider = computerScrollRef.current;
+  const scrollProducts = (buttonDirection: "left" | "right") => {
+    const slider = scrollRef.current;
     if (!slider) return;
 
     pauseAutoScroll();
 
     slider.scrollBy({
-      left: direction === "right" ? 420 : -420,
+      left: buttonDirection === "right" ? 420 : -420,
       behavior: "smooth",
     });
 
@@ -314,11 +276,127 @@ export default function BoutiquePage() {
   };
 
   return (
-    
+    <section id={id} className={`scroll-mt-28 py-20 overflow-hidden ${sectionClassName}`}>
+      <div className="max-w-7xl mx-auto px-6 mb-12">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+            <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+              {eyebrow}
+            </span>
+            <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-black text-white">
+            {title}
+          </h2>
+
+          <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6">
+        <p className="text-center text-gray-400 mb-6 text-sm">
+          Faites glisser pour faire votre choix.
+        </p>
+
+        <button
+          onClick={() => scrollProducts("left")}
+          className="hidden md:flex absolute left-2 top-1/2 z-30 -translate-y-1/2 w-14 h-14 items-center justify-center rounded-full bg-[#020B2E]/90 border border-[#FCCD12]/60 text-[#FCCD12] text-2xl font-black backdrop-blur hover:bg-[#FCCD12] hover:text-[#020B2E] transition"
+          aria-label="Défiler vers la gauche"
+        >
+          ←
+        </button>
+
+        <button
+          onClick={() => scrollProducts("right")}
+          className="hidden md:flex absolute right-2 top-1/2 z-30 -translate-y-1/2 w-14 h-14 items-center justify-center rounded-full bg-[#020B2E]/90 border border-[#FCCD12]/60 text-[#FCCD12] text-2xl font-black backdrop-blur hover:bg-[#FCCD12] hover:text-[#020B2E] transition"
+          aria-label="Défiler vers la droite"
+        >
+          →
+        </button>
+
+        <div className="hidden md:block pointer-events-none absolute left-0 top-12 h-[calc(100%-48px)] w-24 bg-gradient-to-r from-[#020B2E] to-transparent z-20"></div>
+        <div className="hidden md:block pointer-events-none absolute right-0 top-12 h-[calc(100%-48px)] w-24 bg-gradient-to-l from-[#020B2E] to-transparent z-20"></div>
+
+        <div
+          ref={scrollRef}
+          onMouseEnter={pauseAutoScroll}
+          onMouseLeave={resumeAutoScrollLater}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          className="flex gap-8 overflow-x-auto px-6 pb-8 cursor-grab active:cursor-grabbing select-none scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {[...products, ...products, ...products].map((product, index) => (
+            <article
+              key={`${product.name}-${index}`}
+              className="w-[310px] sm:w-[350px] md:w-[380px] shrink-0 rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
+            >
+              <div className="relative h-[230px] bg-[#0B1C54] overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+
+                <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
+                  PROMO
+                </div>
+              </div>
+
+              <div className="p-7">
+                {product.specs && (
+                  <span className="text-[#FCCD12] text-sm font-bold">
+                    {product.specs}
+                  </span>
+                )}
+
+                <h3 className="mt-3 text-2xl font-black text-white">
+                  {product.name}
+                </h3>
+
+                <p className="mt-4 text-gray-400 leading-7">
+                  {product.desc}
+                </p>
+
+                <div className="mt-6 flex items-end gap-4">
+                  <span className="text-gray-500 line-through font-bold">
+                    {product.oldPrice}
+                  </span>
+
+                  <span className="text-[#FCCD12] text-2xl font-black">
+                    {product.price}
+                  </span>
+                </div>
+
+                <a
+                  href={getWhatsappLink(product.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-7 py-3 rounded-full font-black hover:scale-105 transition"
+                >
+                  Commander →
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function BoutiquePage() {
+  return (
     <>
       <Navbar />
 
-      <main className="bg-[#020B2E] text-white overflow-hidden">
+      <main id="produits" className="bg-[#020B2E] text-white overflow-hidden">
         {/* HERO */}
         <section className="relative min-h-[620px] flex items-center justify-center px-6 text-center overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,87,255,0.35),transparent_45%)]"></div>
@@ -336,10 +414,7 @@ export default function BoutiquePage() {
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight">
               Boutique tech & lifestyle <br />
-              signée{" "}
-              <span className="text-[#FCCD12]">
-                Bichridigital.
-              </span>
+              signée <span className="text-[#FCCD12]">Bichridigital.</span>
             </h1>
 
             <p className="mt-7 text-gray-300 text-lg md:text-xl leading-8 max-w-3xl mx-auto">
@@ -348,12 +423,12 @@ export default function BoutiquePage() {
             </p>
 
             <div className="mt-10 flex flex-wrap justify-center gap-5">
-              <Link
-                href="#produits"
+              <a
+                href="#ordinateurs"
                 className="bg-[#FCCD12] text-[#020B2E] px-10 py-4 rounded-full font-black shadow-lg hover:scale-105 transition"
               >
                 Voir les produits →
-              </Link>
+              </a>
 
               <a
                 href="https://wa.me/221773211096"
@@ -367,296 +442,69 @@ export default function BoutiquePage() {
           </div>
         </section>
 
-        {/* CATEGORIES */}
-        <section className="pt-16 pb-8">
+        {/* NAVIGATION CATEGORIES */}
+        <section className="sticky top-0 z-40 py-5 bg-[#020B2E]/95 backdrop-blur border-y border-white/10">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-wrap justify-center gap-4">
-              {categories.map((category, index) => (
-                <button
-                  key={category}
+              {navigationCategories.map((category, index) => (
+                <a
+                  key={category.label}
+                  href={category.href}
                   className={`px-7 py-3 rounded-full border font-bold transition ${
                     index === 0
                       ? "bg-[#FCCD12] text-[#020B2E] border-[#FCCD12]"
                       : "border-white/15 text-gray-300 hover:border-[#FCCD12] hover:text-[#FCCD12]"
                   }`}
                 >
-                  {category}
-                </button>
+                  {category.label}
+                </a>
               ))}
             </div>
           </div>
         </section>
-{/* DERNIERS ORDINATEURS */}
-<section className="py-20 bg-[#020B2E] overflow-hidden">
-  <div className="max-w-7xl mx-auto px-6 mb-12">
-    <div className="text-center">
-      <div className="flex items-center justify-center gap-4 mb-4">
-        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
-        <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
-          Derniers arrivages
-        </span>
-        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
-      </div>
 
-      <h2 className="text-4xl md:text-5xl font-black text-white">
-        Nos derniers ordinateurs disponibles
-      </h2>
+        <ProductCarousel
+          id="ordinateurs"
+          eyebrow="Derniers arrivages"
+          title="Nos derniers ordinateurs disponibles"
+          description="Découvrez nos dernières machines avec des prix promo. Les stocks sont limités, contactez-nous rapidement pour réserver."
+          products={latestComputers}
+          direction="right-to-left"
+          sectionClassName="bg-[#020B2E]"
+        />
 
-      <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
-        Découvrez nos dernières machines avec des prix cassés.
-        Les stocks sont limités, contactez-nous rapidement pour réserver.
-      </p>
+        <ProductCarousel
+          id="tshirts"
+          eyebrow="Textile"
+          title="Nos T-shirts disponibles"
+          description="Des T-shirts personnalisés pour votre marque, vos événements et votre style quotidien."
+          products={tshirtProducts}
+          direction="left-to-right"
+          sectionClassName="bg-[#04113A]"
+        />
 
-    </div>
-  </div>
+        <ProductCarousel
+          id="pulls"
+          eyebrow="Style & confort"
+          title="Nos pulls disponibles"
+          description="Des pulls confortables, sobres et personnalisables selon votre identité."
+          products={pullProducts}
+          direction="right-to-left"
+          sectionClassName="bg-[#020B2E]"
+        />
 
-<div className="relative w-full">
-  <div className="max-w-7xl mx-auto px-6">
-    <p className="text-center text-gray-400 mb-6 text-sm">
-      Faites glisser pour faire votre choix.
-    </p>
-
-  
-
-  {/* Flèche gauche */}
-  <button
-    onClick={() => scrollComputers("left")}
-    className="hidden md:flex absolute left-2 top-1/2 z-30 -translate-y-1/2 w-14 h-14 items-center justify-center rounded-full bg-[#020B2E]/90 border border-[#FCCD12]/60 text-[#FCCD12] text-2xl font-black backdrop-blur hover:bg-[#FCCD12] hover:text-[#020B2E] transition"
-    aria-label="Défiler vers la gauche"
-  >
-    ←
-  </button>
-
-  {/* Flèche droite */}
-  <button
-    onClick={() => scrollComputers("right")}
-    className="hidden md:flex absolute right-2 top-1/2 z-30 -translate-y-1/2 w-14 h-14 items-center justify-center rounded-full bg-[#020B2E]/90 border border-[#FCCD12]/60 text-[#FCCD12] text-2xl font-black backdrop-blur hover:bg-[#FCCD12] hover:text-[#020B2E] transition"
-    aria-label="Défiler vers la droite"
-  >
-    →
-  </button>
-
-  <div className="hidden md:block pointer-events-none absolute left-0 top-12 h-[calc(100%-48px)] w-24 bg-gradient-to-r from-[#020B2E] to-transparent z-20"></div>
-  <div className="hidden md:block pointer-events-none absolute right-0 top-12 h-[calc(100%-48px)] w-24 bg-gradient-to-l from-[#020B2E] to-transparent z-20"></div>
-
-  <div
-    ref={computerScrollRef}
-    onMouseEnter={pauseAutoScroll}
-    onMouseLeave={resumeAutoScrollLater}
-    onPointerDown={handlePointerDown}
-    onPointerMove={handlePointerMove}
-    onPointerUp={handlePointerUp}
-    onPointerCancel={handlePointerUp}
-    className="flex gap-8 overflow-x-auto px-6 pb-8 cursor-grab active:cursor-grabbing select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-  >
-    {[...latestComputers, ...latestComputers, ...latestComputers].map((pc, index) => (
-        <div
-          key={index}
-        className="w-[310px] sm:w-[350px] md:w-[380px] shrink-0 rounded-[28px] 
-        bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] 
-        transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
-        >
-          
-          <div className="relative h-[230px] bg-[#0B1C54] overflow-hidden">
-            <img
-              src={pc.image}
-              alt={pc.name}
-              className="w-full h-full object-cover"
-            />
-
-            <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
-              PROMO
-            </div>
-          </div>
-
-          <div className="p-7">
-            <span className="text-[#FCCD12] text-sm font-bold">
-              {pc.specs}
-            </span>
-
-            <h3 className="mt-3 text-2xl font-black text-white">
-              {pc.name}
-            </h3>
-
-            <p className="mt-4 text-gray-400 leading-7">
-              {pc.desc}
-            </p>
-
-            <div className="mt-6 flex items-end gap-4">
-              <span className="text-gray-500 line-through font-bold">
-                {pc.oldPrice}
-              </span>
-
-              <span className="text-[#FCCD12] text-2xl font-black">
-                {pc.price}
-              </span>
-            </div>
-
-            <a
-              href="https://wa.me/221773211096"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-7 py-3 rounded-full font-black hover:scale-105 transition"
-            >
-              Commander →
-            </a>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
-</section>
-
-  {/* TOUS LES PRODUITS */}
-<section className="py-20 bg-[#071542]">
-  <div className="max-w-7xl mx-auto px-6">
-    <div className="text-center mb-12">
-      <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
-        Boutique
-      </span>
-
-      <h2 className="mt-4 text-4xl md:text-5xl font-black text-white">
-        Tous nos produits disponibles
-      </h2>
-
-      <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
-        Choisissez une catégorie et commandez directement via WhatsApp.
-      </p>
-    </div>
-
-    <div className="flex flex-wrap justify-center gap-4 mb-12">
-      {productCategories.map((category) => (
-        <button
-          key={category}
-          onClick={() => setSelectedCategory(category)}
-          className={`px-6 py-3 rounded-full font-black transition ${
-            selectedCategory === category
-              ? "bg-[#FCCD12] text-[#020B2E]"
-              : "bg-white/10 text-white hover:bg-white/20"
-          }`}
-        >
-          {category}
-        </button>
-      ))}
-    </div>
-
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {filteredProducts.map((product, index) => (
-        <div
-          key={index}
-          className="rounded-[28px] bg-[#020B2E] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
-        >
-          <div className="relative h-[240px] bg-[#0B1C54] overflow-hidden">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-
-            <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
-              {product.category}
-            </div>
-          </div>
-
-          <div className="p-7">
-            <h3 className="text-2xl font-black text-white">
-              {product.name}
-            </h3>
-
-            <p className="mt-4 text-gray-400 leading-7">
-              {product.desc}
-            </p>
-
-            <div className="mt-6 flex items-end gap-4">
-              <span className="text-gray-500 line-through font-bold">
-                {product.oldPrice}
-              </span>
-
-              <span className="text-[#FCCD12] text-2xl font-black">
-                {product.price}
-              </span>
-            </div>
-
-            <a
-              href={getWhatsappLink(product.name)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-7 py-3 rounded-full font-black hover:scale-105 transition"
-            >
-              Commander →
-            </a>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-
-</section>
-        {/* PRODUCTS */}
-        <section id="produits" className="py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-14">
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
-                <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
-                  Nos produits
-                </span>
-                <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
-              </div>
-
-              <h2 className="text-4xl md:text-5xl font-black">
-                Ce que vous pouvez commander
-              </h2>
-
-              <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
-                Une sélection de produits utiles pour le travail, la
-                communication, les événements et la personnalisation de marque.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => (
-                <div
-                  key={product.title}
-                  className="group rounded-[26px] bg-[#071542] border border-blue-500/30 p-8 hover:border-[#FCCD12] hover:-translate-y-2 transition-all duration-300 shadow-[0_0_40px_rgba(0,87,255,0.15)]"
-                >
-                  <div className="w-20 h-20 rounded-2xl bg-[#1738C8] text-[#FCCD12] flex items-center justify-center font-black text-xl mb-7 shadow-[0_0_35px_rgba(0,87,255,0.35)]">
-                    {product.icon}
-                  </div>
-
-                  <span className="inline-block px-4 py-1 rounded-full border border-[#FCCD12]/40 text-[#FCCD12] text-sm font-bold mb-4">
-                    {product.tag}
-                  </span>
-
-                  <h3 className="text-2xl font-black group-hover:text-[#FCCD12] transition">
-                    {product.title}
-                  </h3>
-
-                  <p className="mt-4 text-gray-400 leading-7">
-                    {product.desc}
-                  </p>
-
-                  <p className="mt-5 text-white font-black">
-                    {product.price}
-                  </p>
-
-                  <a
-                    href="https://wa.me/221773211096"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-6 py-3 rounded-full font-black hover:scale-105 transition"
-                  >
-                    Commander →
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <ProductCarousel
+          id="casquettes"
+          eyebrow="Accessoires"
+          title="Nos casquettes disponibles"
+          description="Des casquettes personnalisées pour compléter votre style ou valoriser votre marque."
+          products={casquetteProducts}
+          direction="left-to-right"
+          sectionClassName="bg-[#04113A]"
+        />
 
         {/* ADVANTAGES */}
-        <section className="py-20 bg-[#04113A]">
+        <section className="py-20 bg-[#020B2E]">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-14">
               <div className="flex items-center justify-center gap-4 mb-4">
@@ -675,20 +523,16 @@ export default function BoutiquePage() {
             <div className="grid md:grid-cols-3 gap-8">
               {advantages.map((item, index) => (
                 <div
-                  key={index}
+                  key={item.title}
                   className="rounded-[26px] bg-white/[0.04] border border-white/10 p-8 hover:border-[#FCCD12] transition"
                 >
                   <div className="w-14 h-14 rounded-full bg-[#FCCD12] text-[#020B2E] flex items-center justify-center font-black text-xl mb-6">
                     {index + 1}
                   </div>
 
-                  <h3 className="text-2xl font-black">
-                    {item.title}
-                  </h3>
+                  <h3 className="text-2xl font-black">{item.title}</h3>
 
-                  <p className="mt-4 text-gray-400 leading-7">
-                    {item.desc}
-                  </p>
+                  <p className="mt-4 text-gray-400 leading-7">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -703,15 +547,13 @@ export default function BoutiquePage() {
                 <div className="flex items-center gap-4 mb-4">
                   <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
                   <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
-                    Besoin d’un produit ?
+                    Besoin d'un produit ?
                   </span>
                 </div>
 
                 <h2 className="text-4xl md:text-5xl font-black leading-tight">
                   Commandez vos articles directement avec{" "}
-                  <span className="text-[#FCCD12]">
-                    BichriStore.
-                  </span>
+                  <span className="text-[#FCCD12]">BichriStore.</span>
                 </h2>
               </div>
 
