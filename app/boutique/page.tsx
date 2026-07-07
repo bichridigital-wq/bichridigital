@@ -595,7 +595,7 @@ export default function BoutiquePage() {
           sectionClassName="bg-[#04113A]"
         />
 {/* SERVICES BICHRIDIGITAL */}
-<section id="services-bichridigital" className="scroll-mt-28 py-20 bg-[#020B2E]">
+<section id="services-bichridigital" className="boutique-reveal scroll-mt-28 py-20 bg-[#020B2E]">
   <div className="max-w-7xl mx-auto px-6">
     <div className="text-center mb-14">
       <div className="flex items-center justify-center gap-4 mb-4">
@@ -619,43 +619,59 @@ export default function BoutiquePage() {
     </div>
 
     <div className="grid lg:grid-cols-2 gap-10 items-start">
-      <div className="rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden shadow-[0_0_45px_rgba(0,87,255,0.18)]">
+      <div className="group rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden shadow-[0_0_45px_rgba(0,87,255,0.18)] hover:border-[#FCCD12] hover:scale-[1.03] hover:shadow-[0_0_80px_rgba(252,205,18,0.22)] transition-all duration-500">
         <img
           src="/boutique/services-disponibles.jpg"
           alt="Bichridigital services disponibles"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
       </div>
 
       <div className="grid sm:grid-cols-2 gap-5">
         {[
-          ["Impression et personnalisation", "Impression numérique grand format, affiches, flyers, cartes de visite, papier en-tête, brochures."],
-          ["Décoration et tableaux muraux", "Tableaux muraux personnalisés, cadres photo, tableaux d’entreprise, décoration intérieure, canvas."],
+          ["Impression et personnalisation", "Impression numérique grand format, affiches publicitaires, flyers, dépliants, cartes de visite, papier en-tête, enveloppes, brochures et catalogues."],
+          ["Décoration et tableaux muraux", "Tableaux muraux personnalisés, cadres photo, tableaux d’entreprise, décoration intérieure et événementielle, impressions sur toile canvas."],
           ["Objets publicitaires", "Mugs personnalisés, porte-clés, stylos, goodies, agendas et cadeaux d’entreprise."],
-          ["Packaging personnalisé", "Sachets personnalisés, sacs en papier, emballages, étiquettes et autocollants."],
+          ["Packaging personnalisé", "Sachets personnalisés, sacs en papier, sacs promotionnels, emballages de produits, étiquettes et autocollants."],
           ["Textile personnalisé", "T-shirts, polos, pulls, sweats, casquettes, bonnets, uniformes et vêtements d’entreprise."],
           ["Signalétique et événementiel", "Banderoles, kakémonos, roll-up, bâches publicitaires, panneaux et enseignes."],
-          ["Communication digitale", "Sites web, réseaux sociaux, conception graphique, logos, audiovisuel et streaming en direct."],
+          ["Communication digitale", "Création de sites web, gestion des réseaux sociaux, conception graphique, logos, identités visuelles, production audiovisuelle et streaming en direct."],
         ].map(([title, desc]) => (
           <div
             key={title}
-            className="rounded-[22px] bg-white/[0.04] border border-white/10 p-6 hover:border-[#FCCD12]/80 transition"
+            className="group rounded-[22px] bg-white/[0.04] border border-white/10 p-6 hover:border-[#FCCD12]/80 hover:bg-white/[0.06] hover:scale-[1.04] hover:-translate-y-1 hover:shadow-[0_0_45px_rgba(252,205,18,0.12)] transition-all duration-300"
           >
-            <h3 className="text-xl font-black text-[#FCCD12]">{title}</h3>
+            <h3 className="text-xl font-black text-[#FCCD12] group-hover:text-white transition">
+              {title}
+            </h3>
             <p className="mt-4 text-gray-300 leading-7 text-sm">{desc}</p>
           </div>
         ))}
       </div>
     </div>
 
-    <div className="mt-12 rounded-[28px] bg-gradient-to-r from-[#003CFF] to-[#0057FF] p-8 md:p-10 flex flex-col lg:flex-row gap-8 items-center justify-between">
+    <div className="mt-12 rounded-[28px] bg-gradient-to-r from-[#003CFF] to-[#0057FF] p-8 md:p-10 grid lg:grid-cols-[1fr_auto] gap-8 items-center hover:scale-[1.01] transition-transform duration-300">
       <div>
         <h3 className="text-3xl font-black">Pourquoi choisir Bichridigital ?</h3>
-        <p className="mt-4 text-white/85 leading-7">
-          Qualité premium, créativité, personnalisation sur mesure, service rapide
-          et accompagnement professionnel.
-        </p>
-        <p className="mt-4 text-[#FCCD12] font-black">
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          {[
+            "Qualité premium",
+            "Créativité et innovation",
+            "Personnalisation sur mesure",
+            "Service rapide et fiable",
+            "Accompagnement professionnel",
+          ].map((item) => (
+            <span
+              key={item}
+              className="rounded-full bg-white/10 border border-white/15 px-5 py-2 text-sm font-bold text-white hover:bg-[#FCCD12] hover:text-[#020B2E] hover:scale-105 transition"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+
+        <p className="mt-6 text-white/85 leading-7">
           Votre histoire, image par image. Votre communication, notre priorité.
         </p>
       </div>
@@ -664,12 +680,29 @@ export default function BoutiquePage() {
         href="https://wa.me/221773211096"
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-[#FCCD12] text-[#020B2E] px-8 py-4 rounded-xl font-black hover:scale-105 transition text-center"
+        className="inline-block bg-[#FCCD12] text-[#020B2E] px-8 py-4 rounded-xl font-black hover:scale-105 hover:-translate-y-1 active:scale-95 transition text-center"
       >
         Demander un devis →
       </a>
     </div>
   </div>
+
+  <style>{`
+    @keyframes boutiqueFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .boutique-reveal {
+      animation: boutiqueFadeUp 0.85s ease both;
+    }
+  `}</style>
 </section>
         {/* ADVANTAGES */}
         <section className="py-20 bg-[#020B2E]">
