@@ -1,139 +1,118 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
+const navLinks = [
+  { name: "Accueil", href: "/" },
+  { name: "Services", href: "/services" },
+  { name: "Portfolio", href: "/portfolio" },
+  { name: "Boutique", href: "/boutique" },
+  { name: "À propos", href: "/about" },
+  { name: "Contact", href: "/contact" },
+];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 left-0 w-full z-50 bg-[#020B2E]/95 backdrop-blur-md border-b border-blue-900">
-
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-        {/* Logo */}
-        <a href="/">
+    <header className="fixed left-0 top-0 z-50 w-full px-4 pt-4">
+      <nav className="relative mx-auto grid h-[66px] max-w-7xl grid-cols-[auto_1fr_auto] items-center rounded-full border border-white/10 bg-[#020B2E]/85 px-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl md:px-5">
+        {/* LOGO */}
+        <Link href="/" className="flex items-center">
           <Image
             src="/logo.png"
-            alt="Bichridigital"
-            width={180}
-            height={60}
+            alt="Bichridigital Agency"
+            width={140}
+            height={48}
             priority
+            className="h-9 w-auto object-contain md:h-10"
           />
-        </a>
+        </Link>
 
-        {/* Menu Desktop */}
-        <div className="hidden md:flex items-center gap-8 text-white font-medium">
+        {/* MENU CENTER */}
+        <div className="hidden justify-center lg:flex">
+          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
 
-          <Link href="/" className="hover:text-[#FCCD12] transition">
-  Accueil
-</Link>
-
-<Link href="/services" className="hover:text-[#FCCD12] transition">
-  Services
-</Link>
-
-<Link href="/portfolio" className="hover:text-[#FCCD12] transition">
-  Portfolio
-</Link>
-
-<Link href="/boutique" className="hover:text-[#FCCD12] transition">
-  Boutique
-</Link>
-
-<Link href="/apropos" className="hover:text-[#FCCD12] transition">
-  À propos
-</Link>
-
-<Link href="/contact" className="hover:text-[#FCCD12] transition">
-  Contact
-</Link>
-
-          <Link
-  href="/contact"
-  className="bg-[#0057FF] hover:bg-blue-700 px-6 py-3 rounded-full font-semibold transition"
->
-  Demander un devis →
-</Link>
-
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+                    active
+                      ? "bg-[#FCCD12] text-[#020B2E]"
+                      : "text-white/80 hover:bg-white/10 hover:text-[#FCCD12]"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Hamburger Mobile */}
+        {/* CTA RIGHT */}
+        <div className="hidden justify-end lg:flex">
+          <a
+            href="https://wa.me/221773211096"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-[#FCCD12] px-5 py-2.5 text-sm font-black text-[#020B2E] shadow-[0_0_30px_rgba(252,205,18,0.25)] transition hover:scale-105"
+          >
+            Demander un devis
+          </a>
+        </div>
+
+        {/* MOBILE BUTTON */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-white text-3xl"
+          className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-white lg:hidden"
+          aria-label="Menu"
         >
-          ☰
+          {menuOpen ? <X size={21} /> : <Menu size={21} />}
         </button>
+      </nav>
 
-      </div>
-
-      {/* Menu Mobile */}
+      {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="md:hidden bg-gradient-to-b from-[#020B2E] to-[#00154A] border-t border-blue-900 shadow-lg">
+        <div className="mx-auto mt-3 max-w-7xl rounded-[24px] border border-white/10 bg-[#020B2E]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl lg:hidden">
+          <div className="flex flex-col gap-3">
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
 
-          <div className="flex flex-col items-center justify-center gap-8 py-10 text-white text-lg font-medium">
-
-            <a
-              href="/"
-              onClick={() => setMenuOpen(false)}
-              className="hover:text-[#FCCD12]"
-            >
-              Accueil
-            </a>
-
-            <a
-              href="/services"
-              onClick={() => setMenuOpen(false)}
-              className="hover:text-[#FCCD12]"
-            >
-              Services
-            </a>
-<a
-  href="/boutique"
-  onClick={() => setMenuOpen(false)}
-  className="hover:text-[#FCCD12]"
->
-  Boutique
-</a>
-            <a
-              href="/portfolio"
-              onClick={() => setMenuOpen(false)}
-              className="hover:text-[#FCCD12]"
-            >
-              Portfolio
-            </a>
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
+                    active
+                      ? "bg-[#FCCD12] text-[#020B2E]"
+                      : "bg-white/5 text-white hover:bg-white/10"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
 
             <a
-              href="/apropos"
-              onClick={() => setMenuOpen(false)}
-              className="hover:text-[#FCCD12]"
+              href="https://wa.me/221773211096"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl bg-[#FCCD12] px-4 py-3 text-center text-sm font-black text-[#020B2E]"
             >
-              À propos
+              Demander un devis
             </a>
-
-            <a
-              href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="hover:text-[#FCCD12]"
-            >
-              Contact
-            </a>
-
-            <a
-              href="/contact"
-              className="bg-[#0057FF] text-white px-6 py-3 rounded-full font-semibold"
-            >
-              Demander un devis →
-            </a>
-
           </div>
-
         </div>
       )}
-
-    </nav>
+    </header>
   );
 }

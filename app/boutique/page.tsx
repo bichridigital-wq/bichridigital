@@ -702,7 +702,8 @@ export default function BoutiquePage() {
     .boutique-reveal {
       animation: boutiqueFadeUp 0.85s ease both;
     }
-  `}</style>
+  `}
+  </style>
 </section>
         {/* ADVANTAGES */}
         <section className="py-20 bg-[#020B2E]">

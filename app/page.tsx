@@ -1,22 +1,16 @@
-
-
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import CountUp from "react-countup";
-import { useState } from "react";
+import Navbar from "./components/navbar";
 import {
   FaYoutube,
   FaFacebook,
   FaTiktok,
   FaInstagram,
-  FaLinkedin,
-  FaSnapchat,
 } from "react-icons/fa";
 
-import { FaXTwitter } from "react-icons/fa6";
 const teamMembers = [
   {
     name: "Bounama Niang",
@@ -82,8 +76,6 @@ const storeItems = [
   },
 ];
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   const portfolio = [
     "/portfolio1.png",
     "/portfolio2.png",
@@ -94,124 +86,13 @@ export default function Home() {
 
   return (
     <main className="bg-[#020B2E] text-white">
-{/* ================= NAVBAR ================= */}
-
-<nav className="fixed top-0 left-0 w-full z-50 bg-[#020B2E]/95 backdrop-blur-md border-b border-blue-900">
-  <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-    {/* Logo */}
-    <a href="#" className="flex items-center">
-      <Image
-        src="/logo.png"
-        alt="Bichridigital"
-        width={180}
-        height={60}
-        priority
-      />
-    </a>
-
-    {/* Menu Desktop */}
-    <div className="hidden md:flex items-center gap-8 text-white font-medium">
-      <a
-        href="/accueil"
-        className="hover:text-[#FCCD12] transition"
-      >
-        Accueil
-      </a>
-
-      <a
-        href="/services"
-        className="hover:text-[#FCCD12] transition"
-      >
-        Services
-      </a>
-
-      <a
-        href="/portfolio"
-        className="hover:text-[#FCCD12] transition"
-      >
-        Portfolio
-      </a>
-
-      <a
-        href="/apropos"
-        className="hover:text-[#FCCD12] transition"
-      >
-        À propos
-      </a>
-
-      <a
-  href="/contact"
-  className="hover:text-[#FCCD12] transition"
->
-  Contact
-</a>
-
-     <a
-  href="/contact"
-  className="bg-[#0057FF] hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold"
->
-  Demander un devis →
-</a>
-    </div>
-
-    {/* Bouton Hamburger Mobile */}
-    <button
-      onClick={() => setMenuOpen(!menuOpen)}
-      className="md:hidden text-white text-3xl"
-    >
-      ☰
-    </button>
-
-  </div>
-
-  {/* Menu Mobile */}
-  {menuOpen && (
-    <div className="md:hidden bg-gradient-to-b from-[#020B2E] to-[#00154A] border-t border-blue-900 shadow-2xl">
-      <div className="flex flex-col items-center justify-center gap-8 py-10 text-white text-lg font-medium">
-
-       <a href="/" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
-  Accueil
-</a>
-
-<a href="/services" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
-  Services
-</a>
-
-<a href="/portfolio" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
-  Portfolio
-</a>
-
-<a href="/boutique" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
-  Boutique
-</a>
-
-<a href="/apropos" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
-  À propos
-</a>
-
-<a href="/contact" onClick={() => setMenuOpen(false)} className="hover:text-[#FCCD12]">
-  Contact
-</a>
-
-        <a
-          href="/contact"
-          onClick={() => setMenuOpen(false)}
-          className="bg-[#0057FF] text-white px-6 py-3 rounded-full font-semibold"
-        >
-          Demander un devis →
-        </a>
-
-      </div>
-    </div>
-  )}
-</nav>
+      <Navbar />
 
 {/* ================= HERO ================= */}
 
 <section
   id="accueil"
-  className="relative min-h-screen flex items-center justify-center overflow-hidden"
+  className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28"
 >
 
   <video
