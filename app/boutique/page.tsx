@@ -150,13 +150,13 @@ const tshirtProducts: Product[] = [
     oldPrice: "10 000 FCFA",
     price: "8 000 FCFA",
   },
-  {
-    name: "T-shirt Mbégtémi - Jaune",
-    image: "/boutique/tshirt5.jpg",
-    desc: "Version jaune du T-shirt Mbégtémi, lumineuse et expressive.",
-    oldPrice: "10 000 FCFA",
-    price: "8 000 FCFA",
-  },
+{
+  name: "T-shirt Mbégtémi - Jaune",
+  image: "/boutique/tshirt6.jpg",
+  desc: "Version jaune du T-shirt Mbégtémi, lumineuse et expressive.",
+  oldPrice: "10 000 FCFA",
+  price: "8 000 FCFA",
+},
 ];
 
 const pullProducts: Product[] = [
