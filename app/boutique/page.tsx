@@ -413,18 +413,23 @@ function ProductCarousel({
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="flex gap-8 overflow-x-auto px-6 pb-8 cursor-grab active:cursor-grabbing select-none scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-8 overflow-x-auto px-6 py-8 cursor-grab active:cursor-grabbing select-none scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {[...products, ...products, ...products].map((product, index) => (
             <article
               key={`${product.name}-${index}`}
-              className="w-[310px] sm:w-[350px] md:w-[380px] shrink-0 rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)]"
+             className="group w-[310px] sm:w-[350px] md:w-[380px] shrink-0 rounded-[28px]
+              bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] 
+              hover:scale-[1.04] active:scale-[1.03] focus-within:scale-[1.04] hover:z-30 
+              focus-within:z-30 transition-all duration-300 shadow-[0_0_45px_rgba(0,87,255,0.18)] 
+             hover:shadow-[0_0_70px_rgba(252,205,18,0.25)]"
             >
               <div className="relative h-[230px] bg-[#0B1C54] overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500
+                   group-hover:scale-110 group-focus-within:scale-110"
                   draggable={false}
                 />
 
