@@ -16,6 +16,7 @@ type Product = {
 type CarouselDirection = "right-to-left" | "left-to-right";
 
 const navigationCategories = [
+  { label: "Services", href: "#services-bichridigital" },
   { label: "Tous", href: "#produits" },
   { label: "Ordinateurs", href: "#ordinateurs" },
   { label: "T-shirts", href: "#tshirts" },
@@ -535,8 +536,10 @@ export default function BoutiquePage() {
         <section className="sticky top-0 z-40 py-5 bg-[#020B2E]/95 backdrop-blur border-y border-white/10">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-wrap justify-center gap-4">
+              
               {navigationCategories.map((category, index) => (
                 <a
+                
                   key={category.label}
                   href={category.href}
                   className={`px-7 py-3 rounded-full border font-bold transition ${
@@ -591,7 +594,83 @@ export default function BoutiquePage() {
           direction="left-to-right"
           sectionClassName="bg-[#04113A]"
         />
+{/* SERVICES BICHRIDIGITAL */}
+<section id="services-bichridigital" className="scroll-mt-28 py-20 bg-[#020B2E]">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="text-center mb-14">
+      <div className="flex items-center justify-center gap-4 mb-4">
+        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+        <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+          Services disponibles
+        </span>
+        <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+      </div>
 
+      <h2 className="text-4xl md:text-5xl font-black">
+        Votre partenaire en communication et impression digitale
+      </h2>
+
+      <p className="mt-5 text-gray-400 max-w-3xl mx-auto leading-7">
+        Chez Bichridigital Agency, nous transformons vos idées en supports de
+        communication innovants et de haute qualité. Nous vous accompagnons dans
+        la création, la personnalisation et l’impression de tous vos produits de
+        communication.
+      </p>
+    </div>
+
+    <div className="grid lg:grid-cols-2 gap-10 items-start">
+      <div className="rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden shadow-[0_0_45px_rgba(0,87,255,0.18)]">
+        <img
+          src="/boutique/services-disponibles.jpg"
+          alt="Bichridigital services disponibles"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-5">
+        {[
+          ["Impression et personnalisation", "Impression numérique grand format, affiches, flyers, cartes de visite, papier en-tête, brochures."],
+          ["Décoration et tableaux muraux", "Tableaux muraux personnalisés, cadres photo, tableaux d’entreprise, décoration intérieure, canvas."],
+          ["Objets publicitaires", "Mugs personnalisés, porte-clés, stylos, goodies, agendas et cadeaux d’entreprise."],
+          ["Packaging personnalisé", "Sachets personnalisés, sacs en papier, emballages, étiquettes et autocollants."],
+          ["Textile personnalisé", "T-shirts, polos, pulls, sweats, casquettes, bonnets, uniformes et vêtements d’entreprise."],
+          ["Signalétique et événementiel", "Banderoles, kakémonos, roll-up, bâches publicitaires, panneaux et enseignes."],
+          ["Communication digitale", "Sites web, réseaux sociaux, conception graphique, logos, audiovisuel et streaming en direct."],
+        ].map(([title, desc]) => (
+          <div
+            key={title}
+            className="rounded-[22px] bg-white/[0.04] border border-white/10 p-6 hover:border-[#FCCD12]/80 transition"
+          >
+            <h3 className="text-xl font-black text-[#FCCD12]">{title}</h3>
+            <p className="mt-4 text-gray-300 leading-7 text-sm">{desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="mt-12 rounded-[28px] bg-gradient-to-r from-[#003CFF] to-[#0057FF] p-8 md:p-10 flex flex-col lg:flex-row gap-8 items-center justify-between">
+      <div>
+        <h3 className="text-3xl font-black">Pourquoi choisir Bichridigital ?</h3>
+        <p className="mt-4 text-white/85 leading-7">
+          Qualité premium, créativité, personnalisation sur mesure, service rapide
+          et accompagnement professionnel.
+        </p>
+        <p className="mt-4 text-[#FCCD12] font-black">
+          Votre histoire, image par image. Votre communication, notre priorité.
+        </p>
+      </div>
+
+      <a
+        href="https://wa.me/221773211096"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-[#FCCD12] text-[#020B2E] px-8 py-4 rounded-xl font-black hover:scale-105 transition text-center"
+      >
+        Demander un devis →
+      </a>
+    </div>
+  </div>
+</section>
         {/* ADVANTAGES */}
         <section className="py-20 bg-[#020B2E]">
           <div className="max-w-7xl mx-auto px-6">
