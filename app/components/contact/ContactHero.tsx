@@ -8,7 +8,7 @@ export default function ContactHero() {
     <section className="relative min-h-[70vh] flex items-center overflow-hidden">
 
       <Image
-        src="/hero.jpg"
+        src="/bounama.jpg"
         alt="Contact Bichridigital"
         fill
         priority
