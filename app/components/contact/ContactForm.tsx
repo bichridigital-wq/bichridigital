@@ -1,15 +1,56 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 export default function ContactForm() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const whatsappMessage = `
+Bonjour Bichridigital Agency,
+
+Je souhaite vous contacter depuis le site web.
+
+Nom : ${form.name}
+Email : ${form.email || "Non renseigné"}
+Téléphone : ${form.phone}
+Sujet : ${form.subject}
+
+Message :
+${form.message}
+`;
+
+    const whatsappUrl = `https://wa.me/221773211096?text=${encodeURIComponent(
+      whatsappMessage
+    )}`;
+
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <section
       id="formulaire"
       className="py-24 bg-gradient-to-b from-[#020B2E] to-[#07184d]"
     >
       <div className="max-w-5xl mx-auto px-6">
-
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -31,11 +72,14 @@ export default function ContactForm() {
             Nous vous répondrons dans les plus brefs délais.
           </p>
 
-          <form className="space-y-8">
-
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div className="grid md:grid-cols-2 gap-6">
               <input
                 type="text"
+                name="name"
+                required
+                value={form.name}
+                onChange={handleChange}
                 placeholder="Votre nom"
                 className="
                   w-full
@@ -50,6 +94,9 @@ export default function ContactForm() {
 
               <input
                 type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
                 placeholder="Votre email"
                 className="
                   w-full
@@ -65,7 +112,11 @@ export default function ContactForm() {
 
             <div className="grid md:grid-cols-2 gap-6">
               <input
-                type="text"
+                type="tel"
+                name="phone"
+                required
+                value={form.phone}
+                onChange={handleChange}
                 placeholder="Téléphone"
                 className="
                   w-full
@@ -80,6 +131,10 @@ export default function ContactForm() {
 
               <input
                 type="text"
+                name="subject"
+                required
+                value={form.subject}
+                onChange={handleChange}
                 placeholder="Sujet"
                 className="
                   w-full
@@ -94,7 +149,11 @@ export default function ContactForm() {
             </div>
 
             <textarea
+              name="message"
+              required
               rows={7}
+              value={form.message}
+              onChange={handleChange}
               placeholder="Votre message..."
               className="
                 w-full
@@ -104,6 +163,7 @@ export default function ContactForm() {
                 px-6 py-4
                 outline-none
                 focus:border-[#FCCD12]
+                resize-none
               "
             />
 
@@ -122,10 +182,9 @@ export default function ContactForm() {
                   shadow-[0_0_35px_rgba(252,205,18,.45)]
                 "
               >
-                Envoyer le message →
+                Envoyer sur WhatsApp →
               </button>
             </div>
-
           </form>
         </motion.div>
       </div>
