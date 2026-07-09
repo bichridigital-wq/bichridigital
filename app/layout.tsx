@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ServiceWorkerRegister from "./components/service-worker-register";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bichridigital.com"),
+  manifest: "/manifest.webmanifest",
 
   title: {
     default: "Bichridigital Agency | Communication digitale au Sénégal",
@@ -89,9 +91,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="fr">
-      <body>{children}</body>
-    </html>
-  );
+ return (
+  <html lang="fr">
+    <body>
+      <ServiceWorkerRegister />
+      {children}
+    </body>
+  </html>
+);
 }
