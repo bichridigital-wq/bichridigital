@@ -1,26 +1,22 @@
-import Navbar from "../components/navbar";
-import ContactHero from "../components/contact/ContactHero";
-import ContactCards from "../components/contact/ContactCards";
-import ContactForm from "../components/contact/ContactForm";
-import ContactMap from "../components/contact/ContactMap";
-import ContactCTA from "../components/contact/ContactCTA";
-import ContactFooter from "../components/contact/ContactFooter";
-import Footer from "../components/footer";
+import type { Metadata } from "next";
+import ContactClient from "./contact-client";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description:
+    "Contactez Bichridigital Agency à Ndiagne, Louga, Sénégal pour vos projets de communication digitale, audiovisuel, streaming live, photographie, impression, personnalisation et développement web.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact | Bichridigital Agency",
+    description:
+      "Besoin d’une affiche, d’un live, d’une vidéo, d’un site web, d’un shooting photo ou d’un support personnalisé ? Contactez Bichridigital Agency.",
+    url: "https://bichridigital.com/contact",
+    images: ["/icons/icon-512.png"],
+  },
+};
 
 export default function ContactPage() {
-  return (
-    <>
-      <Navbar />
-
-      <main className="bg-[#020B2E] text-white pt-24">
-        <ContactHero />
-        <ContactCards />
-        <ContactForm />
-        <ContactMap />
-        <ContactCTA />
-      </main>
-
-      <ContactFooter />
-    </>
-  );
+  return <ContactClient />;
 }
