@@ -10,6 +10,7 @@ import {
   type PointerEvent,
 } from "react";
 import { createClient } from "../../lib/supabase/client";
+import OrderModal from "./order-modal";
 
 type Product = {
   id: string;
@@ -62,10 +63,6 @@ const advantages = [
   },
 ];
 
-function getWhatsappLink(productName: string) {
-  const message = `Bonjour Bichridigital, je veux commander : ${productName}`;
-  return `https://wa.me/221773211096?text=${encodeURIComponent(message)}`;
-}
 
 function normalizeImageUrl(imageUrl: string | null) {
   if (!imageUrl) return "/logo.png";
@@ -103,6 +100,7 @@ function ProductCarousel({
   description,
   products,
   direction,
+  onOrder,
   sectionClassName = "bg-[#020B2E]",
 }: {
   id: string;
@@ -111,6 +109,7 @@ function ProductCarousel({
   description: string;
   products: Product[];
   direction: CarouselDirection;
+  onOrder: (product: Product) => void;
   sectionClassName?: string;
 }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -362,14 +361,14 @@ function ProductCarousel({
                   </span>
                 </div>
 
-                <a
-                  href={getWhatsappLink(product.name)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() => onOrder(product)}
                   className="inline-block mt-7 bg-[#FCCD12] text-[#020B2E] px-7 py-3 rounded-full font-black hover:scale-105 transition"
                 >
                   Commander →
-                </a>
+                </button>
               </div>
             </article>
           ))}
@@ -384,6 +383,7 @@ export default function BoutiquePage() {
   const [databaseProducts, setDatabaseProducts] = useState<DatabaseProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -556,6 +556,7 @@ export default function BoutiquePage() {
           description="Découvrez nos dernières machines avec des prix promo. Les stocks sont limités, contactez-nous rapidement pour réserver."
           products={computerProducts}
           direction="right-to-left"
+          onOrder={setSelectedProduct}
           sectionClassName="bg-[#020B2E]"
         />
 
@@ -566,6 +567,7 @@ export default function BoutiquePage() {
           description="Des T-shirts personnalisés pour votre marque, vos événements et votre style quotidien."
           products={tshirtProducts}
           direction="left-to-right"
+          onOrder={setSelectedProduct}
           sectionClassName="bg-[#04113A]"
         />
 
@@ -576,6 +578,7 @@ export default function BoutiquePage() {
           description="Des pulls confortables, sobres et personnalisables selon votre identité."
           products={pullProducts}
           direction="right-to-left"
+          onOrder={setSelectedProduct}
           sectionClassName="bg-[#020B2E]"
         />
 
@@ -586,6 +589,7 @@ export default function BoutiquePage() {
           description="Des casquettes personnalisées pour compléter votre style ou valoriser votre marque."
           products={capProducts}
           direction="left-to-right"
+          onOrder={setSelectedProduct}
           sectionClassName="bg-[#04113A]"
         />
 
@@ -597,6 +601,7 @@ export default function BoutiquePage() {
             description="Découvrez les autres articles ajoutés depuis l’administration Bichridigital."
             products={otherProducts}
             direction="right-to-left"
+            onOrder={setSelectedProduct}
             sectionClassName="bg-[#020B2E]"
           />
         )}
@@ -781,6 +786,11 @@ export default function BoutiquePage() {
       </main>
 
       <Footer />
+
+      <OrderModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
     </>
   );
 }
