@@ -2,15 +2,38 @@
 
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { useEffect, useRef, type PointerEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
+import { createClient } from "../../lib/supabase/client";
 
 type Product = {
+  id: string;
   name: string;
   image: string;
   desc: string;
-  oldPrice: string;
+  oldPrice?: string;
   price: string;
   specs?: string;
+  isPromo?: boolean;
+};
+
+type DatabaseProduct = {
+  id: string;
+  created_at: string;
+  name: string;
+  category: string;
+  description: string | null;
+  price: string | null;
+  old_price: string | null;
+  specs: string | null;
+  image_url: string | null;
+  is_promo: boolean;
+  is_active: boolean;
 };
 
 type CarouselDirection = "right-to-left" | "left-to-right";
@@ -39,206 +62,38 @@ const advantages = [
   },
 ];
 
-const latestComputers: Product[] = [
-  {
-    name: "HP EliteBook Core i5",
-    image: "/boutique/pc1.jpg",
-    desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
-    oldPrice: "180 000 FCFA",
-    price: "150 000 FCFA",
-    specs: "Core i5 - 8GB RAM - 256GB SSD",
-  },
-  {
-    name: "HP EliteBook Core i5",
-    image: "/boutique/pc2.jpg",
-    desc: "Ordinateur portable professionnel, rapide et idéal pour bureautique, études et business.",
-    oldPrice: "200 000 FCFA",
-    price: "180 000 FCFA",
-    specs: "Core i5 - 8GB RAM - 256GB SSD",
-  },
-  {
-    name: "Dell Latitude 7410 Core i7",
-    image: "/boutique/pc3.jpg",
-    desc: "PC puissant pour travail intensif, montage léger, gestion et multitâche.",
-    oldPrice: "300 000 FCFA",
-    price: "230 000 FCFA",
-    specs: "Core i7 - 16GB RAM - 512GB SSD",
-  },
-  {
-    name: "Lenovo ThinkPad",
-    image: "/boutique/pc4.jpg",
-    desc: "Machine solide, fiable et parfaite pour les professionnels et étudiants.",
-    oldPrice: "240 000 FCFA",
-    price: "225 000 FCFA",
-    specs: "Core i5 - 16GB RAM - 256GB SSD",
-  },
-  {
-    name: "HP ProBook 650 G8",
-    image: "/boutique/pc5.jpg",
-    desc: "Ordinateur élégant, performant et adapté aux besoins quotidiens.",
-    oldPrice: "300 000 FCFA",
-    price: "275 000 FCFA",
-    specs: "Core i5 - 16GB RAM - 256GB SSD",
-  },
-  {
-    name: "Dell Latitude 7480",
-    image: "/boutique/pc6.jpg",
-    desc: "PC polyvalent pour navigation, bureautique, formation et travail à distance.",
-    oldPrice: "190 000 FCFA",
-    price: "160 000 FCFA",
-    specs: "Core i5 - 8GB RAM - 256GB SSD",
-  },
-  {
-    name: "HP EliteBook 840 G8",
-    image: "/boutique/pc7.jpg",
-    desc: "Ordinateur professionnel puissant, léger et adapté au travail quotidien.",
-    oldPrice: "290 000 FCFA",
-    price: "260 000 FCFA",
-    specs: "Core i5 - 8GB RAM - 512GB SSD",
-  },
-  {
-    name: "MacBook Pro 2020",
-    image: "/boutique/pc8.jpg",
-    desc: "PC solide et performant pour bureautique, études, business et multitâche.",
-    oldPrice: "400 000 FCFA",
-    price: "380 000 FCFA",
-    specs: "Core i5 - 16GB RAM - 256GB SSD",
-  },
-  {
-    name: "Dell Precision 5540 Gamer",
-    image: "/boutique/pc9.jpg",
-    desc: "Machine fiable, résistante et idéale pour les professionnels.",
-    oldPrice: "390 000 FCFA",
-    price: "350 000 FCFA",
-    specs: "Core i7 - 32GB RAM - 512GB SSD",
-  },
-  {
-    name: "Dell Latitude 3190",
-    image: "/boutique/pc10.jpg",
-    desc: "Ordinateur élégant, rapide et pratique pour le bureau et les études.",
-    oldPrice: "125 000 FCFA",
-    price: "99 000 FCFA",
-    specs: "8GB RAM - 128GB SSD",
-  },
-];
-
-const tshirtProducts: Product[] = [
-  {
-    name: "T-shirt Mbégtémi - Modèle principal",
-    image: "/boutique/tshirt1.jpg",
-    desc: "T-shirt confortable avec un style simple qui inspire le sourire.",
-    oldPrice: "10 000 FCFA",
-    price: "8 000 FCFA",
-  },
-  {
-    name: "T-shirt Mbégtémi - Blanc",
-    image: "/boutique/tshirt2.jpg",
-    desc: "Version blanche du T-shirt Mbégtémi, sobre et facile à porter.",
-    oldPrice: "10 000 FCFA",
-    price: "8 000 FCFA",
-  },
-  {
-    name: "T-shirt Mbégtémi - Noir",
-    image: "/boutique/tshirt3.jpg",
-    desc: "Version noire du T-shirt Mbégtémi, élégante et moderne.",
-    oldPrice: "10 000 FCFA",
-    price: "8 000 FCFA",
-  },
-  {
-    name: "T-shirt Mbégtémi - Bleu",
-    image: "/boutique/tshirt4.jpg",
-    desc: "Version bleue du T-shirt Mbégtémi, dynamique et originale.",
-    oldPrice: "10 000 FCFA",
-    price: "8 000 FCFA",
-  },
-{
-  name: "T-shirt Mbégtémi - Jaune",
-  image: "/boutique/tshirt6.jpg",
-  desc: "Version jaune du T-shirt Mbégtémi, lumineuse et expressive.",
-  oldPrice: "10 000 FCFA",
-  price: "8 000 FCFA",
-},
-];
-
-const pullProducts: Product[] = [
-  {
-    name: "Pull Mbégtémi - Modèle principal",
-    image: "/boutique/pull1.jpg",
-    desc: "Pull Mbégtémi sobre, élégant et confortable.",
-    oldPrice: "18 000 FCFA",
-    price: "15 000 FCFA",
-  },
-  {
-    name: "Pull Mbégtémi - Blanc",
-    image: "/boutique/pull2.jpg",
-    desc: "Version blanche du pull Mbégtémi, propre et élégante.",
-    oldPrice: "18 000 FCFA",
-    price: "15 000 FCFA",
-  },
-  {
-    name: "Pull Mbégtémi - Noir",
-    image: "/boutique/pull3.jpg",
-    desc: "Version noire du pull Mbégtémi, sobre et professionnelle.",
-    oldPrice: "18 000 FCFA",
-    price: "15 000 FCFA",
-  },
-  {
-    name: "Pull Mbégtémi - Bleu",
-    image: "/boutique/pull4.jpg",
-    desc: "Version bleue du pull Mbégtémi, moderne et distinctive.",
-    oldPrice: "18 000 FCFA",
-    price: "15 000 FCFA",
-  },
-  {
-    name: "Pull Mbégtémi - Jaune",
-    image: "/boutique/pull5.jpg",
-    desc: "Version jaune du pull Mbégtémi, joyeuse et remarquable.",
-    oldPrice: "18 000 FCFA",
-    price: "15 000 FCFA",
-  },
-];
-
-const casquetteProducts: Product[] = [
-  {
-    name: "Casquette Mbégtémi - Modèle principal",
-    image: "/boutique/casquette1.jpg",
-    desc: "Casquette personnalisée Mbégtémi pour un style moderne.",
-    oldPrice: "7 000 FCFA",
-    price: "5 000 FCFA",
-  },
-  {
-    name: "Casquette Mbégtémi - Blanche",
-    image: "/boutique/casquette2.jpg",
-    desc: "Version blanche de la casquette Mbégtémi, simple et élégante.",
-    oldPrice: "7 000 FCFA",
-    price: "5 000 FCFA",
-  },
-  {
-    name: "Casquette Mbégtémi - Noire",
-    image: "/boutique/casquette3.jpg",
-    desc: "Version noire de la casquette Mbégtémi, moderne et passe-partout.",
-    oldPrice: "7 000 FCFA",
-    price: "5 000 FCFA",
-  },
-  {
-    name: "Casquette Mbégtémi - Bleue",
-    image: "/boutique/casquette4.jpg",
-    desc: "Version bleue de la casquette Mbégtémi, fraîche et stylée.",
-    oldPrice: "7 000 FCFA",
-    price: "5 000 FCFA",
-  },
-  {
-    name: "Casquette Mbégtémi - Jaune",
-    image: "/boutique/casquette5.jpg",
-    desc: "Version jaune de la casquette Mbégtémi, joyeuse et visible.",
-    oldPrice: "7 000 FCFA",
-    price: "5 000 FCFA",
-  },
-];
-
 function getWhatsappLink(productName: string) {
   const message = `Bonjour Bichridigital, je veux commander : ${productName}`;
   return `https://wa.me/221773211096?text=${encodeURIComponent(message)}`;
+}
+
+function normalizeImageUrl(imageUrl: string | null) {
+  if (!imageUrl) return "/logo.png";
+
+  if (
+    imageUrl.startsWith("http://") ||
+    imageUrl.startsWith("https://") ||
+    imageUrl.startsWith("/")
+  ) {
+    return imageUrl;
+  }
+
+  return `/${imageUrl}`;
+}
+
+function mapDatabaseProduct(product: DatabaseProduct): Product {
+  return {
+    id: product.id,
+    name: product.name,
+    image: normalizeImageUrl(product.image_url),
+    desc:
+      product.description?.trim() ||
+      "Produit disponible chez Bichridigital.",
+    oldPrice: product.old_price?.trim() || undefined,
+    price: product.price?.trim() || "Prix sur demande",
+    specs: product.specs?.trim() || undefined,
+    isPromo: product.is_promo,
+  };
 }
 
 function ProductCarousel({
@@ -285,7 +140,7 @@ function ProductCarousel({
 
   useEffect(() => {
     const slider = scrollRef.current;
-    if (!slider) return;
+    if (!slider || products.length === 0) return;
 
     const oneSetWidth = slider.scrollWidth / 3;
     slider.scrollLeft = oneSetWidth;
@@ -315,7 +170,7 @@ function ProductCarousel({
         clearTimeout(resumeTimerRef.current);
       }
     };
-  }, [direction]);
+  }, [direction, products.length]);
 
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
     const slider = scrollRef.current;
@@ -359,6 +214,45 @@ function ProductCarousel({
 
     resumeAutoScrollLater();
   };
+
+  if (products.length === 0) {
+    return (
+      <section
+        id={id}
+        className={`scroll-mt-28 py-20 overflow-hidden ${sectionClassName}`}
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+              <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
+                {eyebrow}
+              </span>
+              <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
+            </div>
+
+            <h2 className="text-4xl md:text-5xl font-black text-white">
+              {title}
+            </h2>
+
+            <p className="mt-5 text-gray-400 max-w-2xl mx-auto leading-7">
+              {description}
+            </p>
+          </div>
+
+          <div className="mt-10 rounded-[28px] border border-dashed border-white/15 bg-white/[0.04] p-10 text-center">
+            <div className="text-5xl">📦</div>
+            <h3 className="mt-5 text-2xl font-black text-white">
+              Aucun produit actif dans cette catégorie
+            </h3>
+            <p className="mt-3 text-gray-400">
+              Les prochains produits ajoutés depuis l’administration apparaîtront ici automatiquement.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id={id} className={`scroll-mt-28 py-20 overflow-hidden ${sectionClassName}`}>
@@ -418,7 +312,7 @@ function ProductCarousel({
         >
           {[...products, ...products, ...products].map((product, index) => (
             <article
-              key={`${product.name}-${index}`}
+              key={`${product.id ?? product.name}-${index}`}
              className="group w-[310px] sm:w-[350px] md:w-[380px] shrink-0 rounded-[28px]
               bg-[#071542] border border-blue-500/30 overflow-hidden hover:border-[#FCCD12] 
               hover:scale-[1.04] active:scale-[1.03] focus-within:scale-[1.04] hover:z-30 
@@ -434,9 +328,11 @@ function ProductCarousel({
                   draggable={false}
                 />
 
-                <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
-                  PROMO
-                </div>
+                {product.isPromo && (
+                  <div className="absolute top-4 left-4 bg-[#FCCD12] text-[#020B2E] px-4 py-2 rounded-full text-sm font-black">
+                    PROMO
+                  </div>
+                )}
               </div>
 
               <div className="p-7">
@@ -455,9 +351,11 @@ function ProductCarousel({
                 </p>
 
                 <div className="mt-6 flex items-end gap-4">
-                  <span className="text-gray-500 line-through font-bold">
-                    {product.oldPrice}
-                  </span>
+                  {product.oldPrice && (
+                    <span className="text-gray-500 line-through font-bold">
+                      {product.oldPrice}
+                    </span>
+                  )}
 
                   <span className="text-[#FCCD12] text-2xl font-black">
                     {product.price}
@@ -482,6 +380,78 @@ function ProductCarousel({
 }
 
 export default function BoutiquePage() {
+  const supabase = useMemo(() => createClient(), []);
+  const [databaseProducts, setDatabaseProducts] = useState<DatabaseProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProducts() {
+      setLoadingProducts(true);
+      setProductsError("");
+
+      const { data, error } = await supabase
+        .from("products")
+        .select(
+          "id, created_at, name, category, description, price, old_price, specs, image_url, is_promo, is_active"
+        )
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (!isMounted) return;
+
+      if (error) {
+        console.error("Erreur Supabase boutique :", error);
+        setProductsError(
+          "Les nouveaux produits ne peuvent pas être chargés pour le moment."
+        );
+        setDatabaseProducts([]);
+      } else {
+        setDatabaseProducts((data ?? []) as DatabaseProduct[]);
+      }
+
+      setLoadingProducts(false);
+    }
+
+    loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [supabase]);
+
+  const computerProducts = databaseProducts
+    .filter((product) => product.category === "ordinateur")
+    .map(mapDatabaseProduct);
+
+  const tshirtProducts = databaseProducts
+    .filter((product) => product.category === "tshirt")
+    .map(mapDatabaseProduct);
+
+  const pullProducts = databaseProducts
+    .filter((product) => product.category === "pull")
+    .map(mapDatabaseProduct);
+
+  const capProducts = databaseProducts
+    .filter((product) => product.category === "casquette")
+    .map(mapDatabaseProduct);
+
+  const otherProducts = databaseProducts
+    .filter((product) =>
+      ["tableau", "autre"].includes(product.category)
+    )
+    .map(mapDatabaseProduct);
+
+  const visibleNavigationCategories =
+    otherProducts.length > 0
+      ? [
+          ...navigationCategories,
+          { label: "Autres", href: "#autres" },
+        ]
+      : navigationCategories;
+
   return (
     <>
       <Navbar />
@@ -537,7 +507,7 @@ export default function BoutiquePage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-wrap justify-center gap-4">
               
-              {navigationCategories.map((category, index) => (
+              {visibleNavigationCategories.map((category, index) => (
                 <a
                 
                   key={category.label}
@@ -555,12 +525,36 @@ export default function BoutiquePage() {
           </div>
         </section>
 
+        {loadingProducts && (
+          <div className="mx-auto max-w-7xl px-6 pt-8 text-center text-sm font-bold text-gray-400">
+            Chargement des produits...
+          </div>
+        )}
+
+        {productsError && (
+          <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-4 text-center text-sm font-bold text-red-300">
+            {productsError}
+          </div>
+        )}
+
+        {!loadingProducts && !productsError && databaseProducts.length === 0 && (
+          <div className="mx-auto mt-10 max-w-4xl rounded-[28px] border border-dashed border-white/15 bg-white/[0.04] px-8 py-12 text-center">
+            <div className="text-6xl">🛍️</div>
+            <h2 className="mt-5 text-3xl font-black">
+              La boutique sera bientôt remplie
+            </h2>
+            <p className="mt-4 text-gray-400 leading-7">
+              Ajoutez les produits depuis le tableau de bord administrateur. Ils apparaîtront ici automatiquement.
+            </p>
+          </div>
+        )}
+
         <ProductCarousel
           id="ordinateurs"
           eyebrow="Derniers arrivages"
           title="Nos derniers ordinateurs disponibles"
           description="Découvrez nos dernières machines avec des prix promo. Les stocks sont limités, contactez-nous rapidement pour réserver."
-          products={latestComputers}
+          products={computerProducts}
           direction="right-to-left"
           sectionClassName="bg-[#020B2E]"
         />
@@ -590,10 +584,22 @@ export default function BoutiquePage() {
           eyebrow="Accessoires"
           title="Nos casquettes disponibles"
           description="Des casquettes personnalisées pour compléter votre style ou valoriser votre marque."
-          products={casquetteProducts}
+          products={capProducts}
           direction="left-to-right"
           sectionClassName="bg-[#04113A]"
         />
+
+        {otherProducts.length > 0 && (
+          <ProductCarousel
+            id="autres"
+            eyebrow="Nouveautés"
+            title="Nos autres produits disponibles"
+            description="Découvrez les autres articles ajoutés depuis l’administration Bichridigital."
+            products={otherProducts}
+            direction="right-to-left"
+            sectionClassName="bg-[#020B2E]"
+          />
+        )}
 {/* SERVICES BICHRIDIGITAL */}
 <section id="services-bichridigital" className="boutique-reveal scroll-mt-28 py-20 bg-[#020B2E]">
   <div className="max-w-7xl mx-auto px-6">
