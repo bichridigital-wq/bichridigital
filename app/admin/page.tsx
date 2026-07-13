@@ -3,54 +3,89 @@ import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import LogoutButton from "./logout-button";
 
-export const dynamic = "force-dynamic";
-
 export default async function AdminPage() {
   const supabase = await createClient();
 
-  // Vérifier que l'utilisateur est connecté
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
+  if (!user) {
     redirect("/admin/login");
   }
 
-  // Vérifier que l'utilisateur est administrateur
-  const { data: isAdmin, error: adminError } =
-    await supabase.rpc("is_admin");
+  const { data: isAdmin } = await supabase.rpc(
+    "is_admin"
+  );
 
-  if (adminError || !isAdmin) {
+  if (!isAdmin) {
     redirect("/admin/login");
   }
 
-  // Compter les produits enregistrés
-  const { count: productsCount, error: productsError } =
-    await supabase
+  const [
+    productsResult,
+    activeProductsResult,
+    ordersResult,
+    newOrdersResult,
+  ] = await Promise.all([
+    supabase
       .from("products")
       .select("*", {
         count: "exact",
         head: true,
-      });
+      }),
+
+    supabase
+      .from("products")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq("is_active", true),
+
+    supabase
+      .from("orders")
+      .select("*", {
+        count: "exact",
+        head: true,
+      }),
+
+    supabase
+      .from("orders")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq("status", "nouvelle"),
+  ]);
+
+  const totalProducts =
+    productsResult.count ?? 0;
+
+  const activeProducts =
+    activeProductsResult.count ?? 0;
+
+  const totalOrders =
+    ordersResult.count ?? 0;
+
+  const newOrders =
+    newOrdersResult.count ?? 0;
 
   return (
-    <main className="min-h-screen bg-[#020B2E] px-6 py-10 text-white">
+    <main className="min-h-screen bg-[#020B2E] px-5 py-10 text-white md:px-10">
       <div className="mx-auto max-w-7xl">
-        {/* EN-TÊTE */}
-        <header className="flex flex-col gap-6 rounded-[30px] border border-white/10 bg-white/5 p-7 backdrop-blur-xl md:flex-row md:items-center md:justify-between">
+        <header className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.25em] text-[#FCCD12]">
-              Bichridigital Admin
+              Bichridigital
             </p>
 
-            <h1 className="mt-3 text-3xl font-black md:text-5xl">
+            <h1 className="mt-3 text-4xl font-black md:text-5xl">
               Tableau de bord
             </h1>
 
-            <p className="mt-3 text-gray-400">
-              Gérez la boutique et les contenus de Bichridigital.
+            <p className="mt-4 text-gray-400">
+              Bienvenue dans l’espace d’administration.
             </p>
 
             <p className="mt-2 text-sm text-gray-500">
@@ -58,124 +93,181 @@ export default async function AdminPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/"
-              className="rounded-full border border-white/15 px-6 py-3 font-bold transition hover:border-[#FCCD12] hover:text-[#FCCD12]"
-            >
-              Voir le site
-            </Link>
-
-            <LogoutButton />
-          </div>
+          <LogoutButton />
         </header>
 
         {/* STATISTIQUES */}
-        <section className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-[28px] border border-blue-500/20 bg-[#071542] p-7">
-            <p className="text-sm font-bold uppercase tracking-wider text-gray-400">
-              Produits
+        <section className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <article className="rounded-[25px] border border-white/10 bg-white/5 p-6">
+            <p className="text-sm font-bold text-gray-400">
+              Total produits
             </p>
 
-            <p className="mt-4 text-5xl font-black text-[#FCCD12]">
-              {productsError ? "—" : productsCount ?? 0}
+            <p className="mt-3 text-4xl font-black">
+              {totalProducts}
+            </p>
+          </article>
+
+          <article className="rounded-[25px] border border-green-500/20 bg-green-500/10 p-6">
+            <p className="text-sm font-bold text-green-300">
+              Produits actifs
             </p>
 
-            <p className="mt-3 text-gray-400">
-              Produits enregistrés
+            <p className="mt-3 text-4xl font-black">
+              {activeProducts}
             </p>
-          </div>
+          </article>
 
-          <div className="rounded-[28px] border border-blue-500/20 bg-[#071542] p-7">
-            <p className="text-sm font-bold uppercase tracking-wider text-gray-400">
-              Portfolio
-            </p>
-
-            <p className="mt-4 text-5xl font-black text-[#FCCD12]">
-              0
+          <article className="rounded-[25px] border border-purple-500/20 bg-purple-500/10 p-6">
+            <p className="text-sm font-bold text-purple-300">
+              Total commandes
             </p>
 
-            <p className="mt-3 text-gray-400">
-              Réalisations enregistrées
+            <p className="mt-3 text-4xl font-black">
+              {totalOrders}
             </p>
-          </div>
+          </article>
 
-          <div className="rounded-[28px] border border-blue-500/20 bg-[#071542] p-7">
-            <p className="text-sm font-bold uppercase tracking-wider text-gray-400">
-              Messages
-            </p>
-
-            <p className="mt-4 text-5xl font-black text-[#FCCD12]">
-              0
+          <article className="rounded-[25px] border border-blue-500/20 bg-blue-500/10 p-6">
+            <p className="text-sm font-bold text-blue-300">
+              Nouvelles demandes
             </p>
 
-            <p className="mt-3 text-gray-400">
-              Demandes reçues
+            <p className="mt-3 text-4xl font-black">
+              {newOrders}
             </p>
-          </div>
-
-          <div className="rounded-[28px] border border-blue-500/20 bg-[#071542] p-7">
-            <p className="text-sm font-bold uppercase tracking-wider text-gray-400">
-              Statut
-            </p>
-
-            <p className="mt-4 text-3xl font-black text-green-400">
-              En ligne
-            </p>
-
-            <p className="mt-3 text-gray-400">
-              Administration opérationnelle
-            </p>
-          </div>
+          </article>
         </section>
 
-        {/* GESTION RAPIDE */}
-        <section className="mt-10">
-          <h2 className="text-3xl font-black">
-            Gestion rapide
-          </h2>
+        {/* ACTIONS */}
+        <section className="mt-10 grid gap-6 md:grid-cols-2">
+          <Link
+            href="/admin/products"
+            className="group rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:-translate-y-1 hover:border-[#FCCD12]"
+          >
+            <div className="flex items-start justify-between gap-5">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-[#FCCD12]">
+                  Boutique
+                </p>
 
-          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Link
-              href="/admin/products"
-              className="group rounded-[28px] border border-white/10 bg-white/5 p-8 transition hover:-translate-y-2 hover:border-[#FCCD12]"
-            >
-              <div className="text-5xl">📦</div>
+                <h2 className="mt-4 text-3xl font-black">
+                  Gérer les produits
+                </h2>
 
-              <h3 className="mt-6 text-2xl font-black transition group-hover:text-[#FCCD12]">
-                Gérer les produits
-              </h3>
+                <p className="mt-4 leading-7 text-gray-400">
+                  Ajouter, modifier, désactiver ou
+                  supprimer les produits de la boutique.
+                </p>
+              </div>
 
-              <p className="mt-3 leading-7 text-gray-400">
-                Ajouter, modifier, désactiver ou supprimer les produits
-                de la boutique.
-              </p>
-            </Link>
-
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-8 opacity-60">
-              <div className="text-5xl">🎨</div>
-
-              <h3 className="mt-6 text-2xl font-black">
-                Gérer le portfolio
-              </h3>
-
-              <p className="mt-3 leading-7 text-gray-400">
-                Cette fonctionnalité sera ajoutée après la boutique.
-              </p>
+              <span className="text-3xl transition group-hover:translate-x-2">
+                →
+              </span>
             </div>
 
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-8 opacity-60">
-              <div className="text-5xl">📩</div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <span className="rounded-full bg-[#FCCD12] px-5 py-2 text-sm font-black text-[#020B2E]">
+                {totalProducts} produits
+              </span>
 
-              <h3 className="mt-6 text-2xl font-black">
-                Voir les messages
-              </h3>
-
-              <p className="mt-3 leading-7 text-gray-400">
-                Cette fonctionnalité sera ajoutée ultérieurement.
-              </p>
+              <span className="rounded-full border border-green-500/30 bg-green-500/10 px-5 py-2 text-sm font-black text-green-300">
+                {activeProducts} actifs
+              </span>
             </div>
-          </div>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="group relative rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:-translate-y-1 hover:border-blue-400"
+          >
+            {newOrders > 0 && (
+              <span className="absolute right-6 top-6 flex min-h-10 min-w-10 items-center justify-center rounded-full bg-red-500 px-3 text-sm font-black text-white">
+                {newOrders}
+              </span>
+            )}
+
+            <div className="flex items-start justify-between gap-5">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-blue-300">
+                  Clients
+                </p>
+
+                <h2 className="mt-4 text-3xl font-black">
+                  Commandes et devis
+                </h2>
+
+                <p className="mt-4 max-w-lg leading-7 text-gray-400">
+                  Consulter les demandes, contacter les
+                  clients et mettre à jour les statuts.
+                </p>
+              </div>
+
+              <span className="mr-12 text-3xl transition group-hover:translate-x-2">
+                →
+              </span>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-5 py-2 text-sm font-black text-purple-300">
+                {totalOrders} demandes
+              </span>
+
+              <span
+                className={`rounded-full px-5 py-2 text-sm font-black ${
+                  newOrders > 0
+                    ? "bg-red-500 text-white"
+                    : "border border-white/10 bg-white/5 text-gray-400"
+                }`}
+              >
+                {newOrders} nouvelles
+              </span>
+            </div>
+          </Link>
+
+          <Link
+            href="/boutique"
+            className="rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:border-[#FCCD12]"
+          >
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-[#FCCD12]">
+              Site public
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black">
+              Voir la boutique
+            </h2>
+
+            <p className="mt-4 leading-7 text-gray-400">
+              Vérifier l’affichage public des produits et
+              tester le formulaire de commande.
+            </p>
+
+            <p className="mt-8 font-black text-[#FCCD12]">
+              Ouvrir la boutique →
+            </p>
+          </Link>
+
+          <Link
+            href="/"
+            className="rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:border-blue-400"
+          >
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-blue-300">
+              Bichridigital
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black">
+              Voir le site
+            </h2>
+
+            <p className="mt-4 leading-7 text-gray-400">
+              Retourner à la page d’accueil du site
+              Bichridigital.
+            </p>
+
+            <p className="mt-8 font-black text-blue-300">
+              Ouvrir le site →
+            </p>
+          </Link>
         </section>
       </div>
     </main>
