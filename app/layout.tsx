@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
+
 import { GoogleAnalytics } from "@next/third-parties/google";
 import ServiceWorkerRegister from "./components/service-worker-register";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bichridigital.com"),
+
   manifest: "/manifest.webmanifest",
 
   title: {
-    default: "Bichridigital Agency | Communication digitale au Sénégal",
+    default:
+      "Bichridigital Agency | Communication digitale au Sénégal",
     template: "%s | Bichridigital Agency",
   },
 
@@ -26,21 +29,24 @@ export const metadata: Metadata = {
     "création site web Sénégal",
     "design graphique Sénégal",
     "impression numérique Sénégal",
-    "Dakar",
-    "Thies",
+    "agence audiovisuelle Sénégal",
     "Ndiagne",
     "Louga",
+    "Dakar",
+    "Thiès",
   ],
 
-  authors: [{ name: "Bichridigital Agency" }],
+  authors: [
+    {
+      name: "Bichridigital Agency",
+      url: "https://www.bichridigital.com",
+    },
+  ],
+
   creator: "Bichridigital Agency",
   publisher: "Bichridigital Agency",
   applicationName: "Bichridigital",
   category: "Communication digitale",
-
-  alternates: {
-    canonical: "/",
-  },
 
   openGraph: {
     title: "Bichridigital Agency | Votre histoire, image par image",
@@ -55,7 +61,7 @@ export const metadata: Metadata = {
         url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "Bichridigital Agency",
+        alt: "Logo de Bichridigital Agency",
       },
     ],
   },
@@ -80,11 +86,22 @@ export const metadata: Metadata = {
     },
   },
 
-icons: {
-  icon: "/icons/icon-192.png",
-  shortcut: "/icons/icon-192.png",
-  apple: "/icons/icon-512.png",
-},
+  icons: {
+    icon: [
+      {
+        url: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/icons/icon-192.png",
+    apple: "/icons/icon-512.png",
+  },
 };
 
 export default function RootLayout({
@@ -92,19 +109,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
- return (
-  <html lang="fr">
-    <body>
-      <ServiceWorkerRegister />
-      {children}
-    </body>
+  return (
     <html lang="fr">
-  <body>
-    {children}
-  </body>
+      <body>
+        <ServiceWorkerRegister />
 
-  <GoogleAnalytics gaId="G-PPT82RQZLG" />
-</html>
-  </html>
-);
+        {children}
+
+        <GoogleAnalytics gaId="G-PPT82RQZLG" />
+      </body>
+    </html>
+  );
 }
