@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import ServiceWorkerRegister from "./components/service-worker-register";
 
 export const metadata: Metadata = {
@@ -97,6 +98,13 @@ export default function RootLayout({
       <ServiceWorkerRegister />
       {children}
     </body>
+    <html lang="fr">
+  <body>
+    {children}
+  </body>
+
+  <GoogleAnalytics gaId="G-PPT82RQZLG" />
+</html>
   </html>
 );
 }
