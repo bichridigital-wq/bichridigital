@@ -1042,9 +1042,13 @@ export default function Home() {
           <div className="mt-16 flex flex-col justify-between border-t border-blue-900 py-8 text-gray-500 md:flex-row">
             <p>© 2026 Bichridigital Agency - Tous droits réservés.</p>
             <div className="mt-4 flex gap-6 md:mt-0">
-              <a href="#">Mentions légales</a>
-              <a href="#">Confidentialité</a>
-            </div>
+  <a
+    href="/politique-confidentialite"
+    className="transition hover:text-[#FCCD12]"
+  >
+    Politique de confidentialité
+  </a>
+</div>
           </div>
         </div>
       </footer>
