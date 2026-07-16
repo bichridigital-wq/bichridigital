@@ -155,18 +155,25 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-white/10 pt-8 text-center text-gray-500 md:flex-row md:text-left">
+       <div className="flex flex-wrap justify-center gap-5 md:justify-end">
           <p>
             © 2026 Bichridigital Agency — Tous droits réservés.
           </p>
 
           <Link
-            href="/politique-confidentialite"
-            className="transition hover:text-[#FCCD12]"
-          >
-            Politique de confidentialité
-          </Link>
-        </div>
+    href="/mentions-legales"
+    className="transition hover:text-[#FCCD12]"
+  >
+    Mentions légales
+  </Link>
+
+  <Link
+    href="/politique-confidentialite"
+    className="transition hover:text-[#FCCD12]"
+  >
+    Politique de confidentialité
+  </Link>
+</div>
       </div>
     </footer>
   );
