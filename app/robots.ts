@@ -5,7 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: "/admin",
     },
-    sitemap: "https://bichridigital.com/sitemap.xml",
+    sitemap: "https://www.bichridigital.com/sitemap.xml",
   };
 }
