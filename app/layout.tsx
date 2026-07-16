@@ -7,6 +7,9 @@ import Script from "next/script";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bichridigital.com"),
 
+other: {
+  "google-adsense-account": "ca-pub-3040297278987670",
+},
   manifest: "/manifest.webmanifest",
 
   title: {
