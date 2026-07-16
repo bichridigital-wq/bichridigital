@@ -6,87 +6,167 @@ import {
   FaYoutube,
   FaInstagram,
   FaTiktok,
-  FaLinkedin,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
+const socialLinks = [
+  {
+    name: "Facebook",
+    href: "https://www.facebook.com/bichriartprod18Safar",
+    icon: FaFacebook,
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/@bichridigital",
+    icon: FaYoutube,
+  },
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/bichridigitalagency",
+    icon: FaInstagram,
+  },
+  {
+    name: "TikTok",
+    href: "https://www.tiktok.com/@bichridigitalagency",
+    icon: FaTiktok,
+  },
+  {
+    name: "X",
+    href: "https://x.com/bichriartprod",
+    icon: FaXTwitter,
+  },
+];
+
 export default function Footer() {
   return (
-    <footer className="bg-[#01071C] border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-6 py-16">
-
-        <div className="grid md:grid-cols-4 gap-12">
-
+    <footer className="border-t border-white/10 bg-[#01071C]">
+      <div className="mx-auto max-w-7xl px-6 py-16">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Agence */}
           <div>
             <h3 className="text-3xl font-bold text-white">
               Bichridigital
             </h3>
 
-            <p className="text-gray-400 mt-4 leading-7">
-              Agence de communication digitale,
-              audiovisuelle et développement web
-              basée à Ndiagne, Sénégal.
+            <p className="mt-4 leading-7 text-gray-400">
+              Agence de communication digitale, audiovisuelle et développement
+              web basée à Ndiagne, Sénégal.
             </p>
           </div>
 
           {/* Navigation */}
           <div>
-            <h4 className="text-white font-bold mb-5">
+            <h4 className="mb-5 font-bold text-white">
               Navigation
             </h4>
 
-            <div className="flex flex-col gap-3 text-gray-400">
-              <Link href="/">Accueil</Link>
-              <Link href="/services">Services</Link>
-              <Link href="/portfolio">Portfolio</Link>
-              <Link href="/apropos">À propos</Link>
-              <Link href="/contact">Contact</Link>
-            </div>
+            <nav className="flex flex-col gap-3 text-gray-400">
+              <Link className="transition hover:text-[#FCCD12]" href="/">
+                Accueil
+              </Link>
+
+              <Link
+                className="transition hover:text-[#FCCD12]"
+                href="/services"
+              >
+                Services
+              </Link>
+
+              <Link
+                className="transition hover:text-[#FCCD12]"
+                href="/portfolio"
+              >
+                Portfolio
+              </Link>
+
+              <Link
+                className="transition hover:text-[#FCCD12]"
+                href="/apropos"
+              >
+                À propos
+              </Link>
+
+              <Link
+                className="transition hover:text-[#FCCD12]"
+                href="/contact"
+              >
+                Contact
+              </Link>
+            </nav>
           </div>
 
           {/* Services */}
           <div>
-            <h4 className="text-white font-bold mb-5">
+            <h4 className="mb-5 font-bold text-white">
               Services
             </h4>
 
             <div className="flex flex-col gap-3 text-gray-400">
-              <p>Communication Digitale</p>
-              <p>Production Audiovisuelle</p>
-              <p>Développement Web</p>
-              <p>Streaming Live</p>
+              <p>Communication digitale</p>
+              <p>Production audiovisuelle</p>
+              <p>Développement web</p>
+              <p>Streaming live</p>
             </div>
           </div>
 
           {/* Contact */}
           <div>
-            <h4 className="text-white font-bold mb-5">
+            <h4 className="mb-5 font-bold text-white">
               Contact
             </h4>
 
             <div className="space-y-3 text-gray-400">
               <p>📍 Ndiagne, Louga, Sénégal</p>
-              <p>📞 +221 77 321 10 96</p>
-              <p>✉️ bichridigital@gmail.com</p>
+
+              <p>
+                <a
+                  href="tel:+221773211096"
+                  className="transition hover:text-[#FCCD12]"
+                >
+                  📞 +221 77 321 10 96
+                </a>
+              </p>
+
+              <p>
+                <a
+                  href="mailto:bichridigital@gmail.com"
+                  className="break-all transition hover:text-[#FCCD12]"
+                >
+                  ✉️ bichridigital@gmail.com
+                </a>
+              </p>
             </div>
 
-            <div className="flex gap-4 mt-6 text-2xl text-[#FCCD12]">
-              <a href="#"><FaFacebook /></a>
-              <a href="#"><FaYoutube /></a>
-              <a href="#"><FaInstagram /></a>
-              <a href="#"><FaTiktok /></a>
-              <a href="#"><FaLinkedin /></a>
-              <a href="#"><FaXTwitter /></a>
+            <div className="mt-6 flex flex-wrap gap-4 text-2xl text-[#FCCD12]">
+              {socialLinks.map(({ name, href, icon: Icon }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Bichridigital sur ${name}`}
+                  title={name}
+                  className="transition hover:-translate-y-1 hover:text-white"
+                >
+                  <Icon />
+                </a>
+              ))}
             </div>
           </div>
-
         </div>
 
-        <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-500">
-          © 2026 Bichridigital Agency — Tous droits réservés.
-        </div>
+        <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-white/10 pt-8 text-center text-gray-500 md:flex-row md:text-left">
+          <p>
+            © 2026 Bichridigital Agency — Tous droits réservés.
+          </p>
 
+          <Link
+            href="/politique-confidentialite"
+            className="transition hover:text-[#FCCD12]"
+          >
+            Politique de confidentialité
+          </Link>
+        </div>
       </div>
     </footer>
   );
