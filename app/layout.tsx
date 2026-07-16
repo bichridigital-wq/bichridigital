@@ -3,7 +3,7 @@ import "./globals.css";
 import ServiceWorkerRegister from "./components/service-worker-register";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bichridigital.com"),
+  metadataBase: new URL("https://www.bichridigital.com"),
   manifest: "/manifest.webmanifest",
 
   title: {
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     title: "Bichridigital Agency | Votre histoire, image par image",
     description:
       "Agence de communication digitale, audiovisuelle, photographie, streaming live, design graphique, impression et développement web au Sénégal.",
-    url: "https://bichridigital.com",
+    url: "https://www.bichridigital.com",
     siteName: "Bichridigital Agency",
     locale: "fr_SN",
     type: "website",
