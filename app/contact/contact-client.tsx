@@ -4,9 +4,7 @@ import ContactCards from "../components/contact/ContactCards";
 import ContactForm from "../components/contact/ContactForm";
 import ContactMap from "../components/contact/ContactMap";
 import ContactCTA from "../components/contact/ContactCTA";
-import ContactFooter from "../components/contact/ContactFooter";
 import Footer from "../components/footer";
-
 export default function ContactPage() {
   return (
     <>
@@ -20,7 +18,7 @@ export default function ContactPage() {
         <ContactCTA />
       </main>
 
-      <ContactFooter />
+     <Footer />
     </>
   );
 }
