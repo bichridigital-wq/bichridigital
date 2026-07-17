@@ -5,6 +5,7 @@ import Link from "next/link";
 import CountUp from "react-countup";
 import { motion } from "framer-motion";
 import Navbar from "./components/navbar";
+import Footer from "./components/footer";
 import {
   FaFacebook,
   FaInstagram,
@@ -952,113 +953,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#01071F] pt-20 text-white">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid gap-12 md:grid-cols-4">
-            <div>
-              <Image
-                src="/logo.png"
-                alt="Bichridigital"
-                width={190}
-                height={80}
-                className="h-auto w-40"
-              />
-              <p className="mt-6 leading-7 text-gray-400">
-                Votre partenaire digital pour une communication impactante et
-                des résultats professionnels.
-              </p>
-
-              <div className="mt-8 flex gap-5 text-3xl">
-                <a
-                  href="https://www.youtube.com/@bichridigital"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube"
-                >
-                  <FaYoutube className="transition hover:text-red-500" />
-                </a>
-                <a
-                  href="https://www.facebook.com/bichriartprod18Safar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                >
-                  <FaFacebook className="transition hover:text-blue-500" />
-                </a>
-                <a
-                  href="https://www.tiktok.com/@bichridigitalagency"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
-                >
-                  <FaTiktok className="transition hover:text-[#FCCD12]" />
-                </a>
-                <a
-                  href="https://www.instagram.com/bichridigitalagency"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                >
-                  <FaInstagram className="transition hover:text-pink-500" />
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-6 text-xl font-black">Services</h3>
-              <ul className="space-y-3 text-gray-400">
-                <li>Communication Digitale</li>
-                <li>Marketing Digital</li>
-                <li>Développement Web</li>
-                <li>Production Audiovisuelle</li>
-                <li>Streaming Live</li>
-                <li>Design Graphique</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-6 text-xl font-black">Réseaux</h3>
-              <ul className="space-y-3 text-gray-400">
-                <li>YouTube</li>
-                <li>Facebook</li>
-                <li>TikTok</li>
-                <li>Instagram</li>
-                <li>X</li>
-                <li>LinkedIn</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-6 text-xl font-black">Contact</h3>
-              <ul className="space-y-4 text-gray-400">
-                <li>Ndiagne - Louga</li>
-                <li>+221 77 321 10 96</li>
-                <li>bichridigital@gmail.com</li>
-                <li>Lun - Ven : 08h - 18h</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-16 flex flex-col justify-between border-t border-blue-900 py-8 text-gray-500 md:flex-row">
-            <p>© 2026 Bichridigital Agency - Tous droits réservés.</p>
-           <div className="mt-4 flex flex-wrap gap-6 md:mt-0">
-  <a
-    href="/mentions-legales"
-    className="transition hover:text-[#FCCD12]"
-  >
-    Mentions légales
-  </a>
-
-  <a
-    href="/politique-confidentialite"
-    className="transition hover:text-[#FCCD12]"
-  >
-    Politique de confidentialité
-  </a>
-</div>
-          </div>
-        </div>
-      </footer>
+     <Footer />
 
       <a
         href="https://wa.me/221773211096"
