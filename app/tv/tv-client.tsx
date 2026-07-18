@@ -10,7 +10,6 @@ import {
   MessageCircle,
   Mic2,
   Newspaper,
-  Play,
   Radio,
   Trophy,
   Tv,
@@ -43,6 +42,8 @@ const shows: Show[] = [
 ];
 
 const youtubeUrl = "https://www.youtube.com/@bichridigital";
+const youtubeUploadsEmbedUrl =
+  "https://www.youtube.com/embed?listType=user_uploads&list=UCrm-wKWYVhHX5S7usD6jMKQ&playsinline=1";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -117,11 +118,20 @@ export default function TvClient() {
             transition={{ duration: 0.65 }}
             className="mx-auto grid max-w-7xl overflow-hidden rounded-[36px] border border-white/10 bg-[#070F33] shadow-[0_30px_100px_rgba(0,0,0,0.28)] lg:grid-cols-[1.25fr_0.75fr]"
           >
-            <div className="relative flex min-h-[390px] items-center justify-center border-b border-white/10 bg-[radial-gradient(circle_at_center,rgba(30,64,175,0.42),transparent_65%)] p-10 lg:border-b-0 lg:border-r">
-              <div className="absolute inset-8 rounded-[28px] border border-white/10" />
-              <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-[#FCCD12]/30 bg-[#FCCD12]/10 text-[#FCCD12] shadow-[0_0_60px_rgba(252,205,18,0.15)]">
-                <Play className="ml-1 h-10 w-10" fill="currentColor" />
+            <div className="border-b border-white/10 bg-[radial-gradient(circle_at_center,rgba(30,64,175,0.42),transparent_65%)] p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
+              <div className="relative aspect-video w-full overflow-hidden rounded-[24px] border border-white/10 bg-black shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
+                <iframe
+                  src={youtubeUploadsEmbedUrl}
+                  title="Vidéos de la chaîne YouTube Bichridigital"
+                  className="absolute inset-0 h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
               </div>
+              <p className="mt-4 text-sm leading-6 text-white/50">
+                Parcourez et regardez les dernières vidéos publiées sur la chaîne Bichridigital.
+              </p>
             </div>
 
             <div className="flex flex-col justify-center p-8 sm:p-12">
