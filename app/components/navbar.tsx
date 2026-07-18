@@ -59,14 +59,13 @@ export default function Navbar() {
 
         {/* CTA RIGHT */}
         <div className="hidden justify-end lg:flex">
-          <a
-            href="https://wa.me/221773211096"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/tv"
+            aria-current={pathname === "/tv" ? "page" : undefined}
             className="rounded-full bg-[#FCCD12] px-5 py-2.5 text-sm font-black text-[#020B2E] shadow-[0_0_30px_rgba(252,205,18,0.25)] transition hover:scale-105"
           >
-            Demander un devis
-          </a>
+            Bichridigital TV
+          </Link>
         </div>
 
         {/* MOBILE BUTTON */}
@@ -102,14 +101,14 @@ export default function Navbar() {
               );
             })}
 
-            <a
-              href="https://wa.me/221773211096"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/tv"
+              onClick={() => setMenuOpen(false)}
+              aria-current={pathname === "/tv" ? "page" : undefined}
               className="rounded-xl bg-[#FCCD12] px-4 py-3 text-center text-sm font-black text-[#020B2E]"
             >
-              Demander un devis
-            </a>
+              Bichridigital TV
+            </Link>
           </div>
         </div>
       )}
