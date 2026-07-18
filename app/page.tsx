@@ -462,7 +462,7 @@ export default function Home() {
                 À propos
               </p>
               <h2 className="mt-4 text-3xl font-black leading-tight md:text-5xl">
-                Plus de 6 ans d'expérience au service de l'image.
+                Plus de 6 ans d&apos;expérience au service de l&apos;image.
               </h2>
             </motion.div>
 
@@ -756,7 +756,7 @@ export default function Home() {
               className="mx-auto mt-5 max-w-3xl leading-8 text-gray-400"
             >
               Une équipe passionnée par la communication digitale,
-              l'audiovisuel, la photographie, le streaming live et la création
+              l&apos;audiovisuel, la photographie, le streaming live et la création
               de contenus professionnels.
             </motion.p>
           </motion.div>

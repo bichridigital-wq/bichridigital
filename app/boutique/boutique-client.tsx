@@ -760,7 +760,7 @@ export default function BoutiquePage() {
                 <div className="flex items-center gap-4 mb-4">
                   <span className="w-10 h-[2px] bg-[#FCCD12]"></span>
                   <span className="text-[#FCCD12] text-sm font-black uppercase tracking-widest">
-                    Besoin d'un produit ?
+                    Besoin d&apos;un produit ?
                   </span>
                 </div>
 
@@ -787,10 +787,13 @@ export default function BoutiquePage() {
 
       <Footer />
 
-      <OrderModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
+      {selectedProduct && (
+        <OrderModal
+          key={selectedProduct.id}
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </>
   );
 }

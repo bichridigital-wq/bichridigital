@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
 
@@ -56,10 +56,6 @@ export default function OrderActions({
   >(null);
 
   const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    setCurrentStatus(status);
-  }, [status]);
 
   const updateStatus = async (
     newStatus: OrderStatus

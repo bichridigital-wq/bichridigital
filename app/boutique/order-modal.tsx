@@ -42,10 +42,6 @@ export default function OrderModal({
   useEffect(() => {
     if (!product) return;
 
-    setForm(initialForm);
-    setSuccess(false);
-    setErrorMessage("");
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 

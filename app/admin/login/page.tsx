@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
 
@@ -115,12 +116,12 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <a
+          <Link
             href="/"
             className="mt-7 block text-center text-sm font-bold text-gray-400 transition hover:text-[#FCCD12]"
           >
             ← Retour au site
-          </a>
+          </Link>
         </div>
       </div>
     </main>
