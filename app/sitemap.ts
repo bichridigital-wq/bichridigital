@@ -20,14 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...mainRoutes.map((route) => ({
       url: `${baseUrl}${route}`,
-      lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: route === "" ? 1 : 0.8,
     })),
 
     ...legalRoutes.map((route) => ({
       url: `${baseUrl}${route}`,
-      lastModified: new Date(),
       changeFrequency: "yearly" as const,
       priority: 0.4,
     })),

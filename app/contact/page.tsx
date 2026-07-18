@@ -12,7 +12,14 @@ export const metadata: Metadata = {
     title: "Contact | Bichridigital Agency",
     description:
       "Besoin d’une affiche, d’un live, d’une vidéo, d’un site web, d’un shooting photo ou d’un support personnalisé ? Contactez Bichridigital Agency.",
-    url: "https://bichridigital.com/contact",
+    url: "https://www.bichridigital.com/contact",
+    images: ["/icons/icon-512.png"],
+  },
+  twitter: {
+    card: "summary",
+    title: "Contact | Bichridigital Agency",
+    description:
+      "Besoin d’une affiche, d’un live, d’une vidéo, d’un site web, d’un shooting photo ou d’un support personnalisé ? Contactez Bichridigital Agency.",
     images: ["/icons/icon-512.png"],
   },
 };
