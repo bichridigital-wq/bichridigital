@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
@@ -133,7 +134,7 @@ export default async function AdminProductsPage() {
               >
                 <div className="relative h-56 bg-[#020B2E]">
                   {product.image_url ? (
-                   <img
+                   <Image
   src={
     product.image_url.startsWith("http://") ||
     product.image_url.startsWith("https://") ||
@@ -142,7 +143,9 @@ export default async function AdminProductsPage() {
       : `/${product.image_url}`
   }
   alt={product.name}
-  className="h-full w-full object-cover"
+  fill
+  sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+  className="object-cover"
 />
                   ) : (
                     <div className="flex h-full items-center justify-center text-6xl">

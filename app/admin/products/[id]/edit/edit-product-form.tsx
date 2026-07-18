@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   ChangeEvent,
@@ -90,6 +91,7 @@ export default function EditProductForm({
 
   const displayedImage =
     localPreviewUrl || product.image_url || "";
+  const isBlobPreview = displayedImage.startsWith("blob:");
 
   useEffect(() => {
     return () => {
@@ -442,11 +444,14 @@ export default function EditProductForm({
 
         <div className="rounded-[24px] border border-dashed border-white/15 bg-[#020B2E] p-6">
           {displayedImage && (
-            <div className="mb-6 overflow-hidden rounded-[22px] border border-white/10">
-              <img
+            <div className="relative mb-6 h-72 overflow-hidden rounded-[22px] border border-white/10">
+              <Image
                 src={displayedImage}
                 alt={`Aperçu de ${product.name}`}
-                className="h-72 w-full object-cover"
+                fill
+                sizes="100vw"
+                unoptimized={isBlobPreview}
+                className="object-cover"
               />
             </div>
           )}

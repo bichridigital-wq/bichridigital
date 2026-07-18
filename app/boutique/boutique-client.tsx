@@ -320,9 +320,11 @@ function ProductCarousel({
              hover:shadow-[0_0_70px_rgba(252,205,18,0.25)]"
             >
               <div className="relative h-[230px] bg-[#0B1C54] overflow-hidden">
-                <img
+                <Image
                   src={product.image}
                   alt={product.name}
+                  fill
+                  sizes="380px"
                   className="w-full h-full object-cover transition-transform duration-500
                    group-hover:scale-110 group-focus-within:scale-110"
                   draggable={false}

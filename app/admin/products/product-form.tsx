@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   FormEvent,
   useEffect,
@@ -420,11 +421,14 @@ export default function ProductForm() {
             )}
 
             {previewUrl && (
-              <div className="mt-6 overflow-hidden rounded-[22px] border border-white/10">
-                <img
+              <div className="relative mt-6 h-72 overflow-hidden rounded-[22px] border border-white/10">
+                <Image
                   src={previewUrl}
                   alt="Aperçu du produit"
-                  className="h-72 w-full object-cover"
+                  fill
+                  sizes="100vw"
+                  unoptimized
+                  className="object-cover"
                 />
               </div>
             )}
