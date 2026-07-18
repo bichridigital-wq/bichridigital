@@ -6,16 +6,7 @@ import CountUp from "react-countup";
 import { motion } from "framer-motion";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
-import {
-  FaFacebook,
-  FaInstagram,
-  FaLinkedin,
-  FaSnapchat,
-  FaTiktok,
-  FaWhatsapp,
-  FaYoutube,
-} from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaWhatsapp } from "react-icons/fa";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 34 },
@@ -143,62 +134,6 @@ const stats = [
     label: "Années d'expérience",
     value: 6,
     suffix: "+",
-  },
-];
-
-const socialStats = [
-  {
-    label: "YouTube",
-    value: 123,
-    suffix: "K+",
-    icon: FaYoutube,
-    color: "text-red-500",
-  },
-  {
-    label: "TikTok",
-    value: 60.1,
-    suffix: "K+",
-    decimals: 1,
-    icon: FaTiktok,
-    color: "text-white",
-  },
-  {
-    label: "Instagram",
-    value: 19,
-    suffix: "K+",
-    icon: FaInstagram,
-    color: "text-pink-400",
-  },
-  {
-    label: "Facebook",
-    value: 12,
-    suffix: "K+",
-    icon: FaFacebook,
-    color: "text-blue-400",
-  },
-  {
-    label: "X",
-    value: 3988,
-    suffix: "",
-    separator: " ",
-    icon: FaXTwitter,
-    color: "text-white",
-  },
-  {
-    label: "Snapchat",
-    value: 11.8,
-    suffix: "K+",
-    decimals: 1,
-    icon: FaSnapchat,
-    color: "text-[#FCCD12]",
-  },
-  {
-    label: "LinkedIn",
-    value: 315,
-    suffix: "",
-    separator: " ",
-    icon: FaLinkedin,
-    color: "text-blue-300",
   },
 ];
 
