@@ -30,6 +30,7 @@ export default function ContactCTA() {
             muted
             loop
             playsInline
+            poster="/hero-poster.webp"
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source src="/hero-video.mp4" type="video/mp4" />
