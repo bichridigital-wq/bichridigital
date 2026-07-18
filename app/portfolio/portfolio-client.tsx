@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
@@ -178,9 +179,11 @@ export default function PortfolioPage() {
                   className="group rounded-[24px] overflow-hidden bg-[#071542] border border-blue-500/30 hover:border-[#FCCD12] transition-all duration-300 hover:-translate-y-2 shadow-[0_0_40px_rgba(0,87,255,0.15)]"
                 >
                   <div className="relative h-[240px] overflow-hidden">
-                    <img
+                    <Image
                       src={project.image}
                       alt={project.title}
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                     />
 
@@ -254,9 +257,11 @@ export default function PortfolioPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="rounded-[32px] bg-[#071542] border border-blue-500/30 overflow-hidden grid lg:grid-cols-2 gap-0 shadow-[0_0_80px_rgba(0,87,255,0.18)]">
               <div className="relative min-h-[360px]">
-                <img
+                <Image
                   src="/portfolio2.png"
                   alt="Projet à la une"
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                   className="w-full h-full object-cover"
                 />
 

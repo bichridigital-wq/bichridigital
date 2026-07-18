@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import {
@@ -631,9 +632,12 @@ export default function BoutiquePage() {
 
     <div className="grid lg:grid-cols-2 gap-10 items-start">
       <div className="group rounded-[28px] bg-[#071542] border border-blue-500/30 overflow-hidden shadow-[0_0_45px_rgba(0,87,255,0.18)] hover:border-[#FCCD12] hover:scale-[1.03] hover:shadow-[0_0_80px_rgba(252,205,18,0.22)] transition-all duration-500">
-        <img
+        <Image
           src="/boutique/services-disponibles.jpg"
           alt="Bichridigital services disponibles"
+          width={1254}
+          height={1254}
+          sizes="(min-width: 1024px) 50vw, 100vw"
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
       </div>
