@@ -114,17 +114,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <Script
-  id="google-adsense"
-  async
-  strategy="beforeInteractive"
-  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3040297278987670"
-  crossOrigin="anonymous"
-/>
       <body>
         <ServiceWorkerRegister />
 
         {children}
+
+        <Script
+          id="google-adsense"
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3040297278987670"
+          crossOrigin="anonymous"
+        />
 
         <GoogleAnalytics gaId="G-PPT82RQZLG" />
       </body>
