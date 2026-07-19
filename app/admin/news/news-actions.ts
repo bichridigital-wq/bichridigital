@@ -76,23 +76,74 @@ function actionError(error: unknown): TvNewsActionState {
   };
 }
 
-export async function createNewsAction(
+export async function createNewsDraftAction(
   _previousState: TvNewsActionState,
   formData: FormData
 ): Promise<TvNewsActionState> {
   try {
     const supabase = await requireAdmin();
     const input = validateTvNewsFormData(formData);
-    const notificationRequested = input.is_published && formData.get("notification_requested") === "on";
-    const { data, error } = await supabase.from("tv_news").insert({ ...input, notification_requested: notificationRequested }).select("id").single();
+    const { data, error } = await supabase.from("tv_news").insert({
+      ...input,
+      image_url: null,
+      is_published: false,
+      notification_requested: false,
+    }).select("id").single();
 
     if (error) {
       throw new Error("Impossible de créer l’actualité.");
     }
 
     refreshNewsPaths();
-    if (notificationRequested) schedulePush(data.id);
-    return { success: true, message: "Actualité créée avec succès." };
+    return { success: true, message: "Brouillon créé.", newsId: data.id };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+export async function updateCreationDraftAction(
+  id: string,
+  _previousState: TvNewsActionState,
+  formData: FormData
+): Promise<TvNewsActionState> {
+  try {
+    const supabase = await requireAdmin();
+    validateId(id);
+    const input = validateTvNewsFormData(formData);
+    const { error } = await supabase.from("tv_news").update({
+      ...input,
+      image_url: null,
+      is_published: false,
+      notification_requested: false,
+    }).eq("id", id).eq("is_published", false);
+    if (error) throw new Error("Impossible de mettre à jour le brouillon.");
+    refreshNewsPaths();
+    return { success: true, message: "Brouillon mis à jour.", newsId: id };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+export async function finalizeNewsCreationAction(
+  id: string,
+  publish: boolean,
+  notificationRequested: boolean
+): Promise<TvNewsActionState> {
+  try {
+    const supabase = await requireAdmin();
+    validateId(id);
+    const { data, error } = await supabase.from("tv_news").update({
+      is_published: publish,
+      notification_requested: publish && notificationRequested,
+    }).eq("id", id).eq("is_published", false).select("id").single();
+    if (error || !data) throw new Error("Impossible de finaliser l’actualité.");
+    refreshNewsPaths();
+    if (publish && notificationRequested) schedulePush(id);
+    return {
+      success: true,
+      message: publish ? "Actualité publiée avec succès." : "Actualité conservée en brouillon.",
+      newsId: id,
+    };
   } catch (error) {
     return actionError(error);
   }
@@ -107,13 +158,13 @@ export async function updateNewsAction(
     const supabase = await requireAdmin();
     validateId(id);
     const input = validateTvNewsFormData(formData);
-    const { data: previous, error: previousError } = await supabase.from("tv_news").select("is_published,notification_requested,notified_at").eq("id", id).single();
+    const { data: previous, error: previousError } = await supabase.from("tv_news").select("is_published,notification_requested,notified_at,image_url").eq("id", id).single();
     if (previousError) throw new Error("Impossible de vérifier l’état de publication.");
     const transitionedToPublished = !previous.is_published && input.is_published;
     const notificationRequested = transitionedToPublished && formData.get("notification_requested") === "on";
     const { error } = await supabase
       .from("tv_news")
-      .update({ ...input, notification_requested: transitionedToPublished ? notificationRequested : previous.notification_requested })
+      .update({ ...input, image_url: previous.image_url, notification_requested: transitionedToPublished ? notificationRequested : previous.notification_requested })
       .eq("id", id);
 
     if (error) {
@@ -208,15 +259,22 @@ export async function registerUploadedMediaAction(input: RegisterUploadedMediaIn
     const checked = await validateUploadedObject(input);
     const { count } = await supabase.from("tv_news_media").select("id", { count: "exact", head: true }).eq("news_id", input.newsId);
     if ((count ?? 0) >= TV_NEWS_MEDIA_MAX_COUNT) throw new Error("Une actualité ne peut contenir que 10 médias.");
-    const { error } = await supabase.from("tv_news_media").insert({
+    if (input.isCover && checked.mediaType !== "image") {
+      throw new Error("La couverture doit être une image.");
+    }
+    if (input.isCover) {
+      await supabase.from("tv_news_media").update({ is_cover: false }).eq("news_id", input.newsId);
+    }
+    const { data: inserted, error } = await supabase.from("tv_news_media").insert({
       news_id: input.newsId, media_type: checked.mediaType, storage_path: input.storagePath,
       file_name: input.fileName.slice(0, 255), mime_type: checked.actualMime,
       file_size: checked.actualSize, title: optionalMediaText(input.title, 180),
       alt_text: optionalMediaText(input.altText, 300), sort_order: count ?? 0,
-    });
+      is_cover: Boolean(input.isCover),
+    }).select("id").single();
     if (error) throw new Error("L’enregistrement du média a échoué.");
     refreshNewsPaths();
-    return { success: true, message: "Média ajouté." };
+    return { success: true, message: "Média ajouté.", mediaId: inserted.id };
   } catch (error) {
     if (supabase && input.storagePath) await supabase.storage.from(TV_NEWS_MEDIA_BUCKET).remove([input.storagePath]);
     return actionError(error);

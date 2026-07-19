@@ -64,6 +64,7 @@ export type RegisterUploadedMediaInput = {
   expectedSize: number;
   title?: string;
   altText?: string;
+  isCover?: boolean;
 };
 
 export function getMediaTypeFromMime(

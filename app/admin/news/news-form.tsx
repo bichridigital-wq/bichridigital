@@ -1,21 +1,18 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
-  createNewsAction,
+  createNewsDraftAction,
+  finalizeNewsCreationAction,
+  updateCreationDraftAction,
   updateNewsAction,
 } from "./news-actions";
+import NewsMediaUploader, { type NewsMediaUploaderHandle } from "./components/news-media-uploader";
 import {
   TV_NEWS_CATEGORIES,
   type TvNews,
-  type TvNewsActionState,
 } from "../../../types/tv-news";
-
-const initialState: TvNewsActionState = {
-  success: false,
-  message: "",
-};
 
 function toDakarInputValue(value: string | null) {
   if (!value) return "";
@@ -44,19 +41,47 @@ export default function NewsForm({
 }) {
   const router = useRouter();
   const [willPublish, setWillPublish] = useState(news?.is_published ?? false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [createdDraftId, setCreatedDraftId] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const action = news
-    ? updateNewsAction.bind(null, news.id)
-    : createNewsAction;
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const uploaderRef = useRef<NewsMediaUploaderHandle>(null);
 
-  useEffect(() => {
-    if (!state.success) return;
-
-    formRef.current?.reset();
-    router.refresh();
-    onSaved();
-  }, [onSaved, router, state.success]);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true); setMessage(""); setIsError(false);
+    const formData = new FormData(event.currentTarget);
+    const publish = formData.get("is_published") === "on";
+    const notification = formData.get("notification_requested") === "on";
+    try {
+      if (news) {
+        const result = await updateNewsAction(news.id, { success: false, message: "" }, formData);
+        setMessage(result.message); setIsError(!result.success);
+        if (result.success) { router.refresh(); onSaved(); }
+        return;
+      }
+      const draftResult = createdDraftId
+        ? await updateCreationDraftAction(createdDraftId, { success: false, message: "" }, formData)
+        : await createNewsDraftAction({ success: false, message: "" }, formData);
+      if (!draftResult.success || !draftResult.newsId) throw new Error(draftResult.message);
+      const newsId = draftResult.newsId;
+      setCreatedDraftId(newsId);
+      const uploadResult = await uploaderRef.current?.uploadQueued(newsId);
+      if (uploadResult && !uploadResult.success) {
+        setMessage(`${uploadResult.message} L’actualité reste en brouillon ; corrigez le fichier puis réessayez.`);
+        setIsError(true); router.refresh(); return;
+      }
+      const finalResult = await finalizeNewsCreationAction(newsId, publish, notification);
+      setMessage(finalResult.message); setIsError(!finalResult.success);
+      if (finalResult.success) { formRef.current?.reset(); setCreatedDraftId(null); router.refresh(); onSaved(); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Une erreur inattendue est survenue.");
+      setIsError(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const inputClass =
     "w-full rounded-2xl border border-white/10 bg-[#020B2E] px-5 py-4 text-white outline-none transition placeholder:text-gray-600 focus:border-[#FCCD12]";
@@ -70,7 +95,7 @@ export default function NewsForm({
         {news ? `Modifier « ${news.title} »` : "Publier une information"}
       </h2>
 
-      <form ref={formRef} action={formAction} className="mt-8 space-y-6">
+      <form ref={formRef} onSubmit={(event) => void submit(event)} className="mt-8 space-y-6">
         <div>
           <label htmlFor="news-title" className="mb-2 block text-sm font-bold text-gray-300">
             Titre *
@@ -164,23 +189,14 @@ export default function NewsForm({
           </div>
         </div>
 
-        <div>
-          <label htmlFor="news-image-url" className="mb-2 block text-sm font-bold text-gray-300">
-            URL publique de l’image Supabase
-          </label>
-          <input
-            id="news-image-url"
-            name="image_url"
-            type="url"
-            maxLength={2048}
-            placeholder="https://yqgcsaxzpzrueepcomzr.supabase.co/storage/v1/object/public/…"
-            defaultValue={news?.image_url ?? ""}
-            className={inputClass}
+        {!news && (
+          <NewsMediaUploader
+            ref={uploaderRef}
+            currentCount={0}
+            onChanged={() => router.refresh()}
+            creationMode
           />
-          <p className="mt-2 text-sm text-gray-500">
-            Aucun téléversement : utilisez seulement une image publique existante du projet Supabase.
-          </p>
-        </div>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex cursor-pointer items-center gap-4 rounded-2xl border border-white/10 bg-[#020B2E] p-5">
@@ -216,26 +232,26 @@ export default function NewsForm({
           <span><strong>Envoyer une notification lors de la publication</strong><span className="mt-1 block text-sm text-gray-500">L’envoi ne démarre qu’après l’enregistrement d’une publication.</span></span>
         </label>
 
-        {state.message && (
+        {message && (
           <p
             role="status"
             className={`rounded-2xl border p-4 font-bold ${
-              state.success
-                ? "border-green-500/30 bg-green-500/10 text-green-300"
-                : "border-red-500/30 bg-red-500/10 text-red-300"
+              isError
+                ? "border-red-500/30 bg-red-500/10 text-red-300"
+                : "border-green-500/30 bg-green-500/10 text-green-300"
             }`}
           >
-            {state.message}
+            {message}
           </p>
         )}
 
         <div className="flex flex-wrap gap-4">
           <button
             type="submit"
-            disabled={pending}
+            disabled={submitting}
             className="rounded-full bg-[#FCCD12] px-8 py-4 font-black text-[#020B2E] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {pending
+            {submitting
               ? "Enregistrement…"
               : news
                 ? "Enregistrer les modifications"

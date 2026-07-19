@@ -48,4 +48,6 @@ export type TvNewsInput = {
 export type TvNewsActionState = {
   success: boolean;
   message: string;
+  newsId?: string;
+  mediaId?: string;
 };
