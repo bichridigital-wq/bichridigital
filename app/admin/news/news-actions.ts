@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { createClient } from "../../../lib/supabase/server";
 import { validateTvNewsFormData } from "../../../lib/tv-news";
 import type { TvNewsActionState } from "../../../types/tv-news";
@@ -14,6 +15,7 @@ import {
   normalizeYoutubeUrl,
   validateUploadedObject,
 } from "../../../lib/tv-news-media";
+import { sendPushNotificationForNews } from "../../../lib/web-push";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -57,6 +59,13 @@ function refreshNewsPaths() {
   revalidatePath("/tv");
 }
 
+function schedulePush(newsId: string) {
+  after(async () => {
+    try { await sendPushNotificationForNews(newsId); }
+    catch { console.error("L’envoi Web Push planifié a échoué."); }
+  });
+}
+
 function actionError(error: unknown): TvNewsActionState {
   return {
     success: false,
@@ -74,13 +83,15 @@ export async function createNewsAction(
   try {
     const supabase = await requireAdmin();
     const input = validateTvNewsFormData(formData);
-    const { error } = await supabase.from("tv_news").insert(input);
+    const notificationRequested = input.is_published && formData.get("notification_requested") === "on";
+    const { data, error } = await supabase.from("tv_news").insert({ ...input, notification_requested: notificationRequested }).select("id").single();
 
     if (error) {
       throw new Error("Impossible de créer l’actualité.");
     }
 
     refreshNewsPaths();
+    if (notificationRequested) schedulePush(data.id);
     return { success: true, message: "Actualité créée avec succès." };
   } catch (error) {
     return actionError(error);
@@ -96,9 +107,13 @@ export async function updateNewsAction(
     const supabase = await requireAdmin();
     validateId(id);
     const input = validateTvNewsFormData(formData);
+    const { data: previous, error: previousError } = await supabase.from("tv_news").select("is_published,notification_requested,notified_at").eq("id", id).single();
+    if (previousError) throw new Error("Impossible de vérifier l’état de publication.");
+    const transitionedToPublished = !previous.is_published && input.is_published;
+    const notificationRequested = transitionedToPublished && formData.get("notification_requested") === "on";
     const { error } = await supabase
       .from("tv_news")
-      .update(input)
+      .update({ ...input, notification_requested: transitionedToPublished ? notificationRequested : previous.notification_requested })
       .eq("id", id);
 
     if (error) {
@@ -106,10 +121,21 @@ export async function updateNewsAction(
     }
 
     refreshNewsPaths();
+    if (notificationRequested && !previous.notified_at) schedulePush(id);
     return { success: true, message: "Actualité modifiée avec succès." };
   } catch (error) {
     return actionError(error);
   }
+}
+
+export async function retryNewsPushAction(id: string): Promise<TvNewsActionState> {
+  try {
+    const supabase = await requireAdmin(); validateId(id);
+    const { data, error } = await supabase.from("tv_news").select("is_published,notification_requested,notified_at").eq("id", id).single();
+    if (error || !data.is_published || !data.notification_requested || data.notified_at) throw new Error("Cette notification ne peut pas être relancée.");
+    schedulePush(id);
+    return { success: true, message: "Nouvelle tentative planifiée." };
+  } catch (error) { return actionError(error); }
 }
 
 export async function setNewsPublishedAction(

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import NewsForm from "./news-form";
 import {
   deleteNewsAction,
+  retryNewsPushAction,
   setNewsPublishedAction,
 } from "./news-actions";
 import type { TvNews } from "../../../types/tv-news";
@@ -53,6 +54,13 @@ export default function NewsClient({ news, media }: { news: TvNews[]; media: TvN
         if (editingNews?.id === item.id) setEditingNews(null);
         router.refresh();
       }
+    });
+  };
+
+  const retryPush = (item: TvNews) => {
+    startTransition(async () => {
+      const result = await retryNewsPushAction(item.id); setMessage(result.message); setIsError(!result.success);
+      if (result.success) router.refresh();
     });
   };
 
@@ -141,6 +149,7 @@ export default function NewsClient({ news, media }: { news: TvNews[]; media: TvN
                     <p className="mt-4 text-sm font-bold text-gray-500">
                       Publication : {formatDate(item.published_at)}
                     </p>
+                    <p className="mt-2 text-sm text-gray-500">Notification : {!item.notification_requested ? "non demandée" : item.notified_at ? `envoyée le ${formatDate(item.notified_at)}` : "en attente, en échec ou à réessayer"}</p>
                     {item.source_name && (
                       <p className="mt-2 text-sm text-gray-500">
                         Source : {item.source_name}
@@ -149,6 +158,7 @@ export default function NewsClient({ news, media }: { news: TvNews[]; media: TvN
                   </div>
 
                   <div className="flex shrink-0 flex-wrap gap-3">
+                    {item.notification_requested && !item.notified_at && item.is_published && <button type="button" onClick={() => retryPush(item)} disabled={pending} className="rounded-full border border-[#FCCD12]/30 bg-[#FCCD12]/10 px-5 py-3 text-sm font-black text-[#FCCD12] disabled:opacity-50">Réessayer l’envoi</button>}
                     <button
                       type="button"
                       onClick={() => {

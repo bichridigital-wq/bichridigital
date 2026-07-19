@@ -13,7 +13,7 @@ import { TV_NEWS_MEDIA_BUCKET, type TvNewsMedia, type PublicTvNewsMedia } from "
 import { TV_NEWS_MEDIA_SELECT, toPublicMedia } from "./tv-news-media";
 
 const TV_NEWS_SELECT =
-  "id,title,summary,category,source_name,source_url,image_url,is_breaking,is_published,published_at,created_at,updated_at";
+  "id,title,summary,category,source_name,source_url,image_url,is_breaking,is_published,published_at,created_at,updated_at,notification_requested,notified_at";
 
 const SUPABASE_IMAGE_HOST = "yqgcsaxzpzrueepcomzr.supabase.co";
 const SUPABASE_PUBLIC_IMAGE_PATH = "/storage/v1/object/public/";

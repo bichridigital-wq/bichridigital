@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createNewsAction,
@@ -43,6 +43,7 @@ export default function NewsForm({
   onCancel: () => void;
 }) {
   const router = useRouter();
+  const [willPublish, setWillPublish] = useState(news?.is_published ?? false);
   const formRef = useRef<HTMLFormElement>(null);
   const action = news
     ? updateNewsAction.bind(null, news.id)
@@ -197,11 +198,23 @@ export default function NewsForm({
               name="is_published"
               type="checkbox"
               defaultChecked={news?.is_published ?? false}
+              onChange={(event) => setWillPublish(event.target.checked)}
               className="h-5 w-5 accent-[#FCCD12]"
             />
             <span className="font-bold">Publier immédiatement</span>
           </label>
         </div>
+
+        <label className={`flex items-center gap-4 rounded-2xl border border-white/10 bg-[#020B2E] p-5 ${willPublish ? "cursor-pointer" : "opacity-50"}`}>
+          <input
+            name="notification_requested"
+            type="checkbox"
+            disabled={!willPublish || Boolean(news?.is_published) || Boolean(news?.notified_at)}
+            defaultChecked={news?.notification_requested && !news.notified_at}
+            className="h-5 w-5 accent-[#FCCD12]"
+          />
+          <span><strong>Envoyer une notification lors de la publication</strong><span className="mt-1 block text-sm text-gray-500">L’envoi ne démarre qu’après l’enregistrement d’une publication.</span></span>
+        </label>
 
         {state.message && (
           <p

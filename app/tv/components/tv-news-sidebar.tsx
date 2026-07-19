@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FileAudio, FileImage, FileText, FileVideo, Newspaper } from "lucide-react";
 import type { TvNewsListItem } from "../../../types/tv-news";
+import PushSubscriptionButton from "./push-subscription-button";
 
 function formatDate(value: string | null) {
   if (!value) return "";
@@ -29,6 +30,7 @@ export default function TvNewsSidebar({ news }: { news: TvNewsListItem[] }) {
           <h2 className="text-xl font-black">Bichridigital News</h2>
         </div>
       </div>
+      <PushSubscriptionButton />
 
       {news.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-white/15 bg-[#070F33] p-6 text-sm leading-6 text-white/55">

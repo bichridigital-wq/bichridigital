@@ -7,7 +7,7 @@ import { TV_NEWS_MEDIA_BUCKET } from "../../../types/tv-news-media";
 import TvNewsSidebar from "./tv-news-sidebar";
 import TvNewsToast from "./tv-news-toast";
 
-const SELECT = "id,title,summary,category,source_name,source_url,image_url,is_breaking,is_published,published_at,created_at,updated_at,tv_news_media(media_type,storage_path,is_cover,sort_order)";
+const SELECT = "id,title,summary,category,source_name,source_url,image_url,is_breaking,is_published,published_at,created_at,updated_at,notification_requested,notified_at,tv_news_media(media_type,storage_path,is_cover,sort_order)";
 const MIN_RESYNC_INTERVAL = 60_000;
 type Raw = TvNews & { tv_news_media?: { media_type: string; storage_path: string | null; is_cover: boolean }[] };
 

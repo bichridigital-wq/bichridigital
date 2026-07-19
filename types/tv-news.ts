@@ -24,6 +24,8 @@ export type TvNews = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  notification_requested: boolean;
+  notified_at: string | null;
 };
 
 export type TvNewsListItem = TvNews & {
