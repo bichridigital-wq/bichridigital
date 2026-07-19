@@ -26,6 +26,11 @@ export type TvNews = {
   updated_at: string;
 };
 
+export type TvNewsListItem = TvNews & {
+  cover_image_url: string | null;
+  media_types: string[];
+};
+
 export type TvNewsInput = {
   title: string;
   summary: string;

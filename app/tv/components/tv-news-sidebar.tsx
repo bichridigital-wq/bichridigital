@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { ArrowUpRight, Newspaper } from "lucide-react";
-import type { TvNews } from "../../../types/tv-news";
+import Link from "next/link";
+import { FileAudio, FileImage, FileText, FileVideo, Newspaper } from "lucide-react";
+import type { TvNewsListItem } from "../../../types/tv-news";
 
 function formatDate(value: string | null) {
   if (!value) return "";
@@ -12,7 +13,9 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-export default function TvNewsSidebar({ news }: { news: TvNews[] }) {
+const mediaIcons = { image: FileImage, video: FileVideo, youtube: FileVideo, audio: FileAudio, pdf: FileText };
+
+export default function TvNewsSidebar({ news }: { news: TvNewsListItem[] }) {
   return (
     <aside className="min-w-0 lg:sticky lg:top-24">
       <div className="mb-5 flex items-center gap-3">
@@ -38,10 +41,10 @@ export default function TvNewsSidebar({ news }: { news: TvNews[] }) {
               key={item.id}
               className="w-[82vw] min-w-[280px] max-w-[330px] snap-start overflow-hidden rounded-[24px] border border-white/10 bg-[#070F33] shadow-[0_16px_45px_rgba(0,0,0,0.2)] lg:w-auto lg:min-w-0 lg:max-w-none"
             >
-              {item.image_url && (
+              {item.cover_image_url && (
                 <div className="relative aspect-[16/9] bg-[#020B2E]">
                   <Image
-                    src={item.image_url}
+                    src={item.cover_image_url}
                     alt={`Illustration de l’actualité : ${item.title}`}
                     fill
                     sizes="(max-width: 1023px) 82vw, 340px"
@@ -72,22 +75,20 @@ export default function TvNewsSidebar({ news }: { news: TvNews[] }) {
                   {formatDate(item.published_at)}
                 </p>
 
+                {item.media_types.length > 0 && <div className="mt-3 flex gap-2" aria-label="Types de médias">{item.media_types.map((type) => { const Icon = mediaIcons[type as keyof typeof mediaIcons]; return Icon ? <Icon key={type} className="h-4 w-4 text-white/45" aria-label={type} /> : null; })}</div>}
+
                 {item.source_name && (
                   <p className="mt-2 text-xs text-white/45">
                     Source : {item.source_name}
                   </p>
                 )}
 
-                {item.source_url && (
-                  <a
-                    href={item.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <Link
+                    href={`/tv/news/${item.id}`}
                     className="mt-4 inline-flex items-center gap-1.5 text-sm font-black text-[#FCCD12] hover:underline"
                   >
-                    Voir la source <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
-                )}
+                    Lire la suite
+                  </Link>
               </div>
             </article>
           ))}

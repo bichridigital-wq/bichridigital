@@ -21,7 +21,7 @@ import { FaYoutube } from "react-icons/fa6";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import TvNewsRealtime from "./components/tv-news-realtime";
-import type { TvNews } from "../../types/tv-news";
+import type { TvNewsListItem } from "../../types/tv-news";
 
 type Show = {
   name: string;
@@ -52,7 +52,7 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function TvClient({ initialNews }: { initialNews: TvNews[] }) {
+export default function TvClient({ initialNews }: { initialNews: TvNewsListItem[] }) {
   return (
     <>
       <Navbar />

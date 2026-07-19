@@ -8,6 +8,9 @@ import {
   setNewsPublishedAction,
 } from "./news-actions";
 import type { TvNews } from "../../../types/tv-news";
+import type { TvNewsMedia } from "../../../types/tv-news-media";
+import NewsMediaUploader from "./components/news-media-uploader";
+import NewsMediaList from "./components/news-media-list";
 
 function formatDate(value: string | null) {
   if (!value) return "Date non définie";
@@ -19,7 +22,7 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-export default function NewsClient({ news }: { news: TvNews[] }) {
+export default function NewsClient({ news, media }: { news: TvNews[]; media: TvNewsMedia[] }) {
   const router = useRouter();
   const [editingNews, setEditingNews] = useState<TvNews | null>(null);
   const [message, setMessage] = useState("");
@@ -61,6 +64,13 @@ export default function NewsClient({ news }: { news: TvNews[] }) {
         onSaved={closeEditor}
         onCancel={closeEditor}
       />
+      {editingNews && (
+        <section className="mt-6 rounded-[30px] border border-white/10 bg-white/5 p-7 md:p-10">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-[#FCCD12]">Pièces jointes</p>
+          <NewsMediaUploader newsId={editingNews.id} currentCount={media.filter((item) => item.news_id === editingNews.id).length} onChanged={() => router.refresh()} />
+          <NewsMediaList newsId={editingNews.id} media={media.filter((item) => item.news_id === editingNews.id).sort((a, b) => a.sort_order - b.sort_order)} onChanged={() => router.refresh()} />
+        </section>
+      )}
 
       <section className="mt-14">
         <div className="flex flex-wrap items-end justify-between gap-4">

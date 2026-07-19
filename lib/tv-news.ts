@@ -8,6 +8,9 @@ import {
   type TvNewsCategory,
   type TvNewsInput,
 } from "../types/tv-news";
+import type { TvNewsListItem } from "../types/tv-news";
+import { TV_NEWS_MEDIA_BUCKET, type TvNewsMedia, type PublicTvNewsMedia } from "../types/tv-news-media";
+import { TV_NEWS_MEDIA_SELECT, toPublicMedia } from "./tv-news-media";
 
 const TV_NEWS_SELECT =
   "id,title,summary,category,source_name,source_url,image_url,is_breaking,is_published,published_at,created_at,updated_at";
@@ -114,11 +117,11 @@ export function validateTvNewsFormData(formData: FormData): TvNewsInput {
   };
 }
 
-export async function getPublishedTvNews(): Promise<TvNews[]> {
+export async function getPublishedTvNews(): Promise<TvNewsListItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("tv_news")
-    .select(TV_NEWS_SELECT)
+    .select(`${TV_NEWS_SELECT},tv_news_media(media_type,storage_path,is_cover,sort_order)`)
     .eq("is_published", true)
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(TV_NEWS_PUBLIC_LIMIT);
@@ -128,7 +131,28 @@ export async function getPublishedTvNews(): Promise<TvNews[]> {
     return [];
   }
 
-  return (data ?? []) as TvNews[];
+  return (data ?? []).map((item) => {
+    const media = (item.tv_news_media ?? []) as Pick<TvNewsMedia, "media_type" | "storage_path" | "is_cover" | "sort_order">[];
+    const cover = media.find((entry) => entry.is_cover && entry.media_type === "image" && entry.storage_path);
+    return {
+      ...item,
+      cover_image_url: cover?.storage_path
+        ? supabase.storage.from(TV_NEWS_MEDIA_BUCKET).getPublicUrl(cover.storage_path).data.publicUrl
+        : item.image_url,
+      media_types: [...new Set(media.map((entry) => entry.media_type))],
+      tv_news_media: undefined,
+    } as TvNewsListItem;
+  });
+}
+
+export async function getPublishedTvNewsById(id: string): Promise<{ news: TvNews; media: PublicTvNewsMedia[] } | null> {
+  const supabase = await createClient();
+  const { data: news, error } = await supabase.from("tv_news").select(TV_NEWS_SELECT).eq("id", id).eq("is_published", true).maybeSingle();
+  if (error || !news) return null;
+  const { data: media, error: mediaError } = await supabase.from("tv_news_media").select(TV_NEWS_MEDIA_SELECT).eq("news_id", id).order("sort_order").order("created_at");
+  if (mediaError) return null;
+  const publicUrl = (path: string) => supabase.storage.from(TV_NEWS_MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+  return { news: news as TvNews, media: ((media ?? []) as TvNewsMedia[]).map((item) => toPublicMedia(item, publicUrl)) };
 }
 
 export async function getAllTvNews(): Promise<TvNews[]> {

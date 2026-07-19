@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { getAllTvNews } from "../../../lib/tv-news";
+import { getAllTvNewsMedia } from "../../../lib/tv-news-media";
 import NewsClient from "./news-client";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,7 @@ export default async function AdminNewsPage() {
     redirect("/admin/login");
   }
 
-  const news = await getAllTvNews();
+  const [news, media] = await Promise.all([getAllTvNews(), getAllTvNewsMedia()]);
 
   return (
     <main className="min-h-screen bg-[#020B2E] px-5 py-10 text-white md:px-10">
@@ -50,7 +51,7 @@ export default async function AdminNewsPage() {
         </header>
 
         <div className="mt-10">
-          <NewsClient news={news} />
+          <NewsClient news={news} media={media} />
         </div>
       </div>
     </main>
