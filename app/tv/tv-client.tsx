@@ -45,7 +45,7 @@ const shows: Show[] = [
 
 const youtubeUrl = "https://www.youtube.com/@bichridigital";
 const youtubeUploadsEmbedUrl =
-  "https://www.youtube.com/embed?listType=user_uploads&list=UCrm-wKWYVhHX5S7usD6jMKQ&playsinline=1";
+  "https://www.youtube.com/embed/videoseries?list=UUrm-wKWYVhHX5S7usD6jMKQ&playsinline=1";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -137,6 +137,14 @@ export default function TvClient({ initialNews }: { initialNews: TvNews[] }) {
               <p className="mt-4 text-sm leading-6 text-white/50">
                 Parcourez et regardez les dernières vidéos publiées sur la chaîne Bichridigital.
               </p>
+              <a
+                href="https://www.youtube.com/@bichridigital/videos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-sm font-bold text-white/45 transition hover:text-[#FCCD12]"
+              >
+                Voir les vidéos directement sur YouTube
+              </a>
             </div>
 
             <div className="flex flex-col justify-center p-8 sm:p-12">
