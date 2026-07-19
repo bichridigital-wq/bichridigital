@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPublishedTvNews } from "../../lib/tv-news";
 import TvClient from "./tv-client";
 
 const description =
@@ -34,6 +35,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function TvPage() {
-  return <TvClient />;
+export default async function TvPage() {
+  const news = await getPublishedTvNews();
+
+  return <TvClient initialNews={news} />;
 }

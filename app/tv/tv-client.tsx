@@ -20,6 +20,8 @@ import {
 import { FaYoutube } from "react-icons/fa6";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import TvNewsRealtime from "./components/tv-news-realtime";
+import type { TvNews } from "../../types/tv-news";
 
 type Show = {
   name: string;
@@ -50,7 +52,7 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function TvClient() {
+export default function TvClient({ initialNews }: { initialNews: TvNews[] }) {
   return (
     <>
       <Navbar />
@@ -111,13 +113,16 @@ export default function TvClient() {
         </section>
 
         <section className="px-6 py-24">
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.65 }}
-            className="mx-auto grid max-w-7xl overflow-hidden rounded-[36px] border border-white/10 bg-[#070F33] shadow-[0_30px_100px_rgba(0,0,0,0.28)] lg:grid-cols-[1.25fr_0.75fr]"
-          >
+          <div className="mx-auto grid max-w-[1536px] items-start gap-8 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
+            <TvNewsRealtime initialNews={initialNews} />
+
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65 }}
+              className="grid min-w-0 overflow-hidden rounded-[36px] border border-white/10 bg-[#070F33] shadow-[0_30px_100px_rgba(0,0,0,0.28)] lg:grid-cols-[1.25fr_0.75fr]"
+            >
             <div className="border-b border-white/10 bg-[radial-gradient(circle_at_center,rgba(30,64,175,0.42),transparent_65%)] p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
               <div className="relative aspect-video w-full overflow-hidden rounded-[24px] border border-white/10 bg-black shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
                 <iframe
@@ -153,7 +158,8 @@ export default function TvClient() {
                 Accéder au direct <ArrowUpRight className="h-4 w-4" />
               </a>
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </section>
 
         <section className="bg-[#070F33] px-6 py-24">

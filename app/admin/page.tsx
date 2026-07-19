@@ -226,6 +226,35 @@ export default async function AdminPage() {
           </Link>
 
           <Link
+            href="/admin/news"
+            className="group rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:-translate-y-1 hover:border-red-400"
+          >
+            <div className="flex items-start justify-between gap-5">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-red-300">
+                  Bichridigital TV
+                </p>
+
+                <h2 className="mt-4 text-3xl font-black">
+                  Bichridigital News
+                </h2>
+
+                <p className="mt-4 leading-7 text-gray-400">
+                  Créer, modifier, publier ou masquer les actualités affichées sur la page TV.
+                </p>
+              </div>
+
+              <span className="text-3xl transition group-hover:translate-x-2">
+                →
+              </span>
+            </div>
+
+            <p className="mt-8 font-black text-red-300">
+              Gérer les actualités →
+            </p>
+          </Link>
+
+          <Link
             href="/boutique"
             className="rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:border-[#FCCD12]"
           >
