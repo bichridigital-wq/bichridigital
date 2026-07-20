@@ -44,15 +44,26 @@ const shows: Show[] = [
 ];
 
 const youtubeUrl = "https://www.youtube.com/@bichridigital";
-const youtubeUploadsEmbedUrl =
-  "https://www.youtube.com/embed/videoseries?list=UUrm-wKWYVhHX5S7usD6jMKQ&playsinline=1";
+const fallbackVideoId = "1BsxzOBSvQM";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 },
 };
 
-export default function TvClient({ initialNews }: { initialNews: TvNewsListItem[] }) {
+export default function TvClient({
+  initialNews,
+  videoId,
+  title,
+}: {
+  initialNews: TvNewsListItem[];
+  videoId?: string;
+  title?: string;
+}) {
+  const safeVideoId = /^[A-Za-z0-9_-]{11}$/.test(videoId ?? "")
+    ? videoId
+    : fallbackVideoId;
+  const youtubeEmbedUrl = `https://www.youtube.com/embed/${safeVideoId}?playsinline=1`;
   return (
     <>
       <Navbar />
@@ -122,8 +133,8 @@ export default function TvClient({ initialNews }: { initialNews: TvNewsListItem[
             <div className="w-full min-w-0 border-b border-white/10 bg-[radial-gradient(circle_at_center,rgba(30,64,175,0.42),transparent_65%)] p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-10">
               <div className="relative aspect-video w-full overflow-hidden rounded-[24px] border border-white/10 bg-black shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
                 <iframe
-                  src={youtubeUploadsEmbedUrl}
-                  title="Vidéos de la chaîne YouTube Bichridigital"
+                  src={youtubeEmbedUrl}
+                  title={title || "Vidéo de Bichridigital"}
                   className="absolute inset-0 h-full w-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   referrerPolicy="strict-origin-when-cross-origin"

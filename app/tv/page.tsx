@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getPublishedTvNews } from "../../lib/tv-news";
 import TvClient from "./tv-client";
+import { getLatestBichridigitalVideo } from "../../lib/youtube";
 
 const description =
   "Regardez Bichridigital TV : directs, émissions, reportages, interviews et contenus audiovisuels produits par Bichridigital Agency.";
@@ -36,7 +37,10 @@ export const metadata: Metadata = {
 };
 
 export default async function TvPage() {
-  const news = await getPublishedTvNews();
+  const [news, video] = await Promise.all([
+    getPublishedTvNews(),
+    getLatestBichridigitalVideo(),
+  ]);
 
-  return <TvClient initialNews={news} />;
+  return <TvClient initialNews={news} videoId={video.videoId} title={video.title} />;
 }
