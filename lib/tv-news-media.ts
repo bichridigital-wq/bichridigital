@@ -7,14 +7,18 @@ import {
   getMediaTypeFromMime,
   hasAllowedFileSignature,
   type PublicTvNewsMedia,
+  type AdminTvNewsMedia,
   type RegisterUploadedMediaInput,
   type TvNewsMedia,
 } from "../types/tv-news-media";
+import { createAdminClient } from "./supabase/admin";
+import {
+  createAdminTvNewsMediaSignedUrls,
+  validateTvNewsMediaStoragePath,
+} from "./tv-news-media-urls";
 
 export const TV_NEWS_MEDIA_SELECT =
   "id,news_id,media_type,storage_path,external_url,file_name,mime_type,file_size,title,alt_text,sort_order,is_cover,created_at";
-
-const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
 
 export function normalizeYoutubeUrl(value: string) {
   if (value.length > 2048) throw new Error("L’URL YouTube est trop longue.");
@@ -31,16 +35,11 @@ export function normalizeYoutubeUrl(value: string) {
   return { url: `https://www.youtube.com/watch?v=${id}`, embedUrl: `https://www.youtube.com/embed/${id}` };
 }
 
-export function validateStoragePath(newsId: string, path: string) {
-  const pattern = new RegExp(`^news/${newsId}/${UUID}-[a-zA-Z0-9][a-zA-Z0-9._-]*$`, "i");
-  if (!pattern.test(path)) throw new Error("Chemin Storage invalide.");
-}
-
 export async function validateUploadedObject(input: RegisterUploadedMediaInput) {
-  validateStoragePath(input.newsId, input.storagePath);
+  validateTvNewsMediaStoragePath(input.newsId, input.storagePath);
   const mediaType = getMediaTypeFromMime(input.mimeType);
   if (!mediaType) throw new Error("Type MIME interdit.");
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const slash = input.storagePath.lastIndexOf("/");
   const folder = input.storagePath.slice(0, slash);
   const objectName = input.storagePath.slice(slash + 1);
@@ -55,11 +54,16 @@ export async function validateUploadedObject(input: RegisterUploadedMediaInput) 
   return { mediaType, actualSize, actualMime };
 }
 
-export async function getAllTvNewsMedia(): Promise<TvNewsMedia[]> {
+export async function getAllTvNewsMedia(): Promise<AdminTvNewsMedia[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("tv_news_media").select(TV_NEWS_MEDIA_SELECT).order("sort_order");
   if (error) throw new Error("Impossible de charger les médias.");
-  return (data ?? []) as TvNewsMedia[];
+  const media = (data ?? []) as TvNewsMedia[];
+  const signedUrls = await createAdminTvNewsMediaSignedUrls(media);
+  return media.map((item) => ({
+    ...item,
+    signed_url: item.storage_path ? signedUrls[item.storage_path] ?? null : null,
+  }));
 }
 
 export async function assertMediaCapacity(newsId: string) {
@@ -68,13 +72,16 @@ export async function assertMediaCapacity(newsId: string) {
   if (error || (count ?? 0) >= TV_NEWS_MEDIA_MAX_COUNT) throw new Error("Une actualité ne peut contenir que 10 médias.");
 }
 
-export function toPublicMedia(media: TvNewsMedia, publicUrl: (path: string) => string): PublicTvNewsMedia {
+export function toPublicMedia(
+  media: TvNewsMedia,
+  signedUrls: Readonly<Record<string, string>>
+): PublicTvNewsMedia {
   const youtube = media.external_url ? normalizeYoutubeUrl(media.external_url) : null;
   return {
     id: media.id, media_type: media.media_type, file_name: media.file_name,
     mime_type: media.mime_type, file_size: media.file_size, title: media.title,
     alt_text: media.alt_text, sort_order: media.sort_order, is_cover: media.is_cover,
-    url: media.storage_path ? publicUrl(media.storage_path) : youtube!.url,
+    url: media.storage_path ? signedUrls[media.storage_path] ?? "" : youtube!.url,
     youtube_embed_url: youtube?.embedUrl ?? null,
   };
 }

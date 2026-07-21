@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "./supabase/admin";
 import { createClient } from "./supabase/server";
 import {
   TV_NEWS_CATEGORIES,
@@ -9,8 +11,13 @@ import {
   type TvNewsInput,
 } from "../types/tv-news";
 import type { TvNewsListItem } from "../types/tv-news";
-import { TV_NEWS_MEDIA_BUCKET, type TvNewsMedia, type PublicTvNewsMedia } from "../types/tv-news-media";
+import { type TvNewsMedia, type PublicTvNewsMedia } from "../types/tv-news-media";
 import { TV_NEWS_MEDIA_SELECT, toPublicMedia } from "./tv-news-media";
+import {
+  createAdminTvNewsMediaSignedUrls,
+  createPublicTvNewsMediaSignedUrls,
+  getLegacyTvNewsMediaStoragePath,
+} from "./tv-news-media-urls";
 
 const TV_NEWS_SELECT =
   "id,title,summary,category,source_name,source_url,image_url,is_breaking,is_published,published_at,created_at,updated_at,notification_requested,notified_at";
@@ -117,8 +124,8 @@ export function validateTvNewsFormData(formData: FormData): TvNewsInput {
   };
 }
 
-export async function getPublishedTvNews(): Promise<TvNewsListItem[]> {
-  const supabase = await createClient();
+const getCachedPublishedTvNews = unstable_cache(async (): Promise<TvNewsListItem[]> => {
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("tv_news")
     .select(`${TV_NEWS_SELECT},tv_news_media(media_type,storage_path,is_cover,sort_order)`)
@@ -131,28 +138,77 @@ export async function getPublishedTvNews(): Promise<TvNewsListItem[]> {
     return [];
   }
 
-  return (data ?? []).map((item) => {
+  const rows = data ?? [];
+  const legacyImages = rows.flatMap((item) => {
+    const storagePath = getLegacyTvNewsMediaStoragePath(item.id, item.image_url);
+    return storagePath ? [{ news_id: item.id, storage_path: storagePath }] : [];
+  });
+  const covers = rows.flatMap((item) => {
+    const media = (item.tv_news_media ?? []) as Pick<TvNewsMedia, "news_id" | "media_type" | "storage_path" | "is_cover" | "sort_order">[];
+    return media
+      .filter((entry) => entry.is_cover && entry.media_type === "image" && entry.storage_path)
+      .map((entry) => ({ news_id: item.id, storage_path: entry.storage_path }));
+  });
+  const signedUrls = await createPublicTvNewsMediaSignedUrls([
+    ...covers,
+    ...legacyImages,
+  ]);
+
+  return rows.map((item) => {
     const media = (item.tv_news_media ?? []) as Pick<TvNewsMedia, "media_type" | "storage_path" | "is_cover" | "sort_order">[];
     const cover = media.find((entry) => entry.is_cover && entry.media_type === "image" && entry.storage_path);
+    const legacyImagePath = getLegacyTvNewsMediaStoragePath(item.id, item.image_url);
+    const imageUrl = legacyImagePath
+      ? signedUrls[legacyImagePath] ?? null
+      : item.image_url;
     return {
       ...item,
+      image_url: imageUrl,
       cover_image_url: cover?.storage_path
-        ? supabase.storage.from(TV_NEWS_MEDIA_BUCKET).getPublicUrl(cover.storage_path).data.publicUrl
-        : item.image_url,
+        ? signedUrls[cover.storage_path] ?? null
+        : imageUrl,
       media_types: [...new Set(media.map((entry) => entry.media_type))],
       tv_news_media: undefined,
     } as TvNewsListItem;
   });
+}, ["published-tv-news-with-signed-media"], {
+  revalidate: 300,
+  tags: ["published-tv-news"],
+});
+
+export async function getPublishedTvNews(): Promise<TvNewsListItem[]> {
+  return getCachedPublishedTvNews();
 }
 
-export async function getPublishedTvNewsById(id: string): Promise<{ news: TvNews; media: PublicTvNewsMedia[] } | null> {
-  const supabase = await createClient();
+const getCachedPublishedTvNewsById = unstable_cache(async (id: string): Promise<{ news: TvNews; media: PublicTvNewsMedia[] } | null> => {
+  const supabase = createAdminClient();
   const { data: news, error } = await supabase.from("tv_news").select(TV_NEWS_SELECT).eq("id", id).eq("is_published", true).maybeSingle();
   if (error || !news) return null;
   const { data: media, error: mediaError } = await supabase.from("tv_news_media").select(TV_NEWS_MEDIA_SELECT).eq("news_id", id).order("sort_order").order("created_at");
   if (mediaError) return null;
-  const publicUrl = (path: string) => supabase.storage.from(TV_NEWS_MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
-  return { news: news as TvNews, media: ((media ?? []) as TvNewsMedia[]).map((item) => toPublicMedia(item, publicUrl)) };
+  const mediaRows = (media ?? []) as TvNewsMedia[];
+  const legacyImagePath = getLegacyTvNewsMediaStoragePath(news.id, news.image_url);
+  const signedUrls = await createPublicTvNewsMediaSignedUrls([
+    ...mediaRows,
+    ...(legacyImagePath
+      ? [{ news_id: news.id, storage_path: legacyImagePath }]
+      : []),
+  ]);
+  const publicNews = {
+    ...news,
+    image_url: legacyImagePath
+      ? signedUrls[legacyImagePath] ?? null
+      : news.image_url,
+  } as TvNews;
+  return { news: publicNews, media: mediaRows.map((item) => toPublicMedia(item, signedUrls)) };
+}, ["published-tv-news-detail-with-signed-media"], {
+  revalidate: 300,
+  tags: ["published-tv-news"],
+});
+
+export async function getPublishedTvNewsById(id: string): Promise<{ news: TvNews; media: PublicTvNewsMedia[] } | null> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return null;
+  return getCachedPublishedTvNewsById(id);
 }
 
 export async function getAllTvNews(): Promise<TvNews[]> {
@@ -166,5 +222,18 @@ export async function getAllTvNews(): Promise<TvNews[]> {
     throw new Error("Impossible de charger les actualités.");
   }
 
-  return (data ?? []) as TvNews[];
+  const news = (data ?? []) as TvNews[];
+  const legacyImages = news.flatMap((item) => {
+    const storagePath = getLegacyTvNewsMediaStoragePath(item.id, item.image_url);
+    return storagePath ? [{ news_id: item.id, storage_path: storagePath }] : [];
+  });
+  const signedUrls = await createAdminTvNewsMediaSignedUrls(legacyImages);
+
+  return news.map((item) => {
+    const storagePath = getLegacyTvNewsMediaStoragePath(item.id, item.image_url);
+    return {
+      ...item,
+      image_url: storagePath ? signedUrls[storagePath] ?? null : item.image_url,
+    };
+  });
 }

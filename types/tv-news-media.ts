@@ -40,6 +40,10 @@ export type TvNewsMedia = {
   created_at: string;
 };
 
+export type AdminTvNewsMedia = TvNewsMedia & {
+  signed_url: string | null;
+};
+
 export type PublicTvNewsMedia = Pick<
   TvNewsMedia,
   | "id"

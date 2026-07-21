@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { createClient } from "../../../lib/supabase/server";
 import { validateTvNewsFormData } from "../../../lib/tv-news";
@@ -54,6 +54,7 @@ function optionalMediaText(value: string | undefined, maximum: number) {
 }
 
 function refreshNewsPaths() {
+  revalidateTag("published-tv-news", "max");
   revalidatePath("/admin");
   revalidatePath("/admin/news");
   revalidatePath("/tv");

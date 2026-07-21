@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import NewsForm from "./news-form";
 import {
   deleteNewsAction,
@@ -9,7 +10,7 @@ import {
   setNewsPublishedAction,
 } from "./news-actions";
 import type { TvNews } from "../../../types/tv-news";
-import type { TvNewsMedia } from "../../../types/tv-news-media";
+import type { AdminTvNewsMedia } from "../../../types/tv-news-media";
 import NewsMediaUploader from "./components/news-media-uploader";
 import NewsMediaList from "./components/news-media-list";
 
@@ -23,7 +24,7 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-export default function NewsClient({ news, media }: { news: TvNews[]; media: TvNewsMedia[] }) {
+export default function NewsClient({ news, media }: { news: TvNews[]; media: AdminTvNewsMedia[] }) {
   const router = useRouter();
   const [editingNews, setEditingNews] = useState<TvNews | null>(null);
   const [message, setMessage] = useState("");
@@ -141,6 +142,18 @@ export default function NewsClient({ news, media }: { news: TvNews[]; media: TvN
                         {item.is_published ? "Publiée" : "Masquée"}
                       </span>
                     </div>
+
+                    {item.image_url && (
+                      <div className="relative mt-5 aspect-video max-w-md overflow-hidden rounded-2xl bg-[#020B2E]">
+                        <Image
+                          src={item.image_url}
+                          alt={`Couverture de ${item.title}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 448px"
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
 
                     <h3 className="mt-5 text-2xl font-black">{item.title}</h3>
                     <p className="mt-3 whitespace-pre-wrap leading-7 text-gray-400">
