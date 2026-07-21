@@ -67,22 +67,6 @@ function validateOptionalUrl(
   return url.toString();
 }
 
-function parsePublishedAt(value: string | null) {
-  if (!value) return null;
-
-  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
-    throw new Error("La date de publication est invalide.");
-  }
-
-  const date = new Date(`${value}:00Z`);
-
-  if (Number.isNaN(date.getTime())) {
-    throw new Error("La date de publication est invalide.");
-  }
-
-  return date.toISOString();
-}
-
 export function validateTvNewsFormData(formData: FormData): TvNewsInput {
   const title = optionalText(formData.get("title"));
   const summary = optionalText(formData.get("summary"));
@@ -90,7 +74,6 @@ export function validateTvNewsFormData(formData: FormData): TvNewsInput {
   const sourceName = optionalText(formData.get("source_name"));
   const sourceUrl = optionalText(formData.get("source_url"));
   const imageUrl = optionalText(formData.get("image_url"));
-  const publishedAt = optionalText(formData.get("published_at"));
 
   if (!title || title.length > 180) {
     throw new Error("Le titre doit contenir entre 1 et 180 caractères.");
@@ -120,11 +103,10 @@ export function validateTvNewsFormData(formData: FormData): TvNewsInput {
     image_url: validateOptionalUrl(imageUrl, "L’URL de l’image", true),
     is_breaking: formData.get("is_breaking") === "on",
     is_published: formData.get("is_published") === "on",
-    published_at: parsePublishedAt(publishedAt),
   };
 }
 
-const getCachedPublishedTvNews = unstable_cache(async (): Promise<TvNewsListItem[]> => {
+async function loadPublishedTvNews(): Promise<TvNewsListItem[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("tv_news")
@@ -171,13 +153,63 @@ const getCachedPublishedTvNews = unstable_cache(async (): Promise<TvNewsListItem
       tv_news_media: undefined,
     } as TvNewsListItem;
   });
-}, ["published-tv-news-with-signed-media"], {
+}
+
+const getCachedPublishedTvNews = unstable_cache(loadPublishedTvNews, ["published-tv-news-with-signed-media"], {
   revalidate: 300,
   tags: ["published-tv-news"],
 });
 
 export async function getPublishedTvNews(): Promise<TvNewsListItem[]> {
   return getCachedPublishedTvNews();
+}
+
+export async function getFreshPublishedTvNews(): Promise<TvNewsListItem[]> {
+  return loadPublishedTvNews();
+}
+
+export async function getFreshPublishedTvNewsListItemById(
+  id: string
+): Promise<TvNewsListItem | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("tv_news")
+    .select(`${TV_NEWS_SELECT},tv_news_media(media_type,storage_path,is_cover,sort_order)`)
+    .eq("id", id)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const media = (data.tv_news_media ?? []) as Pick<
+    TvNewsMedia,
+    "media_type" | "storage_path" | "is_cover" | "sort_order"
+  >[];
+  const cover = media.find(
+    (item) => item.is_cover && item.media_type === "image" && item.storage_path
+  );
+  const legacyImagePath = getLegacyTvNewsMediaStoragePath(data.id, data.image_url);
+  const signedUrls = await createPublicTvNewsMediaSignedUrls([
+    ...(cover?.storage_path
+      ? [{ news_id: data.id, storage_path: cover.storage_path }]
+      : []),
+    ...(legacyImagePath
+      ? [{ news_id: data.id, storage_path: legacyImagePath }]
+      : []),
+  ]);
+  const imageUrl = legacyImagePath
+    ? signedUrls[legacyImagePath] ?? null
+    : data.image_url;
+
+  return {
+    ...data,
+    image_url: imageUrl,
+    cover_image_url: cover?.storage_path
+      ? signedUrls[cover.storage_path] ?? null
+      : imageUrl,
+    media_types: [...new Set(media.map((item) => item.media_type))],
+    tv_news_media: undefined,
+  } as TvNewsListItem;
 }
 
 const getCachedPublishedTvNewsById = unstable_cache(async (id: string): Promise<{ news: TvNews; media: PublicTvNewsMedia[] } | null> => {

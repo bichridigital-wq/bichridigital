@@ -42,7 +42,6 @@ export type TvNewsInput = {
   image_url: string | null;
   is_breaking: boolean;
   is_published: boolean;
-  published_at: string | null;
 };
 
 export type TvNewsActionState = {

@@ -151,8 +151,8 @@ export default function NewsForm({
             </label>
             <input
               id="news-published-at"
-              name="published_at"
               type="datetime-local"
+              readOnly
               defaultValue={toDakarInputValue(news?.published_at ?? null)}
               className={inputClass}
             />
