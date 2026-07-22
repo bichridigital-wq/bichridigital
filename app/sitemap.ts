@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { getPublishedArticleSitemapRows } from "../lib/bichridigital-articles";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.bichridigital.com";
 
   const mainRoutes = [
@@ -9,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/portfolio",
     "/boutique",
     "/tv",
+    "/conseils",
     "/apropos",
     "/contact",
   ];
@@ -17,6 +19,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/mentions-legales",
     "/politique-confidentialite",
   ];
+
+  let articleRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const articles = await getPublishedArticleSitemapRows();
+    articleRoutes = articles.map((article) => ({
+      url: `${baseUrl}/conseils/${article.slug}`,
+      lastModified: article.published_at ?? article.updated_at,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }));
+  } catch {
+    articleRoutes = [];
+  }
 
   return [
     ...mainRoutes.map((route) => ({
@@ -30,5 +45,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly" as const,
       priority: 0.4,
     })),
+    ...articleRoutes,
   ];
 }

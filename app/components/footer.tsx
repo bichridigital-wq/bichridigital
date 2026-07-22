@@ -81,6 +81,13 @@ export default function Footer() {
 
               <Link
                 className="transition hover:text-[#FCCD12]"
+                href="/conseils"
+              >
+                Conseils
+              </Link>
+
+              <Link
+                className="transition hover:text-[#FCCD12]"
                 href="/apropos"
               >
                 À propos

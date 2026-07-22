@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Services", href: "/services" },
   { name: "Portfolio", href: "/portfolio" },
   { name: "Boutique", href: "/boutique" },
+  { name: "Conseils", href: "/conseils" },
   { name: "À propos", href: "/apropos" },
   { name: "Contact", href: "/contact" },
 ];
@@ -38,7 +39,7 @@ export default function Navbar() {
         <div className="hidden justify-center lg:flex">
           <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
             {navLinks.map((link) => {
-              const active = pathname === link.href;
+              const active = pathname === link.href || (link.href !== "/" && pathname.startsWith(`${link.href}/`));
 
               return (
                 <Link
@@ -83,7 +84,7 @@ export default function Navbar() {
         <div className="mx-auto mt-3 max-w-7xl rounded-[24px] border border-white/10 bg-[#020B2E]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl lg:hidden">
           <div className="flex flex-col gap-3">
             {navLinks.map((link) => {
-              const active = pathname === link.href;
+              const active = pathname === link.href || (link.href !== "/" && pathname.startsWith(`${link.href}/`));
 
               return (
                 <Link

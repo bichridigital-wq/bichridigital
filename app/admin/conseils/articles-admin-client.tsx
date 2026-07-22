@@ -1,0 +1,15 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ARTICLE_CATEGORY_LABELS, type BichridigitalArticle } from "../../../types/bichridigital-article";
+import { deleteArticleAction, setArticlePublishedAction } from "./article-actions";
+
+export default function ArticlesAdminClient({ articles }: { articles: BichridigitalArticle[] }) {
+  const router = useRouter(); const [busy, setBusy] = useState<string | null>(null); const [message, setMessage] = useState("");
+  async function publish(article: BichridigitalArticle) { setBusy(article.id); const result = await setArticlePublishedAction(article.id, !article.is_published); setMessage(result.message); setBusy(null); if (result.success) router.refresh(); }
+  async function remove(article: BichridigitalArticle) { if (!confirm(`Supprimer définitivement « ${article.title} » et sa couverture ?`)) return; setBusy(article.id); const result = await deleteArticleAction(article.id); setMessage(result.message); setBusy(null); if (result.success) router.refresh(); }
+  const date = (value: string | null) => value ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeZone: "Africa/Dakar" }).format(new Date(value)) : "—";
+  return <>{message && <p role="status" className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">{message}</p>}<div className="mt-8 overflow-x-auto rounded-[28px] border border-white/10"><table className="min-w-full text-left text-sm"><thead className="bg-white/10 text-white/60"><tr><th className="p-4">Titre</th><th className="p-4">Catégorie</th><th className="p-4">Statut</th><th className="p-4">Publication</th><th className="p-4">Mise en avant</th><th className="p-4">Actions</th></tr></thead><tbody>{articles.map((article) => <tr key={article.id} className="border-t border-white/10"><td className="max-w-sm p-4 font-bold">{article.title}</td><td className="p-4 text-white/65">{ARTICLE_CATEGORY_LABELS[article.category]}</td><td className="p-4"><span className={`rounded-full px-3 py-1 font-bold ${article.is_published ? "bg-green-500/15 text-green-300" : "bg-white/10 text-white/60"}`}>{article.is_published ? "Publié" : "Brouillon"}</span></td><td className="p-4 text-white/65">{date(article.published_at)}</td><td className="p-4">{article.is_featured ? "Oui" : "Non"}</td><td className="p-4"><div className="flex flex-wrap gap-2"><Link href={`/admin/conseils/${article.id}/modifier`} className="rounded-full border border-white/20 px-3 py-2 font-bold hover:border-[#FCCD12]">Modifier</Link><button disabled={busy === article.id} onClick={() => publish(article)} className="rounded-full bg-[#FCCD12] px-3 py-2 font-black text-[#020B2E] disabled:opacity-50">{article.is_published ? "Masquer" : "Publier"}</button><button disabled={busy === article.id} onClick={() => remove(article)} className="rounded-full bg-red-500/15 px-3 py-2 font-bold text-red-300 disabled:opacity-50">Supprimer</button></div></td></tr>)}</tbody></table>{!articles.length && <p className="p-10 text-center text-white/60">Aucun article pour le moment.</p>}</div></>;
+}
