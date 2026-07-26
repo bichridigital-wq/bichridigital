@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
 import { isArticleId, validateArticleFormData } from "../../../lib/bichridigital-articles";
 import { validateArticleStoragePath } from "../../../lib/article-media-urls";
@@ -16,9 +16,10 @@ async function requireAdmin() {
 }
 
 function refresh(slug?: string) {
-  revalidateTag("bichridigital-articles", "max");
+  updateTag("bichridigital-articles");
   revalidatePath("/conseils");
   if (slug) revalidatePath(`/conseils/${slug}`);
+  revalidatePath("/sitemap.xml");
   revalidatePath("/admin");
   revalidatePath("/admin/conseils");
 }

@@ -1,5 +1,5 @@
 export const ARTICLE_MEDIA_BUCKET = "bichridigital-article-media";
-export const ARTICLE_PUBLIC_LIMIT = 12;
+export const ARTICLE_PUBLIC_LIMIT = 10;
 export const ARTICLE_IMAGE_MAX_BYTES = 8 * 1024 * 1024;
 export const ARTICLE_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 

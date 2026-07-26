@@ -19,22 +19,48 @@ export function validateArticleStoragePath(articleId: string, path: string) {
 
 type CoverSource = { id: string; cover_storage_path: string | null };
 
+function logCoverError(message: string, error: unknown, details?: string) {
+  const supabaseError = error && typeof error === "object" ? error as {
+    message?: unknown;
+    code?: unknown;
+    details?: unknown;
+    statusCode?: unknown;
+  } : null;
+  console.error(message, {
+    message: typeof supabaseError?.message === "string" ? supabaseError.message : String(error),
+    code: supabaseError?.code ?? supabaseError?.statusCode ?? null,
+    details: supabaseError?.details ?? details ?? null,
+    source: "Supabase Storage",
+  });
+}
+
 async function signCovers(items: readonly CoverSource[], expiresIn: number) {
   const paths = [...new Set(items.flatMap((item) => {
     if (!item.cover_storage_path) return [];
-    validateArticleStoragePath(item.id, item.cover_storage_path);
-    return [item.cover_storage_path];
+    try {
+      validateArticleStoragePath(item.id, item.cover_storage_path);
+      return [item.cover_storage_path];
+    } catch (error) {
+      logCoverError("Chemin de couverture d’article invalide.", error, `articleId=${item.id}`);
+      return [];
+    }
   }))];
   if (!paths.length) return {} as Record<string, string>;
 
   const { data, error } = await createAdminClient().storage
     .from(ARTICLE_MEDIA_BUCKET)
     .createSignedUrls(paths, expiresIn);
-  if (error || !data) throw new Error("Impossible de préparer les couvertures.");
+  if (error || !data) {
+    logCoverError("Impossible de préparer les couvertures.", error ?? "Réponse vide");
+    return {};
+  }
 
   const result: Record<string, string> = {};
   for (const item of data) {
-    if (item.error || !item.path || !item.signedUrl) throw new Error("Impossible de préparer les couvertures.");
+    if (item.error || !item.path || !item.signedUrl) {
+      logCoverError("Impossible de préparer une couverture.", item.error ?? "URL signée absente", item.path ?? undefined);
+      continue;
+    }
     result[item.path] = item.signedUrl;
   }
   return result;

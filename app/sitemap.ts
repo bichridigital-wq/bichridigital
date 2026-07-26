@@ -29,7 +29,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.7,
     }));
-  } catch {
+  } catch (error) {
+    console.error("Impossible de générer les URL d’articles du sitemap.", {
+      message: error instanceof Error ? error.message : String(error),
+      code: null,
+      details: null,
+      source: "Supabase",
+    });
     articleRoutes = [];
   }
 

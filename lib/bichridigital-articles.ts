@@ -15,6 +15,22 @@ export const ARTICLE_SELECT = "id,title,slug,excerpt,content,category,author_nam
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+function logSupabaseError(context: string, error: unknown) {
+  const supabaseError = error && typeof error === "object" ? error as {
+    message?: unknown;
+    code?: unknown;
+    details?: unknown;
+    hint?: unknown;
+  } : null;
+  console.error(context, {
+    message: typeof supabaseError?.message === "string" ? supabaseError.message : String(error),
+    code: supabaseError?.code ?? null,
+    details: supabaseError?.details ?? null,
+    hint: supabaseError?.hint ?? null,
+    source: "Supabase",
+  });
+}
+
 export function isArticleId(value: string) { return UUID.test(value); }
 function text(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -50,8 +66,15 @@ const loadPublicArticles = unstable_cache(async (page: number) => {
   const safePage = Number.isInteger(page) && page > 0 ? page : 1;
   const from = (safePage - 1) * ARTICLE_PUBLIC_LIMIT;
   const { data, error } = await createAdminClient().from("bichridigital_articles").select(ARTICLE_SELECT)
-    .eq("is_published", true).order("published_at", { ascending: false, nullsFirst: false }).range(from, from + ARTICLE_PUBLIC_LIMIT);
-  if (error) { console.error("Impossible de charger les Conseils Bichridigital."); return { articles: [], hasMore: false }; }
+    .eq("is_published", true)
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(from, from + ARTICLE_PUBLIC_LIMIT);
+  if (error) {
+    logSupabaseError("Impossible de charger les Conseils Bichridigital.", error);
+    throw new Error("Impossible de charger les Conseils Bichridigital.");
+  }
   const rows = (data ?? []) as Omit<BichridigitalArticle, "cover_url">[];
   return { articles: await attachPublicCovers(rows.slice(0, ARTICLE_PUBLIC_LIMIT)), hasMore: rows.length > ARTICLE_PUBLIC_LIMIT };
 }, ["published-bichridigital-articles"], { revalidate: 300, tags: ["bichridigital-articles"] });
@@ -61,9 +84,17 @@ export function getPublishedArticlePage(page = 1) { return loadPublicArticles(pa
 export const getFeaturedArticle = unstable_cache(async () => {
   const supabase = createAdminClient();
   const featured = await supabase.from("bichridigital_articles").select(ARTICLE_SELECT).eq("is_published", true).eq("is_featured", true).order("published_at", { ascending: false }).limit(1).maybeSingle();
+  if (featured.error) {
+    logSupabaseError("Impossible de charger l’article à la une.", featured.error);
+    throw new Error("Impossible de charger l’article à la une.");
+  }
   let row = featured.data;
   if (!row) {
     const latest = await supabase.from("bichridigital_articles").select(ARTICLE_SELECT).eq("is_published", true).order("published_at", { ascending: false }).limit(1).maybeSingle();
+    if (latest.error) {
+      logSupabaseError("Impossible de charger le dernier article publié.", latest.error);
+      throw new Error("Impossible de charger le dernier article publié.");
+    }
     row = latest.data;
   }
   if (!row) return null;
@@ -74,7 +105,11 @@ export const getPublishedArticleBySlug = unstable_cache(async (slug: string) => 
   if (!SLUG.test(slug)) return null;
   const { data, error } = await createAdminClient().from("bichridigital_articles").select(ARTICLE_SELECT)
     .eq("slug", slug).eq("is_published", true).maybeSingle();
-  if (error || !data) return null;
+  if (error) {
+    logSupabaseError(`Impossible de charger l’article publié « ${slug} ».`, error);
+    throw new Error("Impossible de charger l’article publié.");
+  }
+  if (!data) return null;
   return (await attachPublicCovers([data as Omit<BichridigitalArticle, "cover_url">]))[0];
 }, ["published-bichridigital-article-detail"], { revalidate: 300, tags: ["bichridigital-articles"] });
 
@@ -82,13 +117,19 @@ export const getRelatedArticles = unstable_cache(async (id: string, category: Ar
   if (!isArticleId(id) || !ARTICLE_CATEGORIES.includes(category)) return [];
   const { data, error } = await createAdminClient().from("bichridigital_articles").select(ARTICLE_SELECT)
     .eq("is_published", true).eq("category", category).neq("id", id).order("published_at", { ascending: false }).limit(3);
-  if (error) return [];
+  if (error) {
+    logSupabaseError("Impossible de charger les articles associés.", error);
+    throw new Error("Impossible de charger les articles associés.");
+  }
   return attachPublicCovers((data ?? []) as Omit<BichridigitalArticle, "cover_url">[]);
 }, ["related-bichridigital-articles"], { revalidate: 300, tags: ["bichridigital-articles"] });
 
 export async function getPublishedArticleSitemapRows() {
   const { data, error } = await createAdminClient().from("bichridigital_articles").select("slug,published_at,updated_at").eq("is_published", true);
-  if (error) throw new Error("Sitemap articles indisponible.");
+  if (error) {
+    logSupabaseError("Impossible de charger les articles du sitemap.", error);
+    throw new Error("Sitemap articles indisponible.");
+  }
   return data ?? [];
 }
 
