@@ -1,10 +1,14 @@
 import "server-only";
 
-import { getYouTubeChannelId, youtubeRequest } from "./client";
+import {
+  getYouTubeChannelId,
+  youtubeRequest,
+  YouTubeInvalidResponseError,
+} from "./client";
 import type { LiveBroadcast, Playlist, Video } from "./types";
 
 const DEFAULT_VIDEO_LIMIT = 12;
-const MAX_VIDEO_LIMIT = 25;
+const YOUTUBE_PAGE_LIMIT = 50;
 const PLAYLIST_LIMIT = 25;
 const STANDARD_CACHE_SECONDS = 300;
 const LIVE_CACHE_SECONDS = 60;
@@ -27,6 +31,10 @@ type ChannelItem = {
 type PlaylistItem = {
   snippet?: Snippet;
   contentDetails?: { videoId?: string };
+};
+type PlaylistItemsResponse = {
+  items?: PlaylistItem[];
+  nextPageToken?: string;
 };
 type VideoItem = {
   id?: string;
@@ -56,10 +64,6 @@ function thumbnailUrl(thumbnails?: ThumbnailSet): string {
   );
 }
 
-function boundedLimit(limit: number): number {
-  return Math.max(1, Math.min(Math.trunc(limit), MAX_VIDEO_LIMIT));
-}
-
 function mapVideo(item: VideoItem, playlistId?: string): Video | null {
   if (!item.id || !item.snippet) return null;
   return {
@@ -79,16 +83,27 @@ function mapVideo(item: VideoItem, playlistId?: string): Video | null {
 
 async function getVideoDetails(ids: string[], playlistId?: string): Promise<Video[]> {
   if (ids.length === 0) return [];
-  const response = await youtubeRequest<{ items?: VideoItem[] }>(
-    "videos",
-    {
-      part: "snippet,contentDetails,liveStreamingDetails",
-      id: ids.join(","),
-      maxResults: ids.length,
-    },
-    { revalidate: STANDARD_CACHE_SECONDS, tags: ["youtube-videos"] }
+
+  const detailPages = await Promise.all(
+    Array.from({ length: Math.ceil(ids.length / YOUTUBE_PAGE_LIMIT) }, (_, index) => {
+      const pageIds = ids.slice(
+        index * YOUTUBE_PAGE_LIMIT,
+        (index + 1) * YOUTUBE_PAGE_LIMIT
+      );
+      return youtubeRequest<{ items?: VideoItem[] }>(
+        "videos",
+        {
+          part: "snippet,contentDetails,liveStreamingDetails",
+          id: pageIds.join(","),
+          maxResults: pageIds.length,
+        },
+        { revalidate: STANDARD_CACHE_SECONDS, tags: ["youtube-videos"] }
+      );
+    })
   );
-  const byId = new Map((response.items ?? []).map((item) => [item.id, item]));
+  const byId = new Map(
+    detailPages.flatMap((response) => response.items ?? []).map((item) => [item.id, item])
+  );
   return ids
     .map((id) => byId.get(id))
     .map((item) => (item ? mapVideo(item, playlistId) : null))
@@ -155,21 +170,61 @@ export async function getPlaylists(): Promise<Playlist[]> {
 
 export async function getPlaylistVideos(
   playlistId: string,
-  limit = DEFAULT_VIDEO_LIMIT
+  limit?: number
 ): Promise<Video[]> {
-  const maxResults = boundedLimit(limit);
-  const response = await youtubeRequest<{ items?: PlaylistItem[] }>(
-    "playlistItems",
-    {
-      part: "snippet,contentDetails",
-      playlistId,
-      maxResults,
-    },
-    { revalidate: STANDARD_CACHE_SECONDS, tags: ["youtube-playlist-items"] }
+  const requestedLimit =
+    limit === undefined ? undefined : Math.max(1, Math.trunc(limit));
+  const ids: string[] = [];
+  const seenVideoIds = new Set<string>();
+  const seenPageTokens = new Set<string>();
+  let pageToken: string | undefined;
+
+  do {
+    if (pageToken) {
+      if (seenPageTokens.has(pageToken)) {
+        throw new YouTubeInvalidResponseError();
+      }
+      seenPageTokens.add(pageToken);
+    }
+
+    const remaining =
+      requestedLimit === undefined ? YOUTUBE_PAGE_LIMIT : requestedLimit - ids.length;
+    const response: PlaylistItemsResponse =
+      await youtubeRequest<PlaylistItemsResponse>(
+        "playlistItems",
+        {
+          part: "snippet,contentDetails",
+          playlistId,
+          maxResults: Math.min(YOUTUBE_PAGE_LIMIT, remaining),
+          ...(pageToken ? { pageToken } : {}),
+        },
+        { revalidate: STANDARD_CACHE_SECONDS, tags: ["youtube-playlist-items"] }
+      );
+
+    if (
+      !response ||
+      !Array.isArray(response.items) ||
+      (response.nextPageToken !== undefined &&
+        typeof response.nextPageToken !== "string")
+    ) {
+      throw new YouTubeInvalidResponseError();
+    }
+
+    for (const item of response.items) {
+      const videoId =
+        item.contentDetails?.videoId ?? item.snippet?.resourceId?.videoId;
+      if (!videoId || seenVideoIds.has(videoId)) continue;
+      seenVideoIds.add(videoId);
+      ids.push(videoId);
+      if (requestedLimit !== undefined && ids.length >= requestedLimit) break;
+    }
+
+    pageToken = response.nextPageToken || undefined;
+  } while (
+    pageToken &&
+    (requestedLimit === undefined || ids.length < requestedLimit)
   );
-  const ids = (response.items ?? [])
-    .map((item) => item.contentDetails?.videoId ?? item.snippet?.resourceId?.videoId)
-    .filter((id): id is string => Boolean(id));
+
   return getVideoDetails(ids, playlistId);
 }
 

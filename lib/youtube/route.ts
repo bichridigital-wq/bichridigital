@@ -51,6 +51,17 @@ export function invalidPlaylistId<T>() {
   );
 }
 
+export function invalidLimit<T>() {
+  return NextResponse.json<ApiResponse<T>>(
+    {
+      data: null,
+      source: "youtube",
+      error: "Le paramètre limit doit être un entier positif inférieur ou égal à 500.",
+    },
+    { status: 400, headers: { "Cache-Control": "no-store" } }
+  );
+}
+
 export function isValidPlaylistId(value: string): boolean {
   return /^[A-Za-z0-9_-]{10,80}$/.test(value);
 }
