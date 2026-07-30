@@ -28,12 +28,14 @@ export type PublicScheduleEvent = {
 };
 
 export type AdminScheduleEvent = PublicScheduleEvent & {
+  programId: string | null;
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
 };
 
 export type CreateScheduleEventInput = {
+  programId: string | null;
   title: string;
   slug: string | null;
   description: string | null;
@@ -56,6 +58,7 @@ export type ScheduleActionState = {
 
 export type ScheduleRow = {
   id: string;
+  program_id: string | null;
   title: string;
   slug: string | null;
   description: string | null;

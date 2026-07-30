@@ -15,6 +15,7 @@ import {
   uploadScheduleImage,
   validateScheduleImage,
 } from "../../../lib/schedule/media";
+import { getProgramAdminById } from "../../../lib/programs/service";
 import {
   SCHEDULE_STATUSES,
   type ScheduleActionState,
@@ -46,14 +47,26 @@ export async function saveScheduleEventAction(
   let persisted = false;
   try {
     const input = validateScheduleFormData(formData);
+    const program = input.programId
+      ? await getProgramAdminById(input.programId)
+      : null;
+    if (input.programId && !program) {
+      throw new Error("Programme introuvable.");
+    }
     const image = readScheduleImage(formData);
     const removeImage = formData.get("remove_thumbnail") === "true";
+    const useProgramThumbnail =
+      formData.get("use_program_thumbnail") === "true";
     if (image) await validateScheduleImage(image);
 
     if (id) {
       const current = await getScheduleEventById(id);
       if (!current) throw new Error("Événement introuvable.");
-      let thumbnailUrl = removeImage ? null : current.thumbnailUrl;
+      let thumbnailUrl = removeImage
+        ? null
+        : useProgramThumbnail
+          ? program?.defaultThumbnailUrl ?? null
+          : current.thumbnailUrl;
       if (image) {
         const uploaded = await uploadScheduleImage(id, image);
         uploadedPath = uploaded.path;
@@ -78,7 +91,7 @@ export async function saveScheduleEventAction(
     } else {
       const created = await createScheduleEvent({
         ...input,
-        thumbnailUrl: null,
+        thumbnailUrl: program?.defaultThumbnailUrl ?? null,
       });
       createdId = created.id;
       if (image) {

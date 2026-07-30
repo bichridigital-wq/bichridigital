@@ -11,6 +11,7 @@ const PUBLIC_STORAGE_MARKER =
   `/storage/v1/object/public/${SCHEDULE_MEDIA_BUCKET}/`;
 const UUID_PATTERN =
   "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
+const UUID_REGEX = new RegExp(`^${UUID_PATTERN}$`, "i");
 const EXTENSIONS = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -57,8 +58,16 @@ async function detectImageMime(file: File): Promise<AllowedMime | null> {
 }
 
 export function readScheduleImage(formData: FormData): File | null {
-  const value = formData.get("thumbnail_file");
-  return value instanceof File && value.size > 0 ? value : null;
+  const files = formData
+    .getAll("thumbnail_file")
+    .filter(
+      (value): value is File =>
+        value instanceof File && (value.name.length > 0 || value.size > 0),
+    );
+  if (files.length > 1) {
+    throw new Error("Une seule miniature peut être envoyée.");
+  }
+  return files[0] ?? null;
 }
 
 export async function validateScheduleImage(file: File) {
@@ -85,6 +94,9 @@ export async function validateScheduleImage(file: File) {
 }
 
 export async function uploadScheduleImage(eventId: string, file: File) {
+  if (!UUID_REGEX.test(eventId)) {
+    throw new Error("Identifiant d’événement invalide.");
+  }
   const checked = await validateScheduleImage(file);
   const path = `schedule/${eventId}/${crypto.randomUUID()}.${checked.extension}`;
   const supabase = createAdminClient();
@@ -107,18 +119,24 @@ export function getOwnedScheduleImagePath(
   eventId: string,
   imageUrl: string | null,
 ) {
-  if (!imageUrl) return null;
+  if (!imageUrl || !UUID_REGEX.test(eventId)) return null;
   let url: URL;
+  let expectedOrigin: string;
   try {
     url = new URL(imageUrl);
+    expectedOrigin = new URL(
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    ).origin;
   } catch {
     return null;
   }
-  const markerIndex = url.pathname.indexOf(PUBLIC_STORAGE_MARKER);
-  if (markerIndex === -1) return null;
-  const encodedPath = url.pathname.slice(
-    markerIndex + PUBLIC_STORAGE_MARKER.length,
-  );
+  if (
+    url.origin !== expectedOrigin ||
+    !url.pathname.startsWith(PUBLIC_STORAGE_MARKER)
+  ) {
+    return null;
+  }
+  const encodedPath = url.pathname.slice(PUBLIC_STORAGE_MARKER.length);
   let path: string;
   try {
     path = decodeURIComponent(encodedPath);

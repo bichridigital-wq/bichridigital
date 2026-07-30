@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "../supabase/server";
 import {
   asScheduleRows,
@@ -41,6 +42,7 @@ function publicEvent(row: ScheduleRow): PublicScheduleEvent {
 function adminEvent(row: ScheduleRow): AdminScheduleEvent {
   return {
     ...publicEvent(row),
+    programId: row.program_id,
     isPublished: row.is_published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -78,10 +80,16 @@ export async function getPublicUpcomingSchedule() {
   return loadPublicUpcomingSchedule();
 }
 
-export async function getAdminSchedule() {
-  const supabase = await requireAdmin();
-  const { data, error } = await selectAdminSchedule(supabase);
-  if (error) throw new Error("Impossible de charger l’agenda.");
+export async function getAdminSchedule(supabase?: SupabaseClient) {
+  const authenticatedClient = supabase ?? (await requireAdmin());
+  const { data, error } = await selectAdminSchedule(authenticatedClient);
+  if (error) {
+    console.error("[schedule] Échec de la lecture de l’agenda.", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error("Impossible de charger l’agenda.");
+  }
   return asScheduleRows(data).map(adminEvent);
 }
 

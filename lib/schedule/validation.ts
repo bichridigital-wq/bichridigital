@@ -8,6 +8,8 @@ const DAKAR_DATE_TIME_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function optionalText(
   value: FormDataEntryValue | null,
@@ -121,7 +123,16 @@ export function validateScheduleFormData(
     2048,
     "La vidéo YouTube",
   );
+  const programId = optionalText(
+    formData.get("program_id"),
+    36,
+    "Le programme",
+  );
+  if (programId && !UUID_PATTERN.test(programId)) {
+    throw new Error("Le programme sélectionné est invalide.");
+  }
   return {
+    programId,
     title,
     slug,
     description: optionalText(

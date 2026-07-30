@@ -9,12 +9,14 @@ import type {
 } from "../../types/schedule";
 
 export const SCHEDULE_SELECT =
-  "id,title,slug,description,category,scheduled_start_time,scheduled_end_time,status,youtube_video_id,thumbnail_url,location,is_published,created_at,updated_at";
+  "id,program_id,title,slug,description,category,scheduled_start_time,scheduled_end_time,status,youtube_video_id,thumbnail_url,location,is_published,created_at,updated_at";
+const ADMIN_QUERY_TIMEOUT_MS = 10_000;
 
 function toDatabaseInput(
   input: CreateScheduleEventInput | UpdateScheduleEventInput,
 ) {
   return {
+    program_id: input.programId,
     title: input.title,
     slug: input.slug,
     description: input.description,
@@ -45,7 +47,8 @@ export async function selectAdminSchedule(supabase: SupabaseClient) {
   return supabase
     .from("broadcast_schedule")
     .select(SCHEDULE_SELECT)
-    .order("scheduled_start_time", { ascending: true });
+    .order("scheduled_start_time", { ascending: true })
+    .abortSignal(AbortSignal.timeout(ADMIN_QUERY_TIMEOUT_MS));
 }
 
 export async function selectScheduleEventById(
