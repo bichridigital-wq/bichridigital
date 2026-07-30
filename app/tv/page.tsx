@@ -4,34 +4,41 @@ import TvClient from "./tv-client";
 import { getLatestBichridigitalVideo } from "../../lib/youtube";
 
 const description =
-  "Regardez Bichridigital TV : directs, émissions, reportages, interviews et contenus audiovisuels produits par Bichridigital Agency.";
+  "Regardez Bichridigital TV : émissions, directs, interviews, programmes culturels, religieux et rediffusions de Bichridigital au Sénégal.";
+
+const socialDescription =
+  "Suivez les émissions, directs, interviews, programmes culturels et religieux, ainsi que les rediffusions de Bichridigital TV au Sénégal.";
 
 export const metadata: Metadata = {
   title: "Bichridigital TV",
+
   description,
+
   alternates: {
     canonical: "/tv",
   },
+
   openGraph: {
-    title: "Bichridigital TV | Bichridigital Agency",
-    description,
-    url: "https://www.bichridigital.com/tv",
+    title: "Bichridigital TV | Émissions, directs et rediffusions",
+    description: socialDescription,
+    url: "/tv",
     siteName: "Bichridigital Agency",
     locale: "fr_SN",
     type: "website",
     images: [
       {
         url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Bichridigital TV",
+        width: 1920,
+        height: 1080,
+        alt: "Bichridigital TV, émissions, directs et rediffusions",
       },
     ],
   },
+
   twitter: {
-    card: "summary_large_image",
-    title: "Bichridigital TV | Bichridigital Agency",
-    description,
+    card: "summary",
+    title: "Bichridigital TV | Émissions, directs et rediffusions",
+    description: socialDescription,
     images: ["/logo.png"],
   },
 };
