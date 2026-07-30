@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import ScheduleForm from "./schedule-form";
@@ -93,8 +94,23 @@ export default function ScheduleClient({
         ) : (
           <div className="mt-8 space-y-5">
             {events.map((event) => (
-              <article key={event.id} className="rounded-[28px] border border-white/10 bg-[#071542] p-6 md:p-8">
-                <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
+              <article key={event.id} className="overflow-hidden rounded-[28px] border border-white/10 bg-[#071542]">
+                <div className="aspect-video w-full bg-[#08143D]">
+                  {event.thumbnailUrl ? (
+                    <Image
+                      src={event.thumbnailUrl}
+                      alt={`Miniature de ${event.title}`}
+                      width={1280}
+                      height={720}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center px-6 text-center text-sm font-bold text-gray-500">
+                      Aucune miniature
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col justify-between gap-6 p-6 md:p-8 lg:flex-row lg:items-start">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-2">
                       {event.category && <span className="rounded-full bg-blue-500/15 px-4 py-2 text-xs font-black uppercase text-blue-300">{event.category}</span>}

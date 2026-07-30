@@ -3,8 +3,10 @@ import { getPublicUpcomingSchedule } from "../../../../lib/schedule/service";
 import type { PublicScheduleEvent } from "../../../../types/schedule";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-const CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=120";
+const CACHE_CONTROL = "no-store, max-age=0";
 
 type ScheduleApiResponse = {
   data: PublicScheduleEvent[] | null;

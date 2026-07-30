@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import { createClient } from "../supabase/server";
 import {
   asScheduleRows,
@@ -75,14 +74,8 @@ async function loadPublicUpcomingSchedule(): Promise<PublicScheduleEvent[]> {
   return asScheduleRows(data).map(publicEvent);
 }
 
-const getCachedPublicUpcomingSchedule = unstable_cache(
-  loadPublicUpcomingSchedule,
-  ["public-broadcast-schedule"],
-  { revalidate: 60, tags: ["public-broadcast-schedule"] },
-);
-
 export async function getPublicUpcomingSchedule() {
-  return getCachedPublicUpcomingSchedule();
+  return loadPublicUpcomingSchedule();
 }
 
 export async function getAdminSchedule() {
