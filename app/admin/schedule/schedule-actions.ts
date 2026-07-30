@@ -9,6 +9,13 @@ import {
 } from "../../../lib/schedule/service";
 import { validateScheduleFormData } from "../../../lib/schedule/validation";
 import {
+  getOwnedScheduleImagePath,
+  readScheduleImage,
+  removeScheduleImage,
+  uploadScheduleImage,
+  validateScheduleImage,
+} from "../../../lib/schedule/media";
+import {
   SCHEDULE_STATUSES,
   type ScheduleActionState,
   type ScheduleStatus,
@@ -34,16 +41,76 @@ export async function saveScheduleEventAction(
   id: string | null,
   formData: FormData,
 ): Promise<ScheduleActionState> {
+  let uploadedPath: string | null = null;
+  let createdId: string | null = null;
+  let persisted = false;
   try {
     const input = validateScheduleFormData(formData);
-    if (id) await updateScheduleEvent(id, input);
-    else await createScheduleEvent(input);
+    const image = readScheduleImage(formData);
+    const removeImage = formData.get("remove_thumbnail") === "true";
+    if (image) await validateScheduleImage(image);
+
+    if (id) {
+      const current = await getScheduleEventById(id);
+      if (!current) throw new Error("Événement introuvable.");
+      let thumbnailUrl = removeImage ? null : current.thumbnailUrl;
+      if (image) {
+        const uploaded = await uploadScheduleImage(id, image);
+        uploadedPath = uploaded.path;
+        thumbnailUrl = uploaded.publicUrl;
+      }
+      await updateScheduleEvent(id, { ...input, thumbnailUrl });
+
+      const previousPath = getOwnedScheduleImagePath(id, current.thumbnailUrl);
+      if (
+        previousPath &&
+        (removeImage || (uploadedPath && previousPath !== uploadedPath))
+      ) {
+        try {
+          await removeScheduleImage(previousPath);
+        } catch {
+          console.error(
+            "Agenda : ancienne miniature non supprimée après mise à jour.",
+          );
+        }
+      }
+      persisted = true;
+    } else {
+      const created = await createScheduleEvent({
+        ...input,
+        thumbnailUrl: null,
+      });
+      createdId = created.id;
+      if (image) {
+        const uploaded = await uploadScheduleImage(created.id, image);
+        uploadedPath = uploaded.path;
+        await updateScheduleEvent(created.id, {
+          ...input,
+          thumbnailUrl: uploaded.publicUrl,
+        });
+      }
+      persisted = true;
+    }
     refreshSchedule();
     return {
       success: true,
       message: id ? "Événement modifié." : "Événement créé.",
     };
   } catch (error) {
+    if (!persisted && uploadedPath) {
+      try {
+        await removeScheduleImage(uploadedPath);
+      } catch {
+        console.error("Agenda : miniature temporaire non supprimée.");
+      }
+    }
+    if (!persisted && createdId) {
+      try {
+        await deleteScheduleEvent(createdId);
+      } catch {
+        console.error("Agenda : événement incomplet non supprimé.");
+      }
+    }
     return actionError(error);
   }
 }
@@ -94,7 +161,19 @@ export async function deleteScheduleEventAction(
   id: string,
 ): Promise<ScheduleActionState> {
   try {
+    const event = await getScheduleEventById(id);
+    if (!event) throw new Error("Événement introuvable.");
+    const imagePath = getOwnedScheduleImagePath(id, event.thumbnailUrl);
     await deleteScheduleEvent(id);
+    if (imagePath) {
+      try {
+        await removeScheduleImage(imagePath);
+      } catch {
+        console.error(
+          "Agenda : événement supprimé, mais miniature Storage non supprimée.",
+        );
+      }
+    }
     refreshSchedule();
     return { success: true, message: "Événement supprimé." };
   } catch (error) {

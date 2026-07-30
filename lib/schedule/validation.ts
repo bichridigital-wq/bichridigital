@@ -46,20 +46,6 @@ function parseDakarDateTime(value: FormDataEntryValue | null, label: string) {
   return instant.toISOString();
 }
 
-function validateOptionalUrl(value: string | null, label: string) {
-  if (!value) return null;
-  if (value.length > 2048) {
-    throw new Error(`${label} ne doit pas dépasser 2048 caractères.`);
-  }
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error();
-    return url.toString();
-  } catch {
-    throw new Error(`${label} doit être une URL HTTP ou HTTPS valide.`);
-  }
-}
-
 export function extractYoutubeVideoId(value: string | null) {
   if (!value) return null;
   if (YOUTUBE_VIDEO_ID_PATTERN.test(value)) return value;
@@ -135,12 +121,6 @@ export function validateScheduleFormData(
     2048,
     "La vidéo YouTube",
   );
-  const thumbnailValue = optionalText(
-    formData.get("thumbnail_url"),
-    2048,
-    "La miniature",
-  );
-
   return {
     title,
     slug,
@@ -154,7 +134,7 @@ export function validateScheduleFormData(
     scheduledEndTime,
     status: statusValue as ScheduleStatus,
     youtubeVideoId: extractYoutubeVideoId(youtubeValue),
-    thumbnailUrl: validateOptionalUrl(thumbnailValue, "La miniature"),
+    thumbnailUrl: null,
     location: optionalText(formData.get("location"), 200, "Le lieu"),
     isPublished: formData.get("is_published") === "on",
   };

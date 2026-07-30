@@ -4,6 +4,13 @@ export const SCHEDULE_STATUSES = [
   "completed",
 ] as const;
 
+export const SCHEDULE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const SCHEDULE_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
 export type ScheduleStatus = (typeof SCHEDULE_STATUSES)[number];
 
 export type PublicScheduleEvent = {
