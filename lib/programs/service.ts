@@ -71,9 +71,12 @@ export async function getProgramsAdmin(
   return asProgramRows(data).map(toProgram);
 }
 
-export async function getProgramAdminById(id: string) {
+export async function getProgramAdminById(
+  id: string,
+  authenticatedClient?: SupabaseClient,
+) {
   validateId(id);
-  const supabase = await requireAdmin();
+  const supabase = authenticatedClient ?? (await requireAdmin());
   const { data, error } = await selectProgramById(supabase, id);
   if (error) throw new Error("Impossible de charger ce programme.");
   return data ? toProgram(data as BroadcastProgramRow) : null;

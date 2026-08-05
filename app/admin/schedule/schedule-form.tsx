@@ -18,6 +18,10 @@ import {
   type ScheduleStatus,
 } from "../../../types/schedule";
 import type { BroadcastProgram } from "../../../types/program";
+import type {
+  BroadcastGuest,
+  GuestSelection,
+} from "../../../types/guest";
 
 const STATUS_LABELS: Record<ScheduleStatus, string> = {
   scheduled: "Programmé",
@@ -51,11 +55,13 @@ function addMinutes(value: string, minutes: number) {
 export default function ScheduleForm({
   event,
   programs,
+  guests,
   onCancel,
   onSaved,
 }: {
   event: AdminScheduleEvent | null;
   programs: BroadcastProgram[];
+  guests: BroadcastGuest[];
   onCancel: () => void;
   onSaved: () => void;
 }) {
@@ -87,6 +93,10 @@ export default function ScheduleForm({
   const [previewUrl, setPreviewUrl] = useState(event?.thumbnailUrl ?? "");
   const [removeThumbnail, setRemoveThumbnail] = useState(false);
   const [useProgramThumbnail, setUseProgramThumbnail] = useState(false);
+  const [guestIdToAdd, setGuestIdToAdd] = useState("");
+  const [selectedGuests, setSelectedGuests] = useState<GuestSelection[]>(
+    event?.guests ?? [],
+  );
   const inputClass =
     "w-full rounded-2xl border border-white/10 bg-[#020B2E] px-5 py-4 text-white outline-none transition placeholder:text-gray-600 focus:border-[#FCCD12]";
 
@@ -174,6 +184,76 @@ export default function ScheduleForm({
     if (program) applyProgram(program);
   }
 
+  function addGuest() {
+    const selected = guests.find((guest) => guest.id === guestIdToAdd);
+    if (!selected || selectedGuests.some((guest) => guest.guestId === selected.id)) {
+      return;
+    }
+    setSelectedGuests((current) => [
+      ...current,
+      {
+        associationId: null,
+        guestId: selected.id,
+        fullName: selected.fullName,
+        title: selected.title,
+        photoUrl: selected.photoUrl,
+        roleLabel: null,
+        sortOrder: current.length,
+        isActive: selected.isActive,
+        refreshSnapshot: true,
+      },
+    ]);
+    setGuestIdToAdd("");
+  }
+
+  function updateGuestSelection(
+    index: number,
+    update: Partial<GuestSelection>,
+  ) {
+    setSelectedGuests((current) =>
+      current.map((selection, position) =>
+        position === index ? { ...selection, ...update } : selection,
+      ),
+    );
+  }
+
+  function moveGuest(index: number, direction: -1 | 1) {
+    const destination = index + direction;
+    if (destination < 0 || destination >= selectedGuests.length) return;
+    setSelectedGuests((current) => {
+      const reordered = [...current];
+      [reordered[index], reordered[destination]] = [
+        reordered[destination],
+        reordered[index],
+      ];
+      return reordered.map((selection, position) => ({
+        ...selection,
+        sortOrder: position,
+      }));
+    });
+  }
+
+  function refreshGuestSnapshot(index: number) {
+    const selection = selectedGuests[index];
+    if (!selection.guestId) return;
+    const current = guests.find((guest) => guest.id === selection.guestId);
+    if (
+      !current ||
+      !window.confirm(
+        `Actualiser les informations de « ${selection.fullName} » depuis sa fiche ?`,
+      )
+    ) {
+      return;
+    }
+    updateGuestSelection(index, {
+      fullName: current.fullName,
+      title: current.title,
+      photoUrl: current.photoUrl,
+      isActive: current.isActive,
+      refreshSnapshot: true,
+    });
+  }
+
   async function submit(submitEvent: FormEvent<HTMLFormElement>) {
     submitEvent.preventDefault();
     if (submitting) return;
@@ -212,6 +292,11 @@ export default function ScheduleForm({
         onSubmit={(formEvent) => void submit(formEvent)}
         className="mt-8 space-y-6"
       >
+        <input
+          type="hidden"
+          name="guest_selections"
+          value={JSON.stringify(selectedGuests)}
+        />
         <div className="rounded-2xl border border-[#FCCD12]/25 bg-[#FCCD12]/5 p-5">
           <label className="block text-sm font-bold text-gray-300">
             Programme
@@ -284,6 +369,99 @@ export default function ScheduleForm({
           Description
           <textarea name="description" rows={5} maxLength={5000} value={description} onChange={(changeEvent) => { setDescription(changeEvent.target.value); setManuallyChanged(true); }} className={`${inputClass} mt-2 resize-y`} />
         </label>
+
+        <section className="rounded-2xl border border-white/10 bg-[#020B2E] p-5">
+          <h3 className="text-xl font-black">Invités</h3>
+          <p className="mt-2 text-sm text-gray-400">
+            Ajoutez les intervenants et conservez les informations utilisées
+            pour cet événement.
+          </p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <label className="flex-1 text-sm font-bold text-gray-300">
+              Ajouter un invité
+              <select
+                value={guestIdToAdd}
+                onChange={(changeEvent) => setGuestIdToAdd(changeEvent.target.value)}
+                className={`${inputClass} mt-2`}
+              >
+                <option value="">Sélectionner…</option>
+                {guests
+                  .filter(
+                    (guest) =>
+                      guest.isActive &&
+                      !selectedGuests.some(
+                        (selection) => selection.guestId === guest.id,
+                      ),
+                  )
+                  .map((guest) => (
+                    <option key={guest.id} value={guest.id}>
+                      {guest.fullName}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={!guestIdToAdd}
+              onClick={addGuest}
+              className="self-end rounded-full bg-[#FCCD12] px-5 py-3 font-black text-[#020B2E] disabled:opacity-50"
+            >
+              Ajouter
+            </button>
+          </div>
+          {selectedGuests.length === 0 ? (
+            <p className="mt-5 rounded-xl border border-dashed border-white/10 p-5 text-center text-gray-500">
+              Aucun invité sélectionné.
+            </p>
+          ) : (
+            <div className="mt-5 space-y-3">
+              {selectedGuests.map((selection, index) => (
+                <article
+                  key={`${selection.guestId ?? "snapshot"}-${index}`}
+                  className="grid gap-4 rounded-2xl border border-white/10 bg-[#071542] p-4 sm:grid-cols-[72px_1fr]"
+                >
+                  <div className="aspect-square overflow-hidden rounded-xl bg-[#08143D]">
+                    {selection.photoUrl ? (
+                      <Image
+                        src={selection.photoUrl}
+                        alt={`Photo de ${selection.fullName}`}
+                        width={144}
+                        height={144}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-xs text-gray-500">Sans photo</div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-black">{selection.fullName}</p>
+                    {selection.title ? <p className="text-sm text-gray-400">{selection.title}</p> : null}
+                    {!selection.guestId ? <p className="mt-1 text-xs text-orange-300">Fiche supprimée — snapshot conservé</p> : null}
+                    <label className="mt-3 block text-sm font-bold text-gray-300">
+                      Rôle facultatif
+                      <input
+                        value={selection.roleLabel ?? ""}
+                        maxLength={120}
+                        onChange={(changeEvent) =>
+                          updateGuestSelection(index, {
+                            roleLabel: changeEvent.target.value,
+                          })
+                        }
+                        className={`${inputClass} mt-2`}
+                      />
+                    </label>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button type="button" disabled={index === 0} onClick={() => moveGuest(index, -1)} className="rounded-full border border-white/15 px-3 py-2 disabled:opacity-30" aria-label={`Monter ${selection.fullName}`}>↑</button>
+                      <button type="button" disabled={index === selectedGuests.length - 1} onClick={() => moveGuest(index, 1)} className="rounded-full border border-white/15 px-3 py-2 disabled:opacity-30" aria-label={`Descendre ${selection.fullName}`}>↓</button>
+                      {selection.guestId ? <button type="button" onClick={() => refreshGuestSnapshot(index)} className="rounded-full border border-blue-400/30 px-3 py-2 text-blue-300">Actualiser depuis la fiche</button> : null}
+                      <button type="button" onClick={() => setSelectedGuests((current) => current.filter((_, position) => position !== index).map((item, position) => ({ ...item, sortOrder: position })))} className="rounded-full border border-red-400/30 px-3 py-2 text-red-300">Retirer</button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
 
         <div className="grid gap-6 md:grid-cols-2">
           <label className="text-sm font-bold text-gray-300">

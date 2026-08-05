@@ -29,6 +29,7 @@ export type PublicScheduleEvent = {
 
 export type AdminScheduleEvent = PublicScheduleEvent & {
   programId: string | null;
+  guests: import("./guest").GuestSelection[];
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;

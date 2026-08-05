@@ -14,6 +14,7 @@ import type {
   ScheduleStatus,
 } from "../../../types/schedule";
 import type { BroadcastProgram } from "../../../types/program";
+import type { BroadcastGuest } from "../../../types/guest";
 
 function formatDakarDate(value: string | null) {
   if (!value) return "Non définie";
@@ -33,9 +34,11 @@ const statusLabels: Record<ScheduleStatus, string> = {
 export default function ScheduleClient({
   events,
   programs,
+  guests,
 }: {
   events: AdminScheduleEvent[];
   programs: BroadcastProgram[];
+  guests: BroadcastGuest[];
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState<AdminScheduleEvent | null>(null);
@@ -65,6 +68,7 @@ export default function ScheduleClient({
         key={editing?.id ?? "create"}
         event={editing}
         programs={programs}
+        guests={guests}
         onCancel={() => setEditing(null)}
         onSaved={() => setEditing(null)}
       />

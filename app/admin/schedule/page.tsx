@@ -4,6 +4,7 @@ import { getAdminSchedule } from "../../../lib/schedule/service";
 import { createClient } from "../../../lib/supabase/server";
 import ScheduleClient from "./schedule-client";
 import { getProgramsAdmin } from "../../../lib/programs/service";
+import { getGuestsAdmin } from "../../../lib/guests/service";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -53,9 +54,10 @@ export default async function AdminSchedulePage() {
   }
   if (!isAdmin) redirect("/admin/login");
 
-  const [eventsResult, programsResult] = await Promise.allSettled([
+  const [eventsResult, programsResult, guestsResult] = await Promise.allSettled([
     getAdminSchedule(supabase),
     getProgramsAdmin(supabase),
+    getGuestsAdmin(supabase),
   ]);
   if (eventsResult.status === "rejected") {
     console.error("[schedule] Chargement de l’agenda interrompu.", eventsResult.reason);
@@ -66,14 +68,19 @@ export default async function AdminSchedulePage() {
       programsResult.reason,
     );
   }
+  if (guestsResult.status === "rejected") {
+    console.error("[schedule] Chargement des invités interrompu.", guestsResult.reason);
+  }
   if (
     eventsResult.status === "rejected" ||
-    programsResult.status === "rejected"
+    programsResult.status === "rejected" ||
+    guestsResult.status === "rejected"
   ) {
     return <ScheduleLoadError />;
   }
   const events = eventsResult.value;
   const programs = programsResult.value;
+  const guests = guestsResult.value;
 
   return (
     <main className="min-h-screen bg-[#020B2E] px-5 py-10 text-white md:px-10">
@@ -105,7 +112,7 @@ export default async function AdminSchedulePage() {
           </div>
         </header>
         <div className="mt-10">
-          <ScheduleClient events={events} programs={programs} />
+          <ScheduleClient events={events} programs={programs} guests={guests} />
         </div>
       </div>
     </main>
