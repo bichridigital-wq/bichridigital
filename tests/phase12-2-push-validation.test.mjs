@@ -5,19 +5,25 @@ import { readPushJson } from "../lib/push/request.ts";
 import { isDeviceEligible, shouldDisableDevice } from "../lib/push/policy.ts";
 import {
   derivePushRequestRateKey,
+  hashPushSecret,
   maskPushToken,
   PushRateLimitConfigurationError,
 } from "../lib/push/security.ts";
 import {
   PUSH_BODY_MAX_BYTES,
+  isLegacyInstallationId,
+  isSupportedInstallationId,
+  isUuidV4InstallationId,
   validateNavigation,
   validateOwnership,
+  validatePreferenceUpdate,
   validateRegistration,
   validateTestMessage,
 } from "../lib/push/validation.ts";
 
 const TOKEN = "Exponent" + "PushToken[" + "abcdefghijklmnopqrstuv" + "]";
 const INSTALLATION = "install_mep7p2_abcdefghijklmno1";
+const UUID_INSTALLATION = "550e8400-e29b-41d4-a716-446655440000";
 
 function registration(overrides = {}) {
   return {
@@ -49,6 +55,56 @@ test("token Expo, installation et plateforme invalides sont rejetés", () => {
   assert.throws(() => validateRegistration(registration({ expoPushToken: "invalid" })), /ExpoPushToken/i);
   assert.throws(() => validateRegistration(registration({ installationId: "uuid-inattendu" })), /installationId/i);
   assert.throws(() => validateRegistration(registration({ platform: "web" })), /Plateforme/i);
+});
+
+test("les identifiants legacy et UUIDv4 canoniques sont les seuls formats acceptés", () => {
+  assert.equal(isLegacyInstallationId(INSTALLATION), true);
+  assert.equal(isUuidV4InstallationId(UUID_INSTALLATION), true);
+  assert.equal(isSupportedInstallationId(INSTALLATION), true);
+  assert.equal(isSupportedInstallationId(UUID_INSTALLATION), true);
+
+  const invalidIds = [
+    "550e8400-e29b-11d4-a716-446655440000",
+    "550e8400-e29b-31d4-a716-446655440000",
+    "550e8400-e29b-51d4-a716-446655440000",
+    "550e8400e29b41d4a716446655440000",
+    "550e8400-e29b-41d4-a716-44665544000z",
+    ` ${UUID_INSTALLATION}`,
+    `${UUID_INSTALLATION} `,
+    UUID_INSTALLATION.toUpperCase(),
+    "install_incomplet",
+    "chaîne-aléatoire",
+    `install_test_${"a".repeat(200)}`,
+  ];
+  for (const installationId of invalidIds) {
+    assert.equal(isSupportedInstallationId(installationId), false);
+    assert.throws(
+      () => validateRegistration(registration({ installationId })),
+      /installationId/i,
+    );
+  }
+});
+
+test("POST, PATCH et DELETE acceptent legacy et UUIDv4 sans normalisation", () => {
+  for (const installationId of [INSTALLATION, UUID_INSTALLATION]) {
+    assert.equal(validateRegistration(registration({ installationId })).installationId, installationId);
+    assert.equal(validatePreferenceUpdate({
+      installationId,
+      expoPushToken: TOKEN,
+      preferences: registration().preferences,
+    }).installationId, installationId);
+    assert.equal(validateOwnership({ installationId, expoPushToken: TOKEN }).installationId, installationId);
+  }
+});
+
+test("le rate limiting dérive des clés opaques pour legacy et UUIDv4", () => {
+  const legacyKey = hashPushSecret(`installation:${INSTALLATION}`);
+  const uuidKey = hashPushSecret(`installation:${UUID_INSTALLATION}`);
+  assert.match(legacyKey, /^[0-9a-f]{64}$/);
+  assert.match(uuidKey, /^[0-9a-f]{64}$/);
+  assert.notEqual(legacyKey, uuidKey);
+  assert.equal(legacyKey.includes(INSTALLATION), false);
+  assert.equal(uuidKey.includes(UUID_INSTALLATION), false);
 });
 
 test("les préférences et slugs sont stricts et dédupliqués", () => {

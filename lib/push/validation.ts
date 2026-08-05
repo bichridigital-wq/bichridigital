@@ -8,7 +8,8 @@ import type {
 
 export const PUSH_BODY_MAX_BYTES = 16 * 1024;
 export const PUSH_MESSAGE_MAX_BYTES = 4096;
-const INSTALLATION_PATTERN = /^install_[a-z0-9]+_[a-z0-9]{8,160}$/;
+const LEGACY_INSTALLATION_PATTERN = /^install_[a-z0-9]+_[a-z0-9]{8,160}$/;
+const UUID_V4_INSTALLATION_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 
@@ -46,12 +47,25 @@ function bool(value: unknown, label: string) {
   return value;
 }
 
+export function isLegacyInstallationId(value: string) {
+  return LEGACY_INSTALLATION_PATTERN.test(value);
+}
+
+export function isUuidV4InstallationId(value: string) {
+  return UUID_V4_INSTALLATION_PATTERN.test(value);
+}
+
+export function isSupportedInstallationId(value: string) {
+  return value.length <= 220 && (
+    isLegacyInstallationId(value) || isUuidV4InstallationId(value)
+  );
+}
+
 function installationId(value: unknown) {
-  const id = requiredString(value, "installationId", 220).toLowerCase();
-  if (!INSTALLATION_PATTERN.test(id)) {
+  if (typeof value !== "string" || !isSupportedInstallationId(value)) {
     throw new PushValidationError("installationId est invalide.");
   }
-  return id;
+  return value;
 }
 
 function expoToken(value: unknown) {
