@@ -7,6 +7,7 @@ import type {
   ScheduleRow,
   UpdateScheduleEventInput,
 } from "../../types/schedule";
+import type { BroadcastScheduleGuestRow } from "../../types/guest";
 
 export const SCHEDULE_SELECT =
   "id,program_id,title,slug,description,category,scheduled_start_time,scheduled_end_time,status,youtube_video_id,thumbnail_url,location,is_published,created_at,updated_at";
@@ -41,6 +42,24 @@ export async function selectPublicUpcomingSchedule(cutoff: string) {
     .gte("scheduled_start_time", cutoff)
     .order("scheduled_start_time", { ascending: true })
     .limit(20);
+}
+
+export async function selectPublicScheduleGuests(scheduleIds: string[]) {
+  if (scheduleIds.length === 0) {
+    return {
+      data: [] as BroadcastScheduleGuestRow[],
+      error: null,
+    };
+  }
+
+  const supabase = createAdminClient();
+  return supabase
+    .from("broadcast_schedule_guests")
+    .select(
+      "id,schedule_id,guest_id,guest_name_snapshot,guest_title_snapshot,guest_photo_url_snapshot,role_label,sort_order",
+    )
+    .in("schedule_id", scheduleIds)
+    .order("sort_order", { ascending: true });
 }
 
 export async function selectAdminSchedule(supabase: SupabaseClient) {

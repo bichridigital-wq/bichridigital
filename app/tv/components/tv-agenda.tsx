@@ -1,7 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, Clock3, MapPin, Play } from "lucide-react";
-import type { PublicScheduleEvent } from "../../../types/schedule";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Clock3,
+  MapPin,
+  Play,
+  UserRound,
+} from "lucide-react";
+import type {
+  PublicScheduleEvent,
+  PublicScheduleGuest,
+} from "../../../types/schedule";
 import TvCountdown from "./tv-countdown";
 
 const DAKAR_TIME_ZONE = "Africa/Dakar";
@@ -67,6 +77,60 @@ function EventImage({ event, sizes }: { event: PublicScheduleEvent; sizes: strin
   );
 }
 
+function EventGuests({ guests = [] }: { guests?: PublicScheduleGuest[] }) {
+  if (guests.length === 0) return null;
+
+  const visibleGuests = guests.slice(0, 2);
+  const remainingCount = guests.length - visibleGuests.length;
+
+  return (
+    <div
+      className="mt-6 flex flex-wrap items-center gap-3"
+      aria-label="Invités du programme"
+    >
+      {visibleGuests.map((guest) => {
+        const detail = guest.role ?? guest.title;
+        return (
+          <div
+            key={guest.id}
+            className="flex min-w-0 max-w-full items-center gap-3 rounded-full border border-white/10 bg-white/5 py-2 pl-2 pr-4"
+          >
+            {guest.photoUrl ? (
+              <Image
+                src={guest.photoUrl}
+                alt={`Photo de ${guest.name}`}
+                width={40}
+                height={40}
+                sizes="40px"
+                className="h-10 w-10 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1E40AF]/45 text-[#FCCD12]">
+                <UserRound className="h-5 w-5" aria-hidden="true" />
+              </span>
+            )}
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-black text-white">
+                {guest.name}
+              </span>
+              {detail ? (
+                <span className="block truncate text-xs text-white/55">
+                  {detail}
+                </span>
+              ) : null}
+            </span>
+          </div>
+        );
+      })}
+      {remainingCount > 0 ? (
+        <span className="text-sm font-bold text-white/60">
+          +{remainingCount} invité{remainingCount > 1 ? "s" : ""}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function MainEvent({ event }: { event: PublicScheduleEvent }) {
   const hasShowDestination = Boolean(
     event.slug && PUBLIC_SHOW_SLUGS.has(event.slug),
@@ -95,6 +159,8 @@ function MainEvent({ event }: { event: PublicScheduleEvent }) {
             {event.description}
           </p>
         ) : null}
+
+        <EventGuests guests={event.guests} />
 
         <dl className="mt-7 grid gap-4 text-sm sm:grid-cols-2">
           <div className="flex items-start gap-3">
@@ -210,6 +276,7 @@ export default function TvAgenda({
                           <span>{event.location}</span>
                         </p>
                       ) : null}
+                      <EventGuests guests={event.guests} />
                     </div>
                   </article>
                 ))}

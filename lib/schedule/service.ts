@@ -8,6 +8,7 @@ import {
   insertScheduleEvent,
   selectAdminSchedule,
   selectPublicUpcomingSchedule,
+  selectPublicScheduleGuests,
   selectScheduleEventById,
   updateScheduleEventRow,
 } from "./repository";
@@ -18,33 +19,18 @@ import type {
   ScheduleRow,
   UpdateScheduleEventInput,
 } from "../../types/schedule";
-import {
-  getScheduleGuestsAdmin,
-} from "../guests/service";
+import { getScheduleGuestsAdmin } from "../guests/service";
+import type { BroadcastScheduleGuestRow } from "../../types/guest";
+import { buildPublicScheduleEvents } from "./public-events";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const RECENT_START_WINDOW_MS = 6 * 60 * 60 * 1000;
 
-function publicEvent(row: ScheduleRow): PublicScheduleEvent {
-  return {
-    id: row.id,
-    title: row.title,
-    slug: row.slug,
-    description: row.description,
-    category: row.category,
-    scheduledStartTime: row.scheduled_start_time,
-    scheduledEndTime: row.scheduled_end_time,
-    status: row.status,
-    youtubeVideoId: row.youtube_video_id,
-    thumbnailUrl: row.thumbnail_url,
-    location: row.location,
-  };
-}
-
 function adminEvent(row: ScheduleRow): AdminScheduleEvent {
+  const [event] = buildPublicScheduleEvents([row], []);
   return {
-    ...publicEvent(row),
+    ...event,
     programId: row.program_id,
     guests: [],
     isPublished: row.is_published,
@@ -77,7 +63,16 @@ async function loadPublicUpcomingSchedule(): Promise<PublicScheduleEvent[]> {
   const cutoff = new Date(Date.now() - RECENT_START_WINDOW_MS).toISOString();
   const { data, error } = await selectPublicUpcomingSchedule(cutoff);
   if (error) throw new Error("Impossible de charger l’agenda public.");
-  return asScheduleRows(data).map(publicEvent);
+  const events = asScheduleRows(data);
+  const { data: guestData, error: guestError } =
+    await selectPublicScheduleGuests(events.map((event) => event.id));
+  if (guestError) {
+    throw new Error("Impossible de charger les invités de l’agenda public.");
+  }
+  const guests = Array.isArray(guestData)
+    ? (guestData as BroadcastScheduleGuestRow[])
+    : [];
+  return buildPublicScheduleEvents(events, guests);
 }
 
 export async function getPublicUpcomingSchedule() {

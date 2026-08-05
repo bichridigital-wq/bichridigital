@@ -13,6 +13,16 @@ export const SCHEDULE_IMAGE_MIME_TYPES = [
 
 export type ScheduleStatus = (typeof SCHEDULE_STATUSES)[number];
 
+export type PublicScheduleGuest = {
+  id: string;
+  guestId: string | null;
+  name: string;
+  title: string | null;
+  role: string | null;
+  photoUrl: string | null;
+  sortOrder: number;
+};
+
 export type PublicScheduleEvent = {
   id: string;
   title: string;
@@ -25,9 +35,10 @@ export type PublicScheduleEvent = {
   youtubeVideoId: string | null;
   thumbnailUrl: string | null;
   location: string | null;
+  guests?: PublicScheduleGuest[];
 };
 
-export type AdminScheduleEvent = PublicScheduleEvent & {
+export type AdminScheduleEvent = Omit<PublicScheduleEvent, "guests"> & {
   programId: string | null;
   guests: import("./guest").GuestSelection[];
   isPublished: boolean;
