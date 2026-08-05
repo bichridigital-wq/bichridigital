@@ -22,6 +22,7 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import TvNewsRealtime from "./components/tv-news-realtime";
 import type { TvNewsListItem } from "../../types/tv-news";
+import type { ReactNode } from "react";
 
 type Show = {
   name: string;
@@ -55,10 +56,12 @@ export default function TvClient({
   initialNews,
   videoId,
   title,
+  agenda,
 }: {
   initialNews: TvNewsListItem[];
   videoId?: string;
   title?: string;
+  agenda: ReactNode;
 }) {
   const safeVideoId = /^[A-Za-z0-9_-]{11}$/.test(videoId ?? "")
     ? videoId
@@ -177,7 +180,9 @@ export default function TvClient({
           </div>
         </section>
 
-        <section className="bg-[#070F33] px-6 py-24">
+        {agenda}
+
+        <section id="nos-emissions" className="scroll-mt-24 bg-[#070F33] px-6 py-24">
           <div className="mx-auto max-w-7xl">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
