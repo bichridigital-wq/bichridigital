@@ -339,6 +339,21 @@ export default async function AdminPage() {
           </Link>
 
           <Link
+            href="/admin/notifications"
+            className="group rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:-translate-y-1 hover:border-green-400"
+          >
+            <div className="flex items-start justify-between gap-5">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-green-300">Application mobile</p>
+                <h2 className="mt-4 text-3xl font-black">Notifications push</h2>
+                <p className="mt-4 leading-7 text-gray-400">Diagnostiquer les appareils, tester un envoi unitaire et vérifier les reçus Expo.</p>
+              </div>
+              <span className="text-3xl transition group-hover:translate-x-2">→</span>
+            </div>
+            <p className="mt-8 font-black text-green-300">Gérer les notifications →</p>
+          </Link>
+
+          <Link
             href="/boutique"
             className="rounded-[30px] border border-white/10 bg-white/5 p-8 transition hover:border-[#FCCD12]"
           >
