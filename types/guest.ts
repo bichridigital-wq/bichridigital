@@ -93,3 +93,34 @@ export type GuestValidationError = {
   field: string;
   message: string;
 };
+
+export type PublicGuestProfile = {
+  id: string;
+  fullName: string;
+  slug: string;
+  title: string | null;
+  shortBio: string | null;
+  specialty: string | null;
+  photoUrl: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  youtubeUrl: string | null;
+  websiteUrl: string | null;
+};
+
+export type PublicGuestAppearance = {
+  eventId: string;
+  title: string;
+  slug: string | null;
+  scheduledStartTime: string;
+  scheduledEndTime: string | null;
+  youtubeVideoId: string | null;
+  thumbnailUrl: string | null;
+  location: string | null;
+  role: string | null;
+};
+
+export type PublicGuestSitemapRow = {
+  slug: string;
+  updatedAt: string;
+};

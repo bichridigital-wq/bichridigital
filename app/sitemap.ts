@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedArticleSitemapRows } from "../lib/bichridigital-articles";
+import { getPublicGuestSitemapRows } from "../lib/guests/public-service";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.bichridigital.com";
@@ -10,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/portfolio",
     "/boutique",
     "/tv",
+    "/tv/invites",
     "/conseils",
     "/apropos",
     "/contact",
@@ -39,6 +41,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     articleRoutes = [];
   }
 
+  let guestRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const guests = await getPublicGuestSitemapRows();
+    guestRoutes = guests.map((guest) => ({
+      url: `${baseUrl}/tv/invites/${guest.slug}`,
+      lastModified: guest.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }));
+  } catch (error) {
+    console.error("Impossible de générer les URL des invités du sitemap.", {
+      message: error instanceof Error ? error.message : String(error),
+      source: "Supabase",
+    });
+    guestRoutes = [];
+  }
+
   return [
     ...mainRoutes.map((route) => ({
       url: `${baseUrl}${route}`,
@@ -52,5 +71,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4,
     })),
     ...articleRoutes,
+    ...guestRoutes,
   ];
 }

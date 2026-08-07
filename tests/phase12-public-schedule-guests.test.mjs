@@ -25,7 +25,7 @@ function association(overrides = {}) {
     id: "20000000-0000-4000-8000-000000000001",
     schedule_id: schedule.id,
     guest_id: "30000000-0000-4000-8000-000000000001",
-    guest_name_snapshot: "Bounama",
+    guest_name_snapshot: "Invité de référence",
     guest_title_snapshot: "PDG",
     guest_photo_url_snapshot: "https://example.com/photo.webp",
     role_label: "Présentateur",
@@ -56,7 +56,7 @@ test("un invité expose uniquement ses snapshots publics", () => {
     {
       id: "20000000-0000-4000-8000-000000000001",
       guestId: "30000000-0000-4000-8000-000000000001",
-      name: "Bounama",
+      name: "Invité de référence",
       title: "PDG",
       role: "Présentateur",
       photoUrl: "https://example.com/photo.webp",

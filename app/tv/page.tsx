@@ -4,6 +4,7 @@ import TvClient from "./tv-client";
 import { getLatestBichridigitalVideo } from "../../lib/youtube";
 import { getPublicUpcomingSchedule } from "../../lib/schedule/service";
 import TvAgenda from "./components/tv-agenda";
+import { getActivePublicGuestLinks } from "../../lib/guests/public-service";
 
 const description =
   "Regardez Bichridigital TV : émissions, directs, interviews, programmes culturels, religieux et rediffusions de Bichridigital au Sénégal.";
@@ -55,10 +56,25 @@ async function loadUpcomingSchedule() {
       .filter((event) => new Date(event.scheduledStartTime).getTime() > now)
       .slice(0, 5);
 
-    return { events, unavailable: false };
+    let guestProfileSlugs: Record<string, string> = {};
+    try {
+      guestProfileSlugs = await getActivePublicGuestLinks(
+        events.flatMap((event) =>
+          (event.guests ?? []).flatMap((guest) =>
+            guest.guestId ? [guest.guestId] : [],
+          ),
+        ),
+      );
+    } catch (error) {
+      console.error("[tv] Liens des profils invités indisponibles.", {
+        message: error instanceof Error ? error.message : "Erreur inconnue",
+      });
+    }
+
+    return { events, unavailable: false, guestProfileSlugs };
   } catch (error) {
     console.error("[tv] Chargement de l’agenda public interrompu.", error);
-    return { events: [], unavailable: true };
+    return { events: [], unavailable: true, guestProfileSlugs: {} };
   }
 }
 
@@ -75,7 +91,11 @@ export default async function TvPage() {
       videoId={video.videoId}
       title={video.title}
       agenda={
-        <TvAgenda events={schedule.events} unavailable={schedule.unavailable} />
+        <TvAgenda
+          events={schedule.events}
+          unavailable={schedule.unavailable}
+          guestProfileSlugs={schedule.guestProfileSlugs}
+        />
       }
     />
   );

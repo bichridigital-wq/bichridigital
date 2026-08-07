@@ -12,6 +12,7 @@ import type {
   PublicScheduleEvent,
   PublicScheduleGuest,
 } from "../../../types/schedule";
+import { getPublicGuestHref } from "../../../lib/guests/public-profiles";
 import TvCountdown from "./tv-countdown";
 
 const DAKAR_TIME_ZONE = "Africa/Dakar";
@@ -77,7 +78,13 @@ function EventImage({ event, sizes }: { event: PublicScheduleEvent; sizes: strin
   );
 }
 
-function EventGuests({ guests = [] }: { guests?: PublicScheduleGuest[] }) {
+function EventGuests({
+  guests = [],
+  guestProfileSlugs,
+}: {
+  guests?: PublicScheduleGuest[];
+  guestProfileSlugs: Record<string, string>;
+}) {
   if (guests.length === 0) return null;
 
   const visibleGuests = guests.slice(0, 2);
@@ -90,6 +97,7 @@ function EventGuests({ guests = [] }: { guests?: PublicScheduleGuest[] }) {
     >
       {visibleGuests.map((guest) => {
         const detail = guest.role ?? guest.title;
+        const href = getPublicGuestHref(guest.guestId, guestProfileSlugs);
         return (
           <div
             key={guest.id}
@@ -110,9 +118,18 @@ function EventGuests({ guests = [] }: { guests?: PublicScheduleGuest[] }) {
               </span>
             )}
             <span className="min-w-0">
-              <span className="block truncate text-sm font-black text-white">
-                {guest.name}
-              </span>
+              {href ? (
+                <Link
+                  href={href}
+                  className="block truncate text-sm font-black text-white underline-offset-4 hover:text-[#FCCD12] hover:underline"
+                >
+                  {guest.name}
+                </Link>
+              ) : (
+                <span className="block truncate text-sm font-black text-white">
+                  {guest.name}
+                </span>
+              )}
               {detail ? (
                 <span className="block truncate text-xs text-white/55">
                   {detail}
@@ -131,7 +148,13 @@ function EventGuests({ guests = [] }: { guests?: PublicScheduleGuest[] }) {
   );
 }
 
-function MainEvent({ event }: { event: PublicScheduleEvent }) {
+function MainEvent({
+  event,
+  guestProfileSlugs,
+}: {
+  event: PublicScheduleEvent;
+  guestProfileSlugs: Record<string, string>;
+}) {
   const hasShowDestination = Boolean(
     event.slug && PUBLIC_SHOW_SLUGS.has(event.slug),
   );
@@ -160,7 +183,10 @@ function MainEvent({ event }: { event: PublicScheduleEvent }) {
           </p>
         ) : null}
 
-        <EventGuests guests={event.guests} />
+        <EventGuests
+          guests={event.guests}
+          guestProfileSlugs={guestProfileSlugs}
+        />
 
         <dl className="mt-7 grid gap-4 text-sm sm:grid-cols-2">
           <div className="flex items-start gap-3">
@@ -225,9 +251,11 @@ function MainEvent({ event }: { event: PublicScheduleEvent }) {
 export default function TvAgenda({
   events,
   unavailable,
+  guestProfileSlugs,
 }: {
   events: PublicScheduleEvent[];
   unavailable: boolean;
+  guestProfileSlugs: Record<string, string>;
 }) {
   return (
     <section aria-labelledby="tv-agenda-title" className="border-y border-white/5 bg-[#041038] px-6 py-24">
@@ -252,7 +280,10 @@ export default function TvAgenda({
           </p>
         ) : (
           <>
-            <MainEvent event={events[0]} />
+            <MainEvent
+              event={events[0]}
+              guestProfileSlugs={guestProfileSlugs}
+            />
             {events.length > 1 ? (
               <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {events.slice(1).map((event) => (
@@ -276,7 +307,10 @@ export default function TvAgenda({
                           <span>{event.location}</span>
                         </p>
                       ) : null}
-                      <EventGuests guests={event.guests} />
+                      <EventGuests
+                        guests={event.guests}
+                        guestProfileSlugs={guestProfileSlugs}
+                      />
                     </div>
                   </article>
                 ))}
