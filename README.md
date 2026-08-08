@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -35,23 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# bichridigital
->>>>>>> ace187c9ebce40e54422cc4be2c97c1e4de2e6e4
-
 ## Automatisation Push des directs
 
-Sur Vercel Hobby, GitHub Actions appelle toutes les cinq minutes
-`/api/internal/push/live-check`. Le secret GitHub
-`BICHRIDIGITAL_CRON_SECRET` doit avoir exactement la même valeur que
-`CRON_SECRET` sur Vercel. Ces valeurs sont configurées manuellement et ne
-doivent jamais être ajoutées au dépôt. L’automatisation reste inactive tant
+Sur Vercel Hobby, cron-job.org appelle toutes les cinq minutes
+`/api/internal/push/live-check` avec `CRON_SECRET`. Le secret est configuré
+manuellement et ne doit jamais être ajouté au dépôt. L’automatisation reste inactive tant
 que `PUSH_LIVE_AUTOMATION_ENABLED` n’est pas exactement égal à `true` sur
 Vercel.
 
 Lors du passage à Vercel Pro :
 
-1. désactiver ou retirer le workflow GitHub planifié ;
+1. désactiver la tâche cron-job.org ;
 2. recréer dans `vercel.json` un cron vers
    `/api/internal/push/live-check` avec le planning `* * * * *` ;
 3. conserver `CRON_SECRET` et `PUSH_LIVE_AUTOMATION_ENABLED` ;

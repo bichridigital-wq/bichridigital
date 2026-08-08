@@ -5,13 +5,18 @@ import {
   youtubeRequest,
   YouTubeInvalidResponseError,
 } from "./client";
+import {
+  liveSearchParameters,
+  mapLiveSearchItem,
+  type LiveEventType,
+  type LiveSearchItem,
+} from "./live";
 import type { LiveBroadcast, Playlist, Video } from "./types";
 
 const DEFAULT_VIDEO_LIMIT = 12;
 const YOUTUBE_PAGE_LIMIT = 50;
 const PLAYLIST_LIMIT = 25;
 const STANDARD_CACHE_SECONDS = 300;
-const LIVE_CACHE_SECONDS = 60;
 
 type ThumbnailSet = Record<string, { url?: string } | undefined>;
 type Snippet = {
@@ -51,7 +56,6 @@ type PlaylistResource = {
   snippet?: Snippet;
   contentDetails?: { itemCount?: number };
 };
-type SearchItem = { id?: { videoId?: string } };
 
 function thumbnailUrl(thumbnails?: ThumbnailSet): string {
   return (
@@ -228,29 +232,22 @@ export async function getPlaylistVideos(
   return getVideoDetails(ids, playlistId);
 }
 
-async function findBroadcast(eventType: "live" | "upcoming"): Promise<LiveBroadcast | null> {
-  const search = await youtubeRequest<{ items?: SearchItem[] }>(
+async function findBroadcast(eventType: LiveEventType): Promise<LiveBroadcast | null> {
+  const search = await youtubeRequest<{ items?: LiveSearchItem[] }>(
     "search",
-    {
-      part: "id",
-      channelId: getYouTubeChannelId(),
-      eventType,
-      type: "video",
-      maxResults: 1,
-      order: "date",
-    },
-    { revalidate: LIVE_CACHE_SECONDS, tags: ["youtube-live"] }
+    liveSearchParameters(getYouTubeChannelId(), eventType),
+    { cache: "no-store" }
   );
-  const id = search.items?.[0]?.id?.videoId;
-  if (!id) return null;
+  const broadcast = mapLiveSearchItem(search.items?.[0], eventType);
+  if (!broadcast) return null;
 
   const details = await youtubeRequest<{ items?: VideoItem[] }>(
     "videos",
-    { part: "snippet,liveStreamingDetails", id },
-    { revalidate: LIVE_CACHE_SECONDS, tags: ["youtube-live"] }
+    { part: "snippet,liveStreamingDetails", id: broadcast.id },
+    { cache: "no-store" }
   );
   const item = details.items?.[0];
-  if (!item?.id || !item.snippet) return null;
+  if (!item?.id || !item.snippet) return broadcast;
   const live = item.liveStreamingDetails;
   return {
     id: item.id,
@@ -260,11 +257,7 @@ async function findBroadcast(eventType: "live" | "upcoming"): Promise<LiveBroadc
     scheduledStartTime:
       live?.scheduledStartTime ?? item.snippet.publishedAt ?? "",
     ...(live?.actualStartTime ? { actualStartTime: live.actualStartTime } : {}),
-    status: live?.actualEndTime
-      ? "completed"
-      : live?.actualStartTime
-        ? "live"
-        : "upcoming",
+    status: eventType,
   };
 }
 

@@ -11,8 +11,7 @@ import type { ApiResponse } from "./types";
 
 export const STANDARD_CACHE_CONTROL =
   "public, s-maxage=300, stale-while-revalidate=600";
-export const LIVE_CACHE_CONTROL =
-  "public, s-maxage=60, stale-while-revalidate=120";
+export const LIVE_CACHE_CONTROL = "no-store";
 
 export function youtubeSuccess<T>(data: T, cacheControl: string) {
   return NextResponse.json<ApiResponse<T>>(

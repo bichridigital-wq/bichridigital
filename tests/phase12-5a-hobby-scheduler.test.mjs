@@ -13,42 +13,9 @@ const routePath = new URL(
 );
 const servicePath = new URL("../lib/push/service.ts", import.meta.url);
 
-test("le scheduler Hobby est présent sans cron Vercel incompatible", async () => {
-  await stat(workflowPath);
+test("le scheduler GitHub obsolète est absent sans cron Vercel incompatible", async () => {
+  await assert.rejects(stat(workflowPath), { code: "ENOENT" });
   await assert.rejects(stat(vercelConfigPath), { code: "ENOENT" });
-});
-
-test("le workflow utilise uniquement schedule et workflow_dispatch", async () => {
-  const workflow = await readFile(workflowPath, "utf8");
-  assert.match(workflow, /^on:\s*\n\s{2}schedule:/m);
-  assert.match(workflow, /cron:\s*["']\*\/5 \* \* \* \*["']/);
-  assert.match(workflow, /^\s{2}workflow_dispatch:\s*$/m);
-  assert.doesNotMatch(workflow, /\b(push|pull_request):/);
-  assert.doesNotMatch(workflow, /actions\/checkout/);
-});
-
-test("l’appel HTTP est borné, silencieux et échoue hors 2xx", async () => {
-  const workflow = await readFile(workflowPath, "utf8");
-  assert.match(workflow, /runs-on:\s*ubuntu-latest/);
-  assert.match(workflow, /curl --fail --silent --show-error/);
-  assert.match(workflow, /--max-time 30/);
-  assert.match(workflow, /--request GET/);
-  assert.match(workflow, /--output \/dev\/null/);
-  assert.match(
-    workflow,
-    /https:\/\/www\.bichridigital\.com\/api\/internal\/push\/live-check/,
-  );
-});
-
-test("le secret vient uniquement du coffre GitHub", async () => {
-  const workflow = await readFile(workflowPath, "utf8");
-  assert.match(
-    workflow,
-    /CRON_SECRET:\s*\$\{\{ secrets\.BICHRIDIGITAL_CRON_SECRET \}\}/,
-  );
-  assert.match(workflow, /Authorization: Bearer \$CRON_SECRET/);
-  assert.doesNotMatch(workflow, /Authorization: Bearer [^$\s]/);
-  assert.doesNotMatch(workflow, /ExponentPushToken|expo_push_token/);
 });
 
 test("la route et le mode sûr Phase 12.5A restent en place", async () => {

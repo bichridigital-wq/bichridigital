@@ -38,6 +38,7 @@ export function getYouTubeChannelId(): string {
 }
 
 type YouTubeRequestOptions = {
+  cache?: RequestCache;
   revalidate?: number;
   tags?: string[];
   timeoutMs?: number;
@@ -70,10 +71,14 @@ export async function youtubeRequest<T>(
         "X-Goog-Api-Key": apiKey,
       },
       signal: controller.signal,
-      next: {
-        revalidate: options.revalidate ?? 300,
-        tags: options.tags,
-      },
+      ...(options.cache
+        ? { cache: options.cache }
+        : {
+            next: {
+              revalidate: options.revalidate ?? 300,
+              tags: options.tags,
+            },
+          }),
     });
 
     if (!response.ok) throw new YouTubeApiError(response.status);
