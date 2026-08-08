@@ -157,6 +157,27 @@ export function claimLiveStartBatch(
     .single();
 }
 
+export function claimVideoPublishedBatch(
+  supabase: SupabaseClient,
+  input: { requestKey: string; title: string; body: string; data: object },
+) {
+  return supabase
+    .from("push_notification_batches")
+    .insert({
+      request_key: input.requestKey,
+      notification_type: "video_published",
+      title: input.title,
+      body: input.body,
+      data: input.data,
+      audience_type: "video_opt_in",
+      status: "sending",
+      requested_count: 0,
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+}
+
 export function selectLiveStartDevices(supabase: SupabaseClient) {
   return supabase
     .from("push_devices")
@@ -166,6 +187,36 @@ export function selectLiveStartDevices(supabase: SupabaseClient) {
     .eq("notify_live_starts", true)
     .not("expo_push_token", "is", null)
     .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function selectVideoPublishedDevices(supabase: SupabaseClient) {
+  return supabase
+    .from("push_devices")
+    .select("id,expo_push_token,token_last_four")
+    .eq("is_active", true)
+    .eq("notifications_enabled", true)
+    .eq("notify_new_videos", true)
+    .not("expo_push_token", "is", null)
+    .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function selectVideoAutomationState(supabase: SupabaseClient) {
+  return supabase
+    .from("youtube_push_automation_state")
+    .select("last_seen_video_id,last_seen_published_at")
+    .eq("automation_key", "video_published")
+    .maybeSingle();
+}
+
+export function advanceVideoAutomationState(
+  supabase: SupabaseClient,
+  videoId: string,
+  publishedAt: string,
+) {
+  return supabase.rpc("advance_youtube_video_push_state", {
+    p_video_id: videoId,
+    p_published_at: publishedAt,
+  });
 }
 
 export function selectBatchByRequestKey(supabase: SupabaseClient, requestKey: string) {
@@ -202,6 +253,22 @@ export function finishBatch(supabase: SupabaseClient, id: string, accepted: bool
 }
 
 export function finishLiveStartBatch(
+  supabase: SupabaseClient,
+  id: string,
+  counts: { requested: number; accepted: number; failed: number },
+  error?: string,
+) {
+  return supabase.from("push_notification_batches").update({
+    status: counts.failed === 0 ? "completed" : "failed",
+    requested_count: counts.requested,
+    accepted_count: counts.accepted,
+    failed_count: counts.failed,
+    completed_at: new Date().toISOString(),
+    error_message: error?.slice(0, 500) ?? null,
+  }).eq("id", id);
+}
+
+export function finishVideoPublishedBatch(
   supabase: SupabaseClient,
   id: string,
   counts: { requested: number; accepted: number; failed: number },

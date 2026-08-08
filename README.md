@@ -42,6 +42,25 @@ manuellement et ne doit jamais être ajouté au dépôt. L’automatisation rest
 que `PUSH_LIVE_AUTOMATION_ENABLED` n’est pas exactement égal à `true` sur
 Vercel.
 
+La détection automatique et la route publique `/api/youtube/live` n’utilisent
+pas `search.list`. Elles lisent les dix éléments récents de la playlist uploads,
+enrichissent tous leurs identifiants avec un unique `videos.list`, puis utilisent
+`snippet.liveBroadcastContent` (`live`, `upcoming` ou `none`) comme source de
+vérité. L’identifiant de la playlist uploads est obtenu par `channels.list` et
+mis en cache 24 heures. Les lectures `playlistItems.list` et `videos.list`
+restent en `no-store`. Aucun fallback vers `search.list` n’est autorisé dans le
+polling automatique.
+
+La détection des nouvelles vidéos dispose d’une route séparée
+`/api/internal/push/video-check`. Elle utilise la playlist officielle des uploads
+YouTube avec des lectures `no-store`. Tant que
+`PUSH_VIDEO_AUTOMATION_ENABLED` n’est pas exactement égal à `true`, aucun Push
+vidéo n’est envoyé : le baseline est initialisé puis avancé vers la publication
+éligible la plus récente afin d’éviter tout backfill lors de l’activation. Une
+fois activée, la route traite au maximum cinq publications parmi les dix plus
+récentes, dans l’ordre chronologique, et exclut tout item possédant
+`liveStreamingDetails` pour ne pas renotifier les archives de directs.
+
 Lors du passage à Vercel Pro :
 
 1. désactiver la tâche cron-job.org ;

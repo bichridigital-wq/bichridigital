@@ -17,10 +17,13 @@ import { isDeviceEligible } from "./policy";
 import { hashPushSecret, safePushError } from "./security";
 import {
   consumeRateLimit,
+  advanceVideoAutomationState,
   claimLiveStartBatch,
+  claimVideoPublishedBatch,
   disableDevice,
   finishBatch,
   finishLiveStartBatch,
+  finishVideoPublishedBatch,
   insertBatch,
   insertDelivery,
   registerDevice,
@@ -31,17 +34,23 @@ import {
   selectPendingReceipts,
   selectRecentDeliveries,
   selectLiveStartDevices,
+  selectVideoAutomationState,
+  selectVideoPublishedDevices,
   unregisterDevice,
   updateDeliveryReceipt,
   updateDeliveryTicket,
   updatePreferences,
 } from "./repository";
-import { getLiveBroadcast } from "../youtube/service";
+import { getLiveBroadcast, getRecentPublicVideoUploads } from "../youtube/service";
 import {
   hasPushToken,
   runLiveStartCheck,
   type LiveStartNotification,
 } from "./live-automation";
+import {
+  runVideoPublishedCheck,
+  type VideoPublishedNotification,
+} from "./video-automation";
 
 async function enforceRateLimit(
   endpoint: "register" | "preferences" | "unregister",
@@ -356,6 +365,126 @@ export async function checkLiveStartAutomation(
       return data.id as string;
     },
     send: (batchId, notification) => sendLiveStartBatch(batchId, notification, expo),
+  });
+}
+
+async function sendVideoPublishedBatch(
+  batchId: string,
+  notification: VideoPublishedNotification,
+  expo: ExpoClient,
+) {
+  const supabase = createAdminClient();
+  const { data, error } = await selectVideoPublishedDevices(supabase);
+  if (error) throw new Error("Impossible de charger l’audience des vidéos.");
+
+  const devices = ((Array.isArray(data) ? data : []) as LiveDeviceRow[]).filter(
+    (device): device is LiveDeviceRow & { expo_push_token: string } =>
+      hasPushToken(device.expo_push_token) && Expo.isExpoPushToken(device.expo_push_token),
+  );
+  let accepted = 0;
+  let failed = 0;
+  const entries = [];
+
+  for (const device of devices) {
+    const { data: delivery, error: deliveryError } = await insertDelivery(
+      supabase,
+      batchId,
+      device.id,
+      device.token_last_four,
+    );
+    if (deliveryError || !delivery) {
+      failed += 1;
+      continue;
+    }
+    entries.push({
+      device,
+      deliveryId: delivery.id,
+      message: {
+        to: device.expo_push_token,
+        title: notification.title,
+        body: notification.body,
+        data: notification.data,
+        sound: "default" as const,
+        channelId: "bichridigital-general",
+      },
+    });
+  }
+
+  for (const chunk of expo.chunkPushNotifications(entries.map((entry) => entry.message))) {
+    const chunkEntries = entries.splice(0, chunk.length);
+    try {
+      const tickets = await withExpoTimeout(expo.sendPushNotificationsAsync(chunk));
+      for (let index = 0; index < chunkEntries.length; index += 1) {
+        const entry = chunkEntries[index];
+        const state = ticketState(tickets[index]);
+        await updateDeliveryTicket(supabase, entry.deliveryId, state);
+        if (state.status === "ok") accepted += 1;
+        else {
+          failed += 1;
+          if (state.disableDevice) {
+            await disableDevice(supabase, entry.device.id, state.code, state.message);
+          }
+        }
+      }
+    } catch (sendError) {
+      const code = safePushError(sendError);
+      for (const entry of chunkEntries) {
+        await updateDeliveryTicket(supabase, entry.deliveryId, {
+          status: "error",
+          code,
+          message: "Erreur temporaire Expo",
+        });
+        failed += 1;
+      }
+    }
+  }
+
+  const counts = { requested: devices.length, accepted, failed };
+  const { error: finishError } = await finishVideoPublishedBatch(
+    supabase,
+    batchId,
+    counts,
+    failed ? "Une ou plusieurs livraisons ont échoué." : undefined,
+  );
+  if (finishError) throw new Error("Impossible de finaliser le lot vidéo.");
+  return counts;
+}
+
+export async function checkVideoPublishedAutomation(
+  expo: ExpoClient = createExpoClient(),
+) {
+  return runVideoPublishedCheck({
+    enabled: process.env.PUSH_VIDEO_AUTOMATION_ENABLED === "true",
+    getRecentUploads: () => getRecentPublicVideoUploads(10),
+    async getState() {
+      const { data, error } = await selectVideoAutomationState(createAdminClient());
+      if (error) throw new Error("Impossible de charger l’état vidéo.");
+      return data
+        ? {
+            lastSeenVideoId: data.last_seen_video_id,
+            lastSeenPublishedAt: data.last_seen_published_at,
+          }
+        : null;
+    },
+    async advanceState(video) {
+      const { error } = await advanceVideoAutomationState(
+        createAdminClient(),
+        video.id,
+        video.publishedAt,
+      );
+      if (error) throw new Error("Impossible d’avancer l’état vidéo.");
+    },
+    async claim(notification) {
+      const { data, error } = await claimVideoPublishedBatch(
+        createAdminClient(),
+        notification,
+      );
+      if (error?.code === "23505") return null;
+      if (error || !data) throw new Error("Impossible de réserver le lot vidéo.");
+      return data.id as string;
+    },
+    send: (batchId, notification) =>
+      sendVideoPublishedBatch(batchId, notification, expo),
   });
 }
 

@@ -5,13 +5,17 @@ import {
   youtubeRequest,
   YouTubeInvalidResponseError,
 } from "./client";
-import {
-  liveSearchParameters,
-  mapLiveSearchItem,
-  type LiveEventType,
-  type LiveSearchItem,
-} from "./live";
 import type { LiveBroadcast, Playlist, Video } from "./types";
+import {
+  publicVideoUploads,
+  quotaSafeBroadcast,
+  recentUploadIds,
+  uploadVideoDetailsParameters,
+  uploadsChannelParameters,
+  uploadsPlaylistParameters,
+  type PublicVideoUpload,
+  type YouTubeUploadVideoItem,
+} from "./video-uploads";
 
 const DEFAULT_VIDEO_LIMIT = 12;
 const YOUTUBE_PAGE_LIMIT = 50;
@@ -126,7 +130,13 @@ export async function getChannel(): Promise<ChannelItem> {
 }
 
 export async function getUploadsPlaylistId(): Promise<string> {
-  const uploadsId = (await getChannel()).contentDetails?.relatedPlaylists?.uploads;
+  const channelId = getYouTubeChannelId();
+  const response = await youtubeRequest<{ items?: ChannelItem[] }>(
+    "channels",
+    uploadsChannelParameters(channelId),
+    { revalidate: 86_400, tags: ["youtube-uploads-playlist"] },
+  );
+  const uploadsId = response.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
   if (!uploadsId) throw new Error("YOUTUBE_UPLOADS_PLAYLIST_NOT_FOUND");
   return uploadsId;
 }
@@ -135,6 +145,36 @@ export async function getLatestVideos(
   limit = DEFAULT_VIDEO_LIMIT
 ): Promise<Video[]> {
   return getPlaylistVideos(await getUploadsPlaylistId(), limit);
+}
+
+export async function getRecentPublicVideoUploads(
+  limit = 10,
+): Promise<PublicVideoUpload[]> {
+  const channelId = getYouTubeChannelId();
+  const videos = await getRecentChannelVideoItems(limit);
+  return publicVideoUploads(videos, channelId);
+}
+
+async function getRecentChannelVideoItems(
+  limit = 10,
+): Promise<YouTubeUploadVideoItem[]> {
+  const playlistResponse = await youtubeRequest<PlaylistItemsResponse>(
+    "playlistItems",
+    uploadsPlaylistParameters(
+      await getUploadsPlaylistId(),
+      Math.min(10, Math.max(1, limit)),
+    ),
+    { cache: "no-store" },
+  );
+  const ids = recentUploadIds(playlistResponse.items);
+  if (ids.length === 0) return [];
+
+  const videosResponse = await youtubeRequest<{ items?: YouTubeUploadVideoItem[] }>(
+    "videos",
+    uploadVideoDetailsParameters(ids),
+    { cache: "no-store" },
+  );
+  return videosResponse.items ?? [];
 }
 
 /**
@@ -232,35 +272,9 @@ export async function getPlaylistVideos(
   return getVideoDetails(ids, playlistId);
 }
 
-async function findBroadcast(eventType: LiveEventType): Promise<LiveBroadcast | null> {
-  const search = await youtubeRequest<{ items?: LiveSearchItem[] }>(
-    "search",
-    liveSearchParameters(getYouTubeChannelId(), eventType),
-    { cache: "no-store" }
-  );
-  const broadcast = mapLiveSearchItem(search.items?.[0], eventType);
-  if (!broadcast) return null;
-
-  const details = await youtubeRequest<{ items?: VideoItem[] }>(
-    "videos",
-    { part: "snippet,liveStreamingDetails", id: broadcast.id },
-    { cache: "no-store" }
-  );
-  const item = details.items?.[0];
-  if (!item?.id || !item.snippet) return broadcast;
-  const live = item.liveStreamingDetails;
-  return {
-    id: item.id,
-    title: item.snippet.title ?? "",
-    description: item.snippet.description ?? "",
-    thumbnailUrl: thumbnailUrl(item.snippet.thumbnails),
-    scheduledStartTime:
-      live?.scheduledStartTime ?? item.snippet.publishedAt ?? "",
-    ...(live?.actualStartTime ? { actualStartTime: live.actualStartTime } : {}),
-    status: eventType,
-  };
-}
-
 export async function getLiveBroadcast(): Promise<LiveBroadcast | null> {
-  return (await findBroadcast("live")) ?? findBroadcast("upcoming");
+  return quotaSafeBroadcast(
+    await getRecentChannelVideoItems(10),
+    getYouTubeChannelId(),
+  );
 }
