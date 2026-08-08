@@ -38,3 +38,21 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 =======
 # bichridigital
 >>>>>>> ace187c9ebce40e54422cc4be2c97c1e4de2e6e4
+
+## Automatisation Push des directs
+
+Sur Vercel Hobby, GitHub Actions appelle toutes les cinq minutes
+`/api/internal/push/live-check`. Le secret GitHub
+`BICHRIDIGITAL_CRON_SECRET` doit avoir exactement la même valeur que
+`CRON_SECRET` sur Vercel. Ces valeurs sont configurées manuellement et ne
+doivent jamais être ajoutées au dépôt. L’automatisation reste inactive tant
+que `PUSH_LIVE_AUTOMATION_ENABLED` n’est pas exactement égal à `true` sur
+Vercel.
+
+Lors du passage à Vercel Pro :
+
+1. désactiver ou retirer le workflow GitHub planifié ;
+2. recréer dans `vercel.json` un cron vers
+   `/api/internal/push/live-check` avec le planning `* * * * *` ;
+3. conserver `CRON_SECRET` et `PUSH_LIVE_AUTOMATION_ENABLED` ;
+4. ne modifier ni le service Push ni son idempotence.

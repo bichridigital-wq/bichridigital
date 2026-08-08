@@ -17,8 +17,10 @@ import { isDeviceEligible } from "./policy";
 import { hashPushSecret, safePushError } from "./security";
 import {
   consumeRateLimit,
+  claimLiveStartBatch,
   disableDevice,
   finishBatch,
+  finishLiveStartBatch,
   insertBatch,
   insertDelivery,
   registerDevice,
@@ -28,11 +30,18 @@ import {
   selectDevicesAdmin,
   selectPendingReceipts,
   selectRecentDeliveries,
+  selectLiveStartDevices,
   unregisterDevice,
   updateDeliveryReceipt,
   updateDeliveryTicket,
   updatePreferences,
 } from "./repository";
+import { getLiveBroadcast } from "../youtube/service";
+import {
+  hasPushToken,
+  runLiveStartCheck,
+  type LiveStartNotification,
+} from "./live-automation";
 
 async function enforceRateLimit(
   endpoint: "register" | "preferences" | "unregister",
@@ -244,6 +253,110 @@ export async function checkPendingReceipts(expo: ExpoClient = createExpoClient()
     }
   }
   return checked;
+}
+
+type LiveDeviceRow = {
+  id: string;
+  expo_push_token: string | null;
+  token_last_four: string | null;
+};
+
+async function sendLiveStartBatch(
+  batchId: string,
+  notification: LiveStartNotification,
+  expo: ExpoClient,
+) {
+  const supabase = createAdminClient();
+  const { data, error } = await selectLiveStartDevices(supabase);
+  if (error) throw new Error("Impossible de charger l’audience du direct.");
+
+  const devices = ((Array.isArray(data) ? data : []) as LiveDeviceRow[]).filter(
+    (device): device is LiveDeviceRow & { expo_push_token: string } =>
+      hasPushToken(device.expo_push_token) && Expo.isExpoPushToken(device.expo_push_token),
+  );
+  let accepted = 0;
+  let failed = 0;
+
+  const entries = [];
+  for (const device of devices) {
+    const { data: delivery, error: deliveryError } = await insertDelivery(
+      supabase,
+      batchId,
+      device.id,
+      device.token_last_four,
+    );
+    if (deliveryError || !delivery) {
+      failed += 1;
+      continue;
+    }
+    entries.push({
+      device,
+      deliveryId: delivery.id,
+      message: {
+        to: device.expo_push_token,
+        title: notification.title,
+        body: notification.body,
+        data: notification.data,
+        sound: "default" as const,
+        channelId: "bichridigital-general",
+      },
+    });
+  }
+
+  for (const chunk of expo.chunkPushNotifications(entries.map((entry) => entry.message))) {
+    const chunkEntries = entries.splice(0, chunk.length);
+    try {
+      const tickets = await withExpoTimeout(expo.sendPushNotificationsAsync(chunk));
+      for (let index = 0; index < chunkEntries.length; index += 1) {
+        const entry = chunkEntries[index];
+        const state = ticketState(tickets[index]);
+        await updateDeliveryTicket(supabase, entry.deliveryId, state);
+        if (state.status === "ok") accepted += 1;
+        else {
+          failed += 1;
+          if (state.disableDevice) {
+            await disableDevice(supabase, entry.device.id, state.code, state.message);
+          }
+        }
+      }
+    } catch (sendError) {
+      const code = safePushError(sendError);
+      for (const entry of chunkEntries) {
+        await updateDeliveryTicket(supabase, entry.deliveryId, {
+          status: "error",
+          code,
+          message: "Erreur temporaire Expo",
+        });
+        failed += 1;
+      }
+    }
+  }
+
+  const counts = { requested: devices.length, accepted, failed };
+  const { error: finishError } = await finishLiveStartBatch(
+    supabase,
+    batchId,
+    counts,
+    failed ? "Une ou plusieurs livraisons ont échoué." : undefined,
+  );
+  if (finishError) throw new Error("Impossible de finaliser le lot du direct.");
+  return counts;
+}
+
+export async function checkLiveStartAutomation(
+  expo: ExpoClient = createExpoClient(),
+) {
+  return runLiveStartCheck({
+    enabled: process.env.PUSH_LIVE_AUTOMATION_ENABLED === "true",
+    getLiveBroadcast,
+    async claim(notification) {
+      const { data, error } = await claimLiveStartBatch(createAdminClient(), notification);
+      if (error?.code === "23505") return null;
+      if (error || !data) throw new Error("Impossible de réserver le lot du direct.");
+      return data.id as string;
+    },
+    send: (batchId, notification) => sendLiveStartBatch(batchId, notification, expo),
+  });
 }
 
 export async function disablePushDeviceManually(deviceId: string) {

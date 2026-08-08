@@ -136,6 +136,38 @@ export function insertBatch(
     .single();
 }
 
+export function claimLiveStartBatch(
+  supabase: SupabaseClient,
+  input: { requestKey: string; title: string; body: string; data: object },
+) {
+  return supabase
+    .from("push_notification_batches")
+    .insert({
+      request_key: input.requestKey,
+      notification_type: "live_start",
+      title: input.title,
+      body: input.body,
+      data: input.data,
+      audience_type: "live_opt_in",
+      status: "sending",
+      requested_count: 0,
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+}
+
+export function selectLiveStartDevices(supabase: SupabaseClient) {
+  return supabase
+    .from("push_devices")
+    .select("id,expo_push_token,token_last_four")
+    .eq("is_active", true)
+    .eq("notifications_enabled", true)
+    .eq("notify_live_starts", true)
+    .not("expo_push_token", "is", null)
+    .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
 export function selectBatchByRequestKey(supabase: SupabaseClient, requestKey: string) {
   return supabase.from("push_notification_batches").select("id,status").eq("request_key", requestKey).maybeSingle();
 }
@@ -164,6 +196,22 @@ export function finishBatch(supabase: SupabaseClient, id: string, accepted: bool
     status: accepted ? "completed" : "failed",
     accepted_count: accepted ? 1 : 0,
     failed_count: accepted ? 0 : 1,
+    completed_at: new Date().toISOString(),
+    error_message: error?.slice(0, 500) ?? null,
+  }).eq("id", id);
+}
+
+export function finishLiveStartBatch(
+  supabase: SupabaseClient,
+  id: string,
+  counts: { requested: number; accepted: number; failed: number },
+  error?: string,
+) {
+  return supabase.from("push_notification_batches").update({
+    status: counts.failed === 0 ? "completed" : "failed",
+    requested_count: counts.requested,
+    accepted_count: counts.accepted,
+    failed_count: counts.failed,
     completed_at: new Date().toISOString(),
     error_message: error?.slice(0, 500) ?? null,
   }).eq("id", id);
