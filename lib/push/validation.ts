@@ -185,13 +185,15 @@ export function validatePreferenceUpdate(value: unknown) {
 
 export function validateNavigation(value: unknown): PushNavigationData {
   const input = record(value, "destination");
-  exactKeys(input, ["type", "emissionSlug", "videoId"]);
+  exactKeys(input, ["type", "emissionSlug", "videoId", "programId", "scheduleId"]);
   if (!["profile", "live", "emission", "video"].includes(String(input.type))) {
     throw new PushValidationError("Destination invalide.");
   }
   const type = input.type as PushNavigationData["type"];
   const emissionSlug = nullableString(input.emissionSlug, "emissionSlug", 140) ?? undefined;
   const videoId = nullableString(input.videoId, "videoId", 11) ?? undefined;
+  const programId = nullableString(input.programId, "programId", 36) ?? undefined;
+  const scheduleId = nullableString(input.scheduleId, "scheduleId", 36) ?? undefined;
   if (type === "emission" && (!emissionSlug || !SLUG_PATTERN.test(emissionSlug))) {
     throw new PushValidationError("Une émission valide est obligatoire.");
   }
@@ -200,7 +202,17 @@ export function validateNavigation(value: unknown): PushNavigationData {
   }
   if (type !== "emission" && emissionSlug) throw new PushValidationError("emissionSlug n’est pas autorisé.");
   if (type !== "video" && videoId) throw new PushValidationError("videoId n’est pas autorisé.");
-  return { type, ...(emissionSlug ? { emissionSlug } : {}), ...(videoId ? { videoId } : {}) };
+  if ((programId || scheduleId) && (
+    type !== "emission" || !programId || !scheduleId ||
+    !UUID_PATTERN.test(programId) || !UUID_PATTERN.test(scheduleId)
+  )) throw new PushValidationError("Les identifiants du rappel sont invalides.");
+  return {
+    type,
+    ...(emissionSlug ? { emissionSlug } : {}),
+    ...(videoId ? { videoId } : {}),
+    ...(programId ? { programId } : {}),
+    ...(scheduleId ? { scheduleId } : {}),
+  };
 }
 
 export function validateTestMessage(value: unknown) {

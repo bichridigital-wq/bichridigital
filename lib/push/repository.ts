@@ -151,7 +151,7 @@ export function selectDevicesAdmin(supabase: SupabaseClient) {
 export function selectRecentDeliveries(supabase: SupabaseClient) {
   return supabase
     .from("push_notification_deliveries")
-    .select("id,token_last_four,ticket_status,ticket_error_code,receipt_status,receipt_error_code,created_at")
+    .select("id,token_last_four,ticket_status,ticket_error_code,receipt_status,receipt_error_code,created_at,push_notification_batches(notification_type)")
     .order("created_at", { ascending: false })
     .limit(20)
     .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
@@ -239,6 +239,34 @@ export function claimVideoPublishedBatch(
     .single();
 }
 
+export function selectEligibleProgramReminders(supabase: SupabaseClient) {
+  return supabase
+    .rpc("select_eligible_program_reminders")
+    .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function claimProgramReminderBatch(
+  supabase: SupabaseClient,
+  input: { requestKey: string; title: string; body: string; data: object },
+  requestedCount: number,
+) {
+  return supabase
+    .from("push_notification_batches")
+    .insert({
+      request_key: input.requestKey,
+      notification_type: "program_reminder",
+      title: input.title,
+      body: input.body,
+      data: input.data,
+      audience_type: "program_followers",
+      status: "sending",
+      requested_count: requestedCount,
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+}
+
 export function selectLiveStartDevices(supabase: SupabaseClient) {
   return supabase
     .from("push_devices")
@@ -293,6 +321,22 @@ export function insertDelivery(supabase: SupabaseClient, batchId: string, device
   }).select("id").single();
 }
 
+export function insertDeliveries(
+  supabase: SupabaseClient,
+  batchId: string,
+  devices: Array<{ id: string; tokenLastFour: string | null }>,
+) {
+  return supabase
+    .from("push_notification_deliveries")
+    .insert(devices.map((device) => ({
+      batch_id: batchId,
+      device_id: device.id,
+      token_last_four: device.tokenLastFour,
+      attempts: 1,
+    })))
+    .select("id,device_id");
+}
+
 export function updateDeliveryTicket(supabase: SupabaseClient, id: string, ticket: { status: string; ticketId?: string; code?: string; message?: string }) {
   return supabase.from("push_notification_deliveries").update({
     expo_ticket_id: ticket.ticketId ?? null,
@@ -344,6 +388,8 @@ export function finishVideoPublishedBatch(
     error_message: error?.slice(0, 500) ?? null,
   }).eq("id", id);
 }
+
+export const finishProgramReminderBatch = finishVideoPublishedBatch;
 
 export function selectPendingReceipts(supabase: SupabaseClient, cutoff: string) {
   return supabase.from("push_notification_deliveries")

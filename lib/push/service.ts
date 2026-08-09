@@ -22,13 +22,16 @@ import {
   advanceVideoAutomationState,
   claimLiveStartBatch,
   claimVideoPublishedBatch,
+  claimProgramReminderBatch,
   disableDevice,
   finishBatch,
   finishLiveStartBatch,
   finishVideoPublishedBatch,
+  finishProgramReminderBatch,
   followProgram,
   insertBatch,
   insertDelivery,
+  insertDeliveries,
   registerDevice,
   selectActiveDeviceForSend,
   selectActiveProgramBySlug,
@@ -41,6 +44,7 @@ import {
   selectLiveStartDevices,
   selectVideoAutomationState,
   selectVideoPublishedDevices,
+  selectEligibleProgramReminders,
   unregisterDevice,
   unfollowProgram,
   updateDeliveryReceipt,
@@ -57,6 +61,12 @@ import {
   runVideoPublishedCheck,
   type VideoPublishedNotification,
 } from "./video-automation";
+import {
+  runProgramReminderCheck,
+  type EligibleProgramReminder,
+  type ProgramReminderDevice,
+  type ProgramReminderNotification,
+} from "./program-reminder-automation";
 
 async function enforceRateLimit(
   endpoint:
@@ -256,15 +266,24 @@ export async function getPushAdminDashboard(): Promise<{ devices: PushDeviceAdmi
     ),
     lastDeliveryError: devices.find((device) => device.lastDeliveryError)?.lastDeliveryError ?? null,
   };
-  const deliveries = (Array.isArray(deliveriesResult.data) ? deliveriesResult.data : []).map((row) => ({
-    id: row.id,
-    tokenLastFour: row.token_last_four,
-    ticketStatus: row.ticket_status,
-    ticketErrorCode: row.ticket_error_code,
-    receiptStatus: row.receipt_status,
-    receiptErrorCode: row.receipt_error_code,
-    createdAt: row.created_at,
-  }));
+  const deliveries = (Array.isArray(deliveriesResult.data) ? deliveriesResult.data : []).map((row) => {
+    const batch = row.push_notification_batches as unknown as
+      | { notification_type?: string }
+      | Array<{ notification_type?: string }>
+      | null;
+    return {
+      id: row.id,
+      tokenLastFour: row.token_last_four,
+      ticketStatus: row.ticket_status,
+      ticketErrorCode: row.ticket_error_code,
+      receiptStatus: row.receipt_status,
+      receiptErrorCode: row.receipt_error_code,
+      createdAt: row.created_at,
+      notificationType: Array.isArray(batch)
+        ? batch[0]?.notification_type ?? null
+        : batch?.notification_type ?? null,
+    };
+  });
   return { devices, deliveries, stats };
 }
 
@@ -581,6 +600,127 @@ export async function checkVideoPublishedAutomation(
     },
     send: (batchId, notification) =>
       sendVideoPublishedBatch(batchId, notification, expo),
+  });
+}
+
+type ProgramReminderRpcRow = {
+  schedule_id: string;
+  program_id: string;
+  program_name: string;
+  program_slug: string;
+  scheduled_start_time: string;
+  devices: ProgramReminderDevice[];
+};
+
+async function sendProgramReminderBatch(
+  batchId: string,
+  notification: ProgramReminderNotification,
+  devices: ProgramReminderDevice[],
+  expo: ExpoClient,
+) {
+  const supabase = createAdminClient();
+  const validDevices = devices.filter((device) =>
+    hasPushToken(device.expoPushToken) && Expo.isExpoPushToken(device.expoPushToken),
+  );
+  const { data: deliveries, error: deliveryError } = await insertDeliveries(
+    supabase,
+    batchId,
+    validDevices,
+  );
+  if (deliveryError) throw new Error("Impossible de créer les livraisons du rappel.");
+  const deliveryByDevice = new Map(
+    (deliveries ?? []).map((delivery) => [delivery.device_id, delivery.id]),
+  );
+  let accepted = 0;
+  let failed = devices.length - validDevices.length;
+  const entries = validDevices.flatMap((device) => {
+    const deliveryId = deliveryByDevice.get(device.id);
+    return deliveryId ? [{
+      device,
+      deliveryId,
+      message: {
+        to: device.expoPushToken,
+        title: notification.title,
+        body: notification.body,
+        data: notification.data,
+        sound: "default" as const,
+        channelId: "bichridigital-general",
+      },
+    }] : [];
+  });
+  failed += validDevices.length - entries.length;
+
+  for (const chunk of expo.chunkPushNotifications(entries.map((entry) => entry.message))) {
+    const chunkEntries = entries.splice(0, chunk.length);
+    try {
+      const tickets = await withExpoTimeout(expo.sendPushNotificationsAsync(chunk));
+      for (let index = 0; index < chunkEntries.length; index += 1) {
+        const entry = chunkEntries[index];
+        const state = ticketState(tickets[index]);
+        await updateDeliveryTicket(supabase, entry.deliveryId, state);
+        if (state.status === "ok") accepted += 1;
+        else {
+          failed += 1;
+          if (state.disableDevice) {
+            await disableDevice(supabase, entry.device.id, state.code, state.message);
+          }
+        }
+      }
+    } catch (sendError) {
+      const code = safePushError(sendError);
+      for (const entry of chunkEntries) {
+        await updateDeliveryTicket(supabase, entry.deliveryId, {
+          status: "error",
+          code,
+          message: "Erreur temporaire Expo",
+        });
+        failed += 1;
+      }
+    }
+  }
+
+  const counts = { requested: devices.length, accepted, failed };
+  const { error: finishError } = await finishProgramReminderBatch(
+    supabase,
+    batchId,
+    counts,
+    failed ? "Une ou plusieurs livraisons ont échoué." : undefined,
+  );
+  if (finishError) throw new Error("Impossible de finaliser le rappel.");
+  return counts;
+}
+
+export async function checkProgramReminderAutomation(
+  expo: ExpoClient = createExpoClient(),
+) {
+  return runProgramReminderCheck({
+    enabled: process.env.PUSH_PROGRAM_REMINDER_AUTOMATION_ENABLED === "true",
+    async getEligibleSchedules() {
+      const { data, error } = await selectEligibleProgramReminders(createAdminClient());
+      if (error) throw new Error("Impossible de charger les rappels éligibles.");
+      return ((Array.isArray(data) ? data : []) as ProgramReminderRpcRow[]).map(
+        (row): EligibleProgramReminder => ({
+          scheduleId: row.schedule_id,
+          programId: row.program_id,
+          programName: row.program_name,
+          emissionSlug: row.program_slug,
+          scheduledStartTime: row.scheduled_start_time,
+          devices: Array.isArray(row.devices) ? row.devices : [],
+        }),
+      );
+    },
+    async claim(notification, deviceCount) {
+      const { data, error } = await claimProgramReminderBatch(
+        createAdminClient(),
+        notification,
+        deviceCount,
+      );
+      if (error?.code === "23505") return null;
+      if (error || !data) throw new Error("Impossible de réserver le rappel.");
+      return data.id as string;
+    },
+    send: (batchId, notification, devices) =>
+      sendProgramReminderBatch(batchId, notification, devices, expo),
   });
 }
 

@@ -38,6 +38,8 @@ export type PushNavigationData = {
   type: "profile" | "live" | "emission" | "video";
   emissionSlug?: string;
   videoId?: string;
+  programId?: string;
+  scheduleId?: string;
 };
 
 export type PushDeviceAdmin = {
@@ -75,6 +77,7 @@ export type PushDeliveryAdmin = {
   receiptStatus: string | null;
   receiptErrorCode: string | null;
   createdAt: string;
+  notificationType: string | null;
 };
 
 export type PushActionState = {

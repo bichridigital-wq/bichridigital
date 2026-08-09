@@ -68,3 +68,26 @@ Lors du passage à Vercel Pro :
    `/api/internal/push/live-check` avec le planning `* * * * *` ;
 3. conserver `CRON_SECRET` et `PUSH_LIVE_AUTOMATION_ENABLED` ;
 4. ne modifier ni le service Push ni son idempotence.
+
+## Rappels Push des émissions suivies
+
+L’automation `program_reminder` cible l’audience `program_followers` à partir
+des relations UUID de `push_device_program_subscriptions`; le tableau legacy
+`followed_emission_slugs` n’est jamais utilisé pour sélectionner l’audience.
+La route interne `/api/internal/push/program-reminder-check`, protégée par
+`CRON_SECRET`, restera sans effet tant que
+`PUSH_PROGRAM_REMINDER_AUTOMATION_ENABLED` n’est pas exactement `true`.
+
+Le futur scheduler cron-job.org appellera cette route toutes les cinq minutes.
+Chaque poll sélectionne en une requête groupée les rendez-vous publics,
+`scheduled`, liés à un programme actif et commençant strictement après l’heure
+courante, au plus tard quinze minutes plus tard. L’heure du message est formatée
+explicitement dans `Africa/Dakar`. Aucun baseline n’est nécessaire, car la
+fenêtre regarde uniquement le futur; aucun batch n’est créé sans follower
+éligible.
+
+L’idempotence repose sur
+`program-reminder:<scheduleId>:<scheduledStartUtc>`. Les polls répétés ne créent
+donc qu’un batch par rendez-vous et horaire. Une vraie reprogrammation après un
+rappel produit volontairement une nouvelle clé et peut déclencher un second
+rappel pour le nouvel horaire.
