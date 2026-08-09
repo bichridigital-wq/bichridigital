@@ -8,11 +8,13 @@ import type {
   PushDeliveryAdmin,
   PushNavigationData,
   PushPreferences,
+  PushProgramSubscriptionList,
   RegisterPushDeviceInput,
 } from "../../types/push";
 import { createExpoClient, type ExpoClient, withExpoTimeout } from "./expo-client";
 import { receiptState, ticketState } from "./delivery-state";
 import { PushOwnershipError, PushRateLimitError } from "./errors";
+import { PushValidationError } from "./validation";
 import { isDeviceEligible } from "./policy";
 import { hashPushSecret, safePushError } from "./security";
 import {
@@ -24,6 +26,7 @@ import {
   finishBatch,
   finishLiveStartBatch,
   finishVideoPublishedBatch,
+  followProgram,
   insertBatch,
   insertDelivery,
   registerDevice,
@@ -32,11 +35,14 @@ import {
   selectBatchByRequestKey,
   selectDevicesAdmin,
   selectPendingReceipts,
+  selectOwnedPushDevice,
+  selectProgramSubscriptions,
   selectRecentDeliveries,
   selectLiveStartDevices,
   selectVideoAutomationState,
   selectVideoPublishedDevices,
   unregisterDevice,
+  unfollowProgram,
   updateDeliveryReceipt,
   updateDeliveryTicket,
   updatePreferences,
@@ -53,7 +59,13 @@ import {
 } from "./video-automation";
 
 async function enforceRateLimit(
-  endpoint: "register" | "preferences" | "unregister",
+  endpoint:
+    | "register"
+    | "preferences"
+    | "unregister"
+    | "program_subscriptions_list"
+    | "program_subscriptions_follow"
+    | "program_subscriptions_unfollow",
   installationId: string,
   token: string,
   requestRateKey: string,
@@ -64,11 +76,95 @@ async function enforceRateLimit(
     hashPushSecret(`token:${token}`),
     requestRateKey,
   ];
+  const limit = endpoint === "program_subscriptions_list" ? 30 : 20;
   for (const key of keys) {
-    const { data, error } = await consumeRateLimit(supabase, key, endpoint, 20);
+    const { data, error } = await consumeRateLimit(supabase, key, endpoint, limit);
     if (error) throw new Error("Rate limit unavailable");
     if (!data) throw new PushRateLimitError("Trop de requêtes.");
   }
+}
+
+async function requireOwnedPushDevice(installationId: string, token: string) {
+  const { data, error } = await selectOwnedPushDevice(
+    createAdminClient(),
+    installationId,
+    hashPushSecret(token),
+  );
+  if (error) throw new Error("Ownership lookup failed");
+  if (!data) throw new PushOwnershipError("Preuve de possession invalide.");
+  return data.id as string;
+}
+
+export async function listProgramSubscriptions(
+  installationId: string,
+  token: string,
+  requestRateKey: string,
+): Promise<PushProgramSubscriptionList> {
+  await enforceRateLimit(
+    "program_subscriptions_list",
+    installationId,
+    token,
+    requestRateKey,
+  );
+  const deviceId = await requireOwnedPushDevice(installationId, token);
+  const { data, error } = await selectProgramSubscriptions(
+    createAdminClient(),
+    deviceId,
+  );
+  if (error) throw new Error("Subscriptions lookup failed");
+  return {
+    programIds: (Array.isArray(data) ? data : []).map((row) => row.program_id),
+  };
+}
+
+async function mutateProgramSubscription(
+  action: "follow" | "unfollow",
+  installationId: string,
+  token: string,
+  programId: string,
+  requestRateKey: string,
+) {
+  const endpoint = `program_subscriptions_${action}` as const;
+  await enforceRateLimit(endpoint, installationId, token, requestRateKey);
+  const mutation = action === "follow" ? followProgram : unfollowProgram;
+  const { data, error } = await mutation(
+    createAdminClient(),
+    installationId,
+    hashPushSecret(token),
+    programId,
+  );
+  if (error) throw new Error("Subscription mutation failed");
+  if (data === "ownership_mismatch") {
+    throw new PushOwnershipError("Preuve de possession invalide.");
+  }
+  if (data === "program_unavailable") {
+    throw new PushValidationError("Programme inexistant ou inactif.");
+  }
+  if (data === "limit_reached") {
+    throw new PushValidationError("Limite de 100 programmes suivis atteinte.");
+  }
+}
+
+export function followProgramSubscription(
+  installationId: string,
+  token: string,
+  programId: string,
+  requestRateKey: string,
+) {
+  return mutateProgramSubscription(
+    "follow", installationId, token, programId, requestRateKey,
+  );
+}
+
+export function unfollowProgramSubscription(
+  installationId: string,
+  token: string,
+  programId: string,
+  requestRateKey: string,
+) {
+  return mutateProgramSubscription(
+    "unfollow", installationId, token, programId, requestRateKey,
+  );
 }
 
 export async function registerPushInstallation(input: RegisterPushDeviceInput, requestRateKey: string) {

@@ -38,6 +38,7 @@ test("un événement sans invité conserve son contrat et retourne guests vide",
   const [event] = buildPublicScheduleEvents([schedule], []);
   assert.deepEqual(event.guests, []);
   assert.equal(event.id, schedule.id);
+  assert.equal(event.programId, null);
   assert.equal(event.title, schedule.title);
   assert.equal(event.slug, schedule.slug);
   assert.equal(event.description, schedule.description);
@@ -48,6 +49,22 @@ test("un événement sans invité conserve son contrat et retourne guests vide",
   assert.equal(event.youtubeVideoId, schedule.youtube_video_id);
   assert.equal(event.thumbnailUrl, schedule.thumbnail_url);
   assert.equal(event.location, schedule.location);
+});
+
+test("un programme liÃ© expose son UUID sans modifier les autres champs", () => {
+  const programId = "40000000-0000-4000-8000-000000000001";
+  const [event] = buildPublicScheduleEvents(
+    [{ ...schedule, program_id: programId }],
+    [],
+  );
+  assert.equal(event.programId, programId);
+});
+
+test("un programId public non canonique est rejetÃ©", () => {
+  assert.throws(
+    () => buildPublicScheduleEvents([{ ...schedule, program_id: "incorrect" }], []),
+    /program id/i,
+  );
 });
 
 test("un invité expose uniquement ses snapshots publics", () => {

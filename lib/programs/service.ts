@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "../supabase/server";
+import { createAdminClient } from "../supabase/admin";
 import {
   asProgramRows,
   deleteProgramRow,
@@ -15,6 +16,7 @@ import type {
   BroadcastProgramInput,
   BroadcastProgramRow,
 } from "../../types/program";
+import { toPublicProgram } from "./public";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -69,6 +71,12 @@ export async function getProgramsAdmin(
     throw new Error("Impossible de charger les programmes.");
   }
   return asProgramRows(data).map(toProgram);
+}
+
+export async function getActiveProgramsPublic() {
+  const { data, error } = await selectPrograms(createAdminClient(), true);
+  if (error) throw new Error("Impossible de charger les programmes publics.");
+  return asProgramRows(data).map(toPublicProgram);
 }
 
 export async function getProgramAdminById(

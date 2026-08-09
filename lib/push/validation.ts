@@ -2,6 +2,7 @@ import { Expo } from "expo-server-sdk";
 import type {
   PushNavigationData,
   PushOwnershipInput,
+  PushProgramSubscriptionInput,
   PushPreferences,
   RegisterPushDeviceInput,
 } from "../../types/push";
@@ -12,6 +13,8 @@ const LEGACY_INSTALLATION_PATTERN = /^install_[a-z0-9]+_[a-z0-9]{8,160}$/;
 const UUID_V4_INSTALLATION_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 export class PushValidationError extends Error {}
 
@@ -151,6 +154,22 @@ export function validateOwnership(value: unknown): PushOwnershipInput {
   return {
     installationId: installationId(input.installationId),
     expoPushToken: expoToken(input.expoPushToken),
+  };
+}
+
+export function validateProgramSubscription(
+  value: unknown,
+): PushProgramSubscriptionInput {
+  const input = record(value);
+  exactKeys(input, ["installationId", "expoPushToken", "programId"]);
+  const programId = requiredString(input.programId, "programId", 36);
+  if (!UUID_PATTERN.test(programId)) {
+    throw new PushValidationError("programId est invalide.");
+  }
+  return {
+    installationId: installationId(input.installationId),
+    expoPushToken: expoToken(input.expoPushToken),
+    programId,
   };
 }
 

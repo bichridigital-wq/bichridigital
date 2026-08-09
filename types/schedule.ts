@@ -25,6 +25,7 @@ export type PublicScheduleGuest = {
 
 export type PublicScheduleEvent = {
   id: string;
+  programId: string | null;
   title: string;
   slug: string | null;
   description: string | null;

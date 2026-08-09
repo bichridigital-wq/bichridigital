@@ -65,7 +65,13 @@ export function unregisterDevice(
 export function consumeRateLimit(
   supabase: SupabaseClient,
   keyHash: string,
-  endpoint: "register" | "preferences" | "unregister",
+  endpoint:
+    | "register"
+    | "preferences"
+    | "unregister"
+    | "program_subscriptions_list"
+    | "program_subscriptions_follow"
+    | "program_subscriptions_unfollow",
   limit: number,
 ) {
   return supabase
@@ -76,6 +82,61 @@ export function consumeRateLimit(
       p_window_seconds: 900,
     })
     .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function selectOwnedPushDevice(
+  supabase: SupabaseClient,
+  installationId: string,
+  tokenHash: string,
+) {
+  return supabase
+    .from("push_devices")
+    .select("id")
+    .eq("installation_id", installationId)
+    .eq("token_hash", tokenHash)
+    .eq("is_active", true)
+    .abortSignal(AbortSignal.timeout(TIMEOUT_MS))
+    .maybeSingle();
+}
+
+export function selectProgramSubscriptions(
+  supabase: SupabaseClient,
+  deviceId: string,
+) {
+  return supabase
+    .from("push_device_program_subscriptions")
+    .select("program_id")
+    .eq("push_device_id", deviceId)
+    .order("program_id")
+    .limit(100)
+    .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function followProgram(
+  supabase: SupabaseClient,
+  installationId: string,
+  tokenHash: string,
+  programId: string,
+) {
+  return supabase.rpc("follow_push_device_program", {
+    p_installation_id: installationId,
+    p_token_hash: tokenHash,
+    p_program_id: programId,
+    p_limit: 100,
+  });
+}
+
+export function unfollowProgram(
+  supabase: SupabaseClient,
+  installationId: string,
+  tokenHash: string,
+  programId: string,
+) {
+  return supabase.rpc("unfollow_push_device_program", {
+    p_installation_id: installationId,
+    p_token_hash: tokenHash,
+    p_program_id: programId,
+  });
 }
 
 export function selectDevicesAdmin(supabase: SupabaseClient) {

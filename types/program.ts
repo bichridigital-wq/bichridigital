@@ -20,6 +20,16 @@ export type BroadcastProgram = {
   updatedAt: string;
 };
 
+export type PublicBroadcastProgram = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  defaultDescription: string | null;
+  defaultThumbnailUrl: string | null;
+  defaultDurationMinutes: number;
+};
+
 export type BroadcastProgramInput = {
   name: string;
   slug: string;

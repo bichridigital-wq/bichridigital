@@ -26,6 +26,14 @@ export type PushOwnershipInput = {
   expoPushToken: string;
 };
 
+export type PushProgramSubscriptionInput = PushOwnershipInput & {
+  programId: string;
+};
+
+export type PushProgramSubscriptionList = {
+  programIds: string[];
+};
+
 export type PushNavigationData = {
   type: "profile" | "live" | "emission" | "video";
   emissionSlug?: string;
