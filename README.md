@@ -91,3 +91,25 @@ L’idempotence repose sur
 donc qu’un batch par rendez-vous et horaire. Une vraie reprogrammation après un
 rappel produit volontairement une nouvelle clé et peut déclencher un second
 rappel pour le nouvel horaire.
+
+## Comptes utilisateurs — backend 13B
+
+L’application reste guest-first. `installationId` identifie une installation,
+`push_devices.id` son enregistrement serveur et `auth.users.id` un compte. Le
+champ nullable `push_devices.user_id` permet un rattachement vérifié sans faire
+de l’ExpoPushToken une identité de compte.
+
+`profiles` contient uniquement le nom d’affichage et l’avatar HTTPS optionnel.
+`user_program_subscriptions` stocke les suivis canoniques du compte. Ces suivis
+ne sont pas encore matérialisés dans `push_device_program_subscriptions` : la
+fusion invité et le multi-appareils appartiennent à la phase 13D.
+
+Les routes privées `/api/me`, `/api/me/program-subscriptions` et
+`/api/account/{link-device,unlink-device}` valident le Bearer JWT avec Supabase
+Auth, appliquent un rate limit distinct et répondent en `no-store`. Le profil
+est créé idempotemment lors du premier `GET /api/me`; aucune metadata utilisateur
+ne confère de privilège. L’administration reste exclusivement déterminée par
+`admin_users` et `public.is_admin()`.
+
+La suppression complète d’un compte n’est volontairement pas exposée en 13B ;
+elle sera implémentée avec la révocation des sessions en phase 13E.
