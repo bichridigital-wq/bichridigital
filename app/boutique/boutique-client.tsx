@@ -448,7 +448,9 @@ export default function BoutiquePage() {
     .map(mapDatabaseProduct);
 
   const visibleNavigationCategories =
-    otherProducts.length > 0
+    databaseProducts.length === 0
+      ? navigationCategories.slice(0, 1)
+      : otherProducts.length > 0
       ? [
           ...navigationCategories,
           { label: "Autres", href: "#autres" },
@@ -487,10 +489,10 @@ export default function BoutiquePage() {
 
             <div className="mt-10 flex flex-wrap justify-center gap-5">
               <a
-                href="#ordinateurs"
+                href="#services-bichridigital"
                 className="bg-[#FCCD12] text-[#020B2E] px-10 py-4 rounded-full font-black shadow-lg hover:scale-105 transition"
               >
-                Voir les produits →
+                Découvrir nos services →
               </a>
 
               <a
@@ -544,15 +546,15 @@ export default function BoutiquePage() {
           <div className="mx-auto mt-10 max-w-4xl rounded-[28px] border border-dashed border-white/15 bg-white/[0.04] px-8 py-12 text-center">
             <div className="text-6xl">🛍️</div>
             <h2 className="mt-5 text-3xl font-black">
-              La boutique sera bientôt remplie
+              Produits disponibles sur demande
             </h2>
             <p className="mt-4 text-gray-400 leading-7">
-              Ajoutez les produits depuis le tableau de bord administrateur. Ils apparaîtront ici automatiquement.
+              Contactez directement Bichridigital pour connaître les articles, options de personnalisation et disponibilités du moment.
             </p>
           </div>
         )}
 
-        <ProductCarousel
+        {computerProducts.length > 0 && <ProductCarousel
           id="ordinateurs"
           eyebrow="Derniers arrivages"
           title="Nos derniers ordinateurs disponibles"
@@ -561,9 +563,9 @@ export default function BoutiquePage() {
           direction="right-to-left"
           onOrder={setSelectedProduct}
           sectionClassName="bg-[#020B2E]"
-        />
+        />}
 
-        <ProductCarousel
+        {tshirtProducts.length > 0 && <ProductCarousel
           id="tshirts"
           eyebrow="Textile"
           title="Nos T-shirts disponibles"
@@ -572,9 +574,9 @@ export default function BoutiquePage() {
           direction="left-to-right"
           onOrder={setSelectedProduct}
           sectionClassName="bg-[#04113A]"
-        />
+        />}
 
-        <ProductCarousel
+        {pullProducts.length > 0 && <ProductCarousel
           id="pulls"
           eyebrow="Style & confort"
           title="Nos pulls disponibles"
@@ -583,9 +585,9 @@ export default function BoutiquePage() {
           direction="right-to-left"
           onOrder={setSelectedProduct}
           sectionClassName="bg-[#020B2E]"
-        />
+        />}
 
-        <ProductCarousel
+        {capProducts.length > 0 && <ProductCarousel
           id="casquettes"
           eyebrow="Accessoires"
           title="Nos casquettes disponibles"
@@ -594,7 +596,7 @@ export default function BoutiquePage() {
           direction="left-to-right"
           onOrder={setSelectedProduct}
           sectionClassName="bg-[#04113A]"
-        />
+        />}
 
         {otherProducts.length > 0 && (
           <ProductCarousel

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import CountUp from "react-countup";
 import { motion } from "framer-motion";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
@@ -106,42 +105,51 @@ const services = [
 const stats = [
   {
     label: "Abonnés YouTube",
-    value: 123,
-    suffix: "K+",
+    display: "123K+",
   },
   {
     label: "Abonnés TikTok",
-    value: 60.1,
-    suffix: "K+",
-    decimals: 1,
+    display: "60,1K+",
   },
   {
     label: "Abonnés Instagram",
-    value: 19,
-    suffix: "K+",
+    display: "19K+",
   },
   {
     label: "Abonnés Facebook",
-    value: 12,
-    suffix: "K+",
+    display: "12K+",
   },
   {
     label: "Projets réalisés",
-    value: 100,
-    suffix: "+",
+    display: "100+",
   },
   {
     label: "Années d'expérience",
-    value: 6,
-    suffix: "+",
+    display: "6+",
   },
 ];
 
 const portfolio = [
-  "/portfolio1.png",
-  "/portfolio2.png",
-  "/portfolio3.png",
-  "/portfolio4.png",
+  {
+    title: "Agro Kayor",
+    description: "Affiche commerciale et support de communication digitale.",
+    image: "/portfolio1.png",
+  },
+  {
+    title: "Production audiovisuelle Bichridigital",
+    description: "Captation et couverture audiovisuelle sur le terrain.",
+    image: "/bounama.jpg",
+  },
+  {
+    title: "Touba Bakhdate Service",
+    description: "Affiche de présentation des services et destinations.",
+    image: "/portfolio5.png",
+  },
+  {
+    title: "Campagne Sarr Sunu GP",
+    description: "Campagne événementielle déclinée pour les réseaux sociaux.",
+    image: "/portfolio2.png",
+  },
 ];
 
 const partners = [
@@ -304,15 +312,7 @@ export default function HomeClient() {
                   className="rounded-2xl border border-white/10 bg-[#020B2E]/70 p-5 text-center"
                 >
                   <h3 className="text-3xl font-black text-[#FCCD12] md:text-4xl">
-                    <CountUp
-                      start={0}
-                      end={item.value}
-                      decimals={item.decimals || 0}
-                      suffix={item.suffix}
-                      duration={2.2}
-                      enableScrollSpy
-                      scrollSpyOnce
-                    />
+                    {item.display}
                   </h3>
                   <p className="mt-2 text-sm text-gray-300">{item.label}</p>
                 </div>
@@ -416,15 +416,7 @@ export default function HomeClient() {
                     className="rounded-2xl bg-white/10 p-5 text-center backdrop-blur"
                   >
                     <h3 className="text-3xl font-black text-[#FCCD12]">
-                      <CountUp
-                        start={0}
-                        end={item.value}
-                        decimals={item.decimals || 0}
-                        suffix={item.suffix}
-                        duration={2.2}
-                        enableScrollSpy
-                        scrollSpyOnce
-                      />
+                      {item.display}
                     </h3>
                     <p className="mt-2 text-sm text-gray-300">{item.label}</p>
                   </div>
@@ -468,17 +460,17 @@ export default function HomeClient() {
             variants={stagger}
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
           >
-            {portfolio.map((img, index) => (
+            {portfolio.map((project) => (
               <motion.div
-                key={img}
+                key={project.title}
                 variants={fadeUp}
                 whileHover={{ scale: 1.04, y: -8 }}
                 className="group overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#071542]"
               >
                 <div className="relative h-80 overflow-hidden">
                   <Image
-                    src={img}
-                    alt={`Projet ${index + 1}`}
+                    src={project.image}
+                    alt={project.title}
                     fill
                     className="object-cover transition duration-700 group-hover:scale-110"
                   />
@@ -486,10 +478,10 @@ export default function HomeClient() {
 
                 <div className="p-6">
                   <h3 className="text-xl font-black text-white">
-                    Réalisation #{index + 1}
+                    {project.title}
                   </h3>
                   <p className="mt-3 text-gray-400">
-                    Projet réalisé par Bichridigital Agency.
+                    {project.description}
                   </p>
                 </div>
               </motion.div>
@@ -580,58 +572,6 @@ export default function HomeClient() {
                 </div>
               ))}
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* TEMOIGNAGES */}
-      <section className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.25 }}
-            variants={stagger}
-            className="mb-12 text-center"
-          >
-            <motion.p
-              variants={fadeUp}
-              className="text-sm font-black uppercase tracking-[0.3em] text-[#FCCD12]"
-            >
-              Témoignages
-            </motion.p>
-            <motion.h2
-              variants={fadeUp}
-              className="mt-4 text-3xl font-black md:text-5xl"
-            >
-              Ce que disent nos clients
-            </motion.h2>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={stagger}
-            className="grid gap-6 md:grid-cols-3"
-          >
-            {[
-              "Bichridigital a complètement transformé notre communication.",
-              "Une équipe sérieuse, créative et professionnelle.",
-              "Des affiches et productions de très haute qualité.",
-            ].map((quote) => (
-              <motion.div
-                key={quote}
-                variants={fadeUp}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="rounded-[1.5rem] border border-white/10 bg-[#071542] p-8"
-              >
-                <p className="text-lg italic leading-8 text-gray-300">
-                  “{quote}”
-                </p>
-                <p className="mt-6 text-xl text-[#FCCD12]">★★★★★</p>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </section>

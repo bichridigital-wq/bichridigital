@@ -9,7 +9,7 @@ import { ARTICLE_CATEGORY_LABELS } from "../../types/bichridigital-article";
 import ArticleGrid from "./article-grid";
 
 const description = "Conseils pratiques de Bichridigital sur la communication digitale, l’audiovisuel, la photographie, le design, le web et le SEO.";
-export const metadata: Metadata = { title: "Conseils Bichridigital | Bichridigital Agency", description, alternates: { canonical: "/conseils" }, robots: { index: true, follow: true }, openGraph: { title: "Conseils Bichridigital", description, url: "https://www.bichridigital.com/conseils", siteName: "Bichridigital Agency", locale: "fr_SN", type: "website", images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Conseils Bichridigital" }] }, twitter: { card: "summary_large_image", title: "Conseils Bichridigital", description, images: ["/logo.png"] } };
+export const metadata: Metadata = { title: "Conseils Bichridigital", description, alternates: { canonical: "/conseils" }, robots: { index: true, follow: true }, openGraph: { title: "Conseils Bichridigital", description, url: "https://www.bichridigital.com/conseils", siteName: "Bichridigital Agency", locale: "fr_SN", type: "website", images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Conseils Bichridigital" }] }, twitter: { card: "summary_large_image", title: "Conseils Bichridigital", description, images: ["/logo.png"] } };
 
 export default async function ConseilsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const query = await searchParams; const parsedPage = Number(query.page ?? "1"); const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
