@@ -20,8 +20,6 @@ import {
 import { FaYoutube } from "react-icons/fa6";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import TvNewsRealtime from "./components/tv-news-realtime";
-import type { TvNewsListItem } from "../../types/tv-news";
 import type { ReactNode } from "react";
 
 type Show = {
@@ -53,12 +51,10 @@ const fadeUp = {
 };
 
 export default function TvClient({
-  initialNews,
   videoId,
   title,
   agenda,
 }: {
-  initialNews: TvNewsListItem[];
   videoId?: string;
   title?: string;
   agenda: ReactNode;
@@ -127,9 +123,7 @@ export default function TvClient({
         </section>
 
         <section className="px-6 py-24">
-          <div className="mx-auto grid max-w-[1536px] items-start gap-8 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
-            <TvNewsRealtime initialNews={initialNews} />
-
+          <div className="mx-auto max-w-7xl">
             <div
               className="grid w-full min-w-0 overflow-hidden rounded-[36px] border border-white/10 bg-[#070F33] shadow-[0_30px_100px_rgba(0,0,0,0.28)] lg:grid-cols-[1.25fr_0.75fr]"
             >

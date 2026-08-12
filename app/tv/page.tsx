@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getPublishedTvNews } from "../../lib/tv-news";
 import TvClient from "./tv-client";
 import { getLatestBichridigitalVideo } from "../../lib/youtube";
 import { getPublicUpcomingSchedule } from "../../lib/schedule/service";
@@ -79,15 +78,13 @@ async function loadUpcomingSchedule() {
 }
 
 export default async function TvPage() {
-  const [news, video, schedule] = await Promise.all([
-    getPublishedTvNews(),
+  const [video, schedule] = await Promise.all([
     getLatestBichridigitalVideo(),
     loadUpcomingSchedule(),
   ]);
 
   return (
     <TvClient
-      initialNews={news}
       videoId={video.videoId}
       title={video.title}
       agenda={
