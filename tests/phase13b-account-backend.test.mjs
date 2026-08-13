@@ -46,10 +46,12 @@ test("ownership ne transfère jamais silencieusement et ne supprime pas le devic
   assert.doesNotMatch(repository, /from\("push_devices"\)\.delete/);
 });
 
-test("subscriptions compte sans matérialisation appareil", async () => {
+test("subscriptions compte centralisées avec matérialisation appareil 13D", async () => {
   const repository = await readFile(new URL("../lib/account/repository.ts", import.meta.url), "utf8");
   assert.match(repository, /from\("user_program_subscriptions"\)/);
-  assert.doesNotMatch(repository, /push_device_program_subscriptions/);
+  assert.match(repository, /reconcile_user_program_subscriptions/);
+  assert.match(repository, /follow_user_program_subscription/);
+  assert.match(repository, /unfollow_user_program_subscription/);
 });
 
 test("suite SQL couvre isolation A/B, anon et frontière admin", async () => {

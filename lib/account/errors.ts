@@ -6,6 +6,7 @@ export type AccountErrorCode =
   | "device_conflict"
   | "program_not_found"
   | "program_inactive"
+  | "limit_reached"
   | "rate_limited"
   | "internal_error";
 

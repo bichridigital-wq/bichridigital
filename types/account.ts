@@ -20,6 +20,12 @@ export type LinkDeviceInput = {
   expoPushToken: string;
 };
 
+export type ReconcileProgramSubscriptionsInput = {
+  localProgramIds: string[];
+  installationId?: string;
+  expoPushToken?: string;
+};
+
 export type DeviceLinkOutcome =
   | "linked"
   | "already_linked"

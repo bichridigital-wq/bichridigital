@@ -69,3 +69,28 @@ export function removeUserProgramSubscription(supabase: SupabaseClient, userId: 
   return supabase.from("user_program_subscriptions").delete().eq("user_id", userId).eq("program_id", programId)
     .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
 }
+
+export function reconcileProgramSubscriptions(
+  supabase: SupabaseClient,
+  userId: string,
+  deviceId: string | null,
+  localProgramIds: string[],
+) {
+  return supabase.rpc("reconcile_user_program_subscriptions", {
+    p_user_id: userId,
+    p_push_device_id: deviceId,
+    p_local_program_ids: localProgramIds,
+  }).abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function followAccountProgram(supabase: SupabaseClient, userId: string, programId: string) {
+  return supabase.rpc("follow_user_program_subscription", {
+    p_user_id: userId, p_program_id: programId, p_limit: 100,
+  }).abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function unfollowAccountProgram(supabase: SupabaseClient, userId: string, programId: string) {
+  return supabase.rpc("unfollow_user_program_subscription", {
+    p_user_id: userId, p_program_id: programId,
+  }).abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}

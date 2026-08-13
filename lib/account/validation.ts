@@ -1,6 +1,7 @@
 import { Expo } from "expo-server-sdk";
-import type { LinkDeviceInput, UpdateAccountProfileInput } from "../../types/account";
+import type { LinkDeviceInput, ReconcileProgramSubscriptionsInput, UpdateAccountProfileInput } from "../../types/account";
 import { AccountError } from "./errors";
+import { hasCompleteDeviceProof, normalizeLocalProgramIds } from "./reconcile-input";
 
 export const ACCOUNT_BODY_MAX_BYTES = 16 * 1024;
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -78,4 +79,27 @@ export function validateDeviceProof(value: unknown): LinkDeviceInput {
 export function validateProgramId(value: string) {
   if (!UUID_PATTERN.test(value)) throw new AccountError(422, "invalid_request", "Programme invalide.");
   return value;
+}
+
+export function validateReconcileInput(value: unknown): ReconcileProgramSubscriptionsInput {
+  const input = object(value);
+  exactKeys(input, ["installationId", "expoPushToken", "localProgramIds"]);
+  let localProgramIds: string[];
+  try {
+    localProgramIds = normalizeLocalProgramIds(input.localProgramIds);
+  } catch {
+    throw new AccountError(422, "invalid_request", "Programmes invalides.");
+  }
+  let hasProof: boolean;
+  try {
+    hasProof = hasCompleteDeviceProof(input);
+  } catch {
+    throw new AccountError(422, "invalid_request", "Preuve appareil incomplète.");
+  }
+  if (!hasProof) return { localProgramIds };
+  const proof = validateDeviceProof({
+    installationId: input.installationId,
+    expoPushToken: input.expoPushToken,
+  });
+  return { ...proof, localProgramIds };
 }
