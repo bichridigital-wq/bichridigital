@@ -10,6 +10,7 @@ const navLinks = [
   { name: "Accueil", href: "/" },
   { name: "Services", href: "/services" },
   { name: "Portfolio", href: "/portfolio" },
+  { name: "TV", href: "/tv" },
   { name: "Boutique", href: "/boutique" },
   { name: "Conseils", href: "/conseils" },
   { name: "À propos", href: "/apropos" },
@@ -45,6 +46,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={active ? "page" : undefined}
                   className={`rounded-full px-4 py-2 text-sm font-bold transition ${
                     active
                       ? "bg-[#FCCD12] text-[#020B2E]"
@@ -58,22 +60,16 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* CTA RIGHT */}
-        <div className="hidden justify-end lg:flex">
-          <Link
-            href="/tv"
-            aria-current={pathname === "/tv" ? "page" : undefined}
-            className="rounded-full bg-[#FCCD12] px-5 py-2.5 text-sm font-black text-[#020B2E] shadow-[0_0_30px_rgba(252,205,18,0.25)] transition hover:scale-105"
-          >
-            Bichridigital TV
-          </Link>
-        </div>
+        {/* Keeps the centered menu balanced with the logo. */}
+        <div className="hidden w-[140px] lg:block" aria-hidden="true" />
 
         {/* MOBILE BUTTON */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-white lg:hidden"
-          aria-label="Menu"
+          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
         >
           {menuOpen ? <X size={21} /> : <Menu size={21} />}
         </button>
@@ -81,7 +77,10 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="mx-auto mt-3 max-w-7xl rounded-[24px] border border-white/10 bg-[#020B2E]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl lg:hidden">
+        <div
+          id="mobile-navigation"
+          className="mx-auto mt-3 max-h-[calc(100dvh-6.5rem)] max-w-7xl overflow-y-auto rounded-[24px] border border-white/10 bg-[#020B2E]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl lg:hidden"
+        >
           <div className="flex flex-col gap-3">
             {navLinks.map((link) => {
               const active = pathname === link.href || (link.href !== "/" && pathname.startsWith(`${link.href}/`));
@@ -91,6 +90,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
+                  aria-current={active ? "page" : undefined}
                   className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
                     active
                       ? "bg-[#FCCD12] text-[#020B2E]"
@@ -102,14 +102,6 @@ export default function Navbar() {
               );
             })}
 
-            <Link
-              href="/tv"
-              onClick={() => setMenuOpen(false)}
-              aria-current={pathname === "/tv" ? "page" : undefined}
-              className="rounded-xl bg-[#FCCD12] px-4 py-3 text-center text-sm font-black text-[#020B2E]"
-            >
-              Bichridigital TV
-            </Link>
           </div>
         </div>
       )}
