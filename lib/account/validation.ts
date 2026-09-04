@@ -81,6 +81,11 @@ export function validateProgramId(value: string) {
   return value;
 }
 
+export function validateAccountDeviceId(value: string) {
+  if (!UUID_PATTERN.test(value)) throw new AccountError(422, "invalid_request", "Appareil invalide.");
+  return value;
+}
+
 export function validateReconcileInput(value: unknown): ReconcileProgramSubscriptionsInput {
   const input = object(value);
   exactKeys(input, ["installationId", "expoPushToken", "localProgramIds"]);

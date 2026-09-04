@@ -5,6 +5,7 @@ import type { UpdateAccountProfileInput } from "../../types/account";
 
 const TIMEOUT_MS = 10_000;
 const PROFILE_SELECT = "display_name,avatar_url,created_at,updated_at";
+const ACCOUNT_DEVICE_SELECT = "id,platform,device_name,app_version,last_seen_at,is_active";
 
 export function createProfileIfMissing(supabase: SupabaseClient, userId: string, displayName: string) {
   return supabase.from("profiles").upsert(
@@ -44,6 +45,17 @@ export function attachDevice(supabase: SupabaseClient, deviceId: string, userId:
 }
 
 export function detachDevice(supabase: SupabaseClient, deviceId: string, userId: string) {
+  return supabase.from("push_devices").update({ user_id: null }).eq("id", deviceId).eq("user_id", userId)
+    .select("id").abortSignal(AbortSignal.timeout(TIMEOUT_MS)).maybeSingle();
+}
+
+export function listAccountDevices(supabase: SupabaseClient, userId: string) {
+  return supabase.from("push_devices").select(ACCOUNT_DEVICE_SELECT).eq("user_id", userId)
+    .order("last_seen_at", { ascending: false })
+    .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+}
+
+export function detachAccountDevice(supabase: SupabaseClient, deviceId: string, userId: string) {
   return supabase.from("push_devices").update({ user_id: null }).eq("id", deviceId).eq("user_id", userId)
     .select("id").abortSignal(AbortSignal.timeout(TIMEOUT_MS)).maybeSingle();
 }

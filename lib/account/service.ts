@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import { createAdminClient } from "../supabase/admin";
 import { hashPushSecret } from "../push/security";
 import type { LinkDeviceInput, ReconcileProgramSubscriptionsInput, UpdateAccountProfileInput } from "../../types/account";
+import { accountDeviceDto } from "./device-dto";
 import { AccountError } from "./errors";
 import * as repository from "./repository";
 
@@ -101,6 +102,18 @@ export async function unlinkDevice(userId: string, input: LinkDeviceInput) {
   if (error) throw new AccountError(500, "internal_error", "Service temporairement indisponible.");
   if (!data) throw new AccountError(409, "device_conflict", "Appareil associé à un autre compte.");
   return { outcome: "unlinked" as const };
+}
+
+export async function getAccountDevices(userId: string) {
+  const { data, error } = await repository.listAccountDevices(createAdminClient(), userId);
+  if (error) throw new AccountError(500, "internal_error", "Appareils indisponibles.");
+  return { devices: (data ?? []).map((row) => accountDeviceDto(row)) };
+}
+
+export async function remoteUnlinkAccountDevice(userId: string, deviceId: string) {
+  const { data, error } = await repository.detachAccountDevice(createAdminClient(), deviceId, userId);
+  if (error) throw new AccountError(500, "internal_error", "Service temporairement indisponible.");
+  if (!data) throw new AccountError(404, "device_not_found", "Appareil non trouvé.");
 }
 
 export async function getUserProgramSubscriptions(userId: string) {

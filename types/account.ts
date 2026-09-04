@@ -32,6 +32,15 @@ export type DeviceLinkOutcome =
   | "unlinked"
   | "already_unlinked";
 
+export type AccountDevice = {
+  deviceId: string;
+  platform: "android" | "ios";
+  deviceName: string | null;
+  appVersion: string | null;
+  lastSeenAt: string;
+  active: boolean;
+};
+
 export type UserProgramSubscription = {
   userId: string;
   programId: string;
