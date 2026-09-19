@@ -57,6 +57,18 @@ export async function patchMe(user: User, input: UpdateAccountProfileInput) {
   return profileDto(data);
 }
 
+export async function deleteMe(user: User) {
+  const { error } = await createAdminClient().auth.admin.deleteUser(user.id);
+  if (error) {
+    throw new AccountError(
+      500,
+      "account_delete_failed",
+      "La suppression du compte est momentanément indisponible.",
+    );
+  }
+  return { deleted: true as const };
+}
+
 async function ownedDevice(input: LinkDeviceInput) {
   const { data, error } = await repository.selectDeviceByProof(
     createAdminClient(), input.installationId, hashPushSecret(input.expoPushToken),
