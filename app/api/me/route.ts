@@ -1,6 +1,6 @@
 import { requireAuthenticatedUser } from "../../../lib/account/auth";
 import { accountApiError, accountJson } from "../../../lib/account/http";
-import { enforceAccountRateLimit, getMe, patchMe } from "../../../lib/account/service";
+import { deleteMe, enforceAccountRateLimit, getMe, patchMe } from "../../../lib/account/service";
 import { readAccountJson, validateProfileUpdate } from "../../../lib/account/validation";
 
 export const runtime = "nodejs";
@@ -21,5 +21,13 @@ export async function PATCH(request: Request) {
     await enforceAccountRateLimit(user.id, "me_update");
     const profile = await patchMe(user, validateProfileUpdate(await readAccountJson(request)));
     return accountJson({ profile });
+  } catch (error) { return accountApiError(error); }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await requireAuthenticatedUser(request);
+    await enforceAccountRateLimit(user.id, "me_update");
+    return accountJson(await deleteMe(user));
   } catch (error) { return accountApiError(error); }
 }
