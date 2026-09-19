@@ -8,6 +8,7 @@ export type AccountErrorCode =
   | "program_inactive"
   | "limit_reached"
   | "rate_limited"
+  | "account_delete_failed"
   | "internal_error";
 
 export class AccountError extends Error {

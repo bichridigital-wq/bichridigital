@@ -36,6 +36,19 @@ test("routes valident le JWT, sont no-store et ne retournent aucun rôle", async
   assert.doesNotMatch(me, /is_admin|admin_users|refresh_token|access_token/);
 });
 
+test("suppression de compte est authentifiée, administrative et nettoyée par les FK", async () => {
+  const route = await readFile(new URL("../app/api/me/route.ts", import.meta.url), "utf8");
+  const service = await readFile(new URL("../lib/account/service.ts", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../supabase/migrations/20260810231901_add_user_accounts_backend.sql", import.meta.url), "utf8");
+  assert.match(route, /export async function DELETE/);
+  assert.match(route, /requireAuthenticatedUser/);
+  assert.match(route, /deleteMe\(user\)/);
+  assert.match(service, /auth\.admin\.deleteUser\(user\.id\)/);
+  assert.match(migration, /profiles[\s\S]*references auth\.users\(id\) on delete cascade/i);
+  assert.match(migration, /user_program_subscriptions[\s\S]*references auth\.users\(id\) on delete cascade/i);
+  assert.match(migration, /push_devices[\s\S]*user_id uuid null references auth\.users\(id\) on delete set null/i);
+});
+
 test("ownership ne transfère jamais silencieusement et ne supprime pas le device", async () => {
   const service = await readFile(new URL("../lib/account/service.ts", import.meta.url), "utf8");
   const repository = await readFile(new URL("../lib/account/repository.ts", import.meta.url), "utf8");
